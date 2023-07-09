@@ -44,18 +44,6 @@ jobs:
           name: release_url
           path: ./release_url.txt
 
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ github.ref }}
-          body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
   # Publish all version
   publish:
     name: Publish
