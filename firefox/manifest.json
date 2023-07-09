@@ -5,6 +5,7 @@
 
   "description": "Adds volume and play controls to Instagram videos.",
   "author": "mail@david-schulte.de",
+  "homepage_url": "https://github.com/Arcus92/instagram-video-control/",
 
   "icons": {
     "48": "icons/icon-48.png",
