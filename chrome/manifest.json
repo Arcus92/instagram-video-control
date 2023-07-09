@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Video Control",
+  "version": "0.1",
+
+  "description": "Adds volume and play controls to Instagram videos.",
+  "author": "mail@david-schulte.de",
+
+  "icons": {
+    "48": "icons/icon-48.png",
+    "64": "icons/icon-64.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["main.js"]
+    }
+  ]
+}
