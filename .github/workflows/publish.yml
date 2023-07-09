@@ -15,8 +15,8 @@ jobs:
       - name: Get release info
         id: get_release_info
         run: |
-          echo ::set-output name=repository::${REPOSITORY_NAME##*/}
-          echo ::set-output name=tag::${TAG_REF_NAME##*/}
+          echo "repository=${REPOSITORY_NAME##*/}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
         env:
           TAG_REF_NAME: ${{ github.ref }}
           REPOSITORY_NAME: ${{ github.repository }}
@@ -81,9 +81,10 @@ jobs:
 
       # Copy files
       - name: Copy files
-        run: mkdir ./release-${{ matrix.target }} \
-          && cp -r ./content/* ./release-${{ matrix.target }} \
-          && cp -r ./${{ matrix.target }}/* ./release-${{ matrix.target }}
+        run: |
+          mkdir ./release-${{ matrix.target }} &&
+          cp -r ./content/* ./release-${{ matrix.target }} &&
+          cp -r ./${{ matrix.target }}/* ./release-${{ matrix.target }}
 
       # Create a .zip archive
       - name: Packing archive
