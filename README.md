@@ -1,4 +1,4 @@
-# Instagram Video Control
+# Video Control for Instagram
 
 Adds volume and play controls to Instagram videos.
 

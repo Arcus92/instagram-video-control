@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Instagram Video Control",
-  "version": "0.1",
+  "name": "Video Control for Instagram",
+  "version": "0.2",
 
   "description": "Adds volume and play controls to Instagram videos.",
   "author": "mail@david-schulte.de",
