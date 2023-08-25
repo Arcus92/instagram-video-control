@@ -3,6 +3,24 @@ const registeredVideos = [];
 let playbackVolume = 0.0;
 let playbackMuted = true;
 
+// Returns if the given video is from the explore page. Video controls in the explore page looks wrong, and we don't
+// want to unmute multiple videos there. We simply ignore them.
+function isVideoInExplorePage(video) {
+
+    // Since Instagram is obfuscated, the best way to test for it, is to check for a video embedded in an a-tag.
+    // The explore videos are like buttons that takes you to the actual view page.
+    let parent = video.parentNode;
+    while (parent)
+    {
+        if (parent.tagName === 'A') {
+            return true;
+        }
+        parent = parent.parentNode;
+    }
+
+    return false;
+}
+
 // Is called when a new video element was detected on the page.
 function registerVideoElement(video) {
     // Enable Html controls
@@ -69,6 +87,8 @@ function checkForVideosAndEnableHtmlControls() {
     // Detect new videos...
     for (const video of videos) {
         if (registeredVideos.includes(video)) continue;
+        if (isVideoInExplorePage(video)) continue;
+
         registeredVideos.push(video);
         registerVideoElement(video);
     }
