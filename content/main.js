@@ -2,6 +2,7 @@ const registeredVideos = [];
 
 let playbackVolume = 0.0;
 let playbackMuted = true;
+let ignoreNextVolumeChange = false
 
 // Returns if the given video is from the explore page. Video controls in the explore page looks wrong, and we don't
 // want to unmute multiple videos there. We simply ignore them.
@@ -65,6 +66,17 @@ function onVolumeChanged(event) {
     if (!event.isTrusted) return;
 
     const video = event.target;
+
+    // Not changed, so no need to update the other videos.
+    if (playbackVolume === video.volume && playbackMuted === video.muted)
+        return;
+
+    // To fix an issue with Reels, we sometimes have to ignore and undo volume events.
+    if (ignoreNextVolumeChange) {
+        updateVolumeForVideo(video);
+        return;
+    }
+
     playbackVolume = video.volume;
     playbackMuted = video.muted;
 
@@ -75,6 +87,14 @@ function onVolumeChanged(event) {
 // Is called when a video is starting playback.
 function onPlay(event) {
     const video = event.target;
+
+    // Instagram will mute videos in Reels as soon as playback starts. To counter this we will ignore the next volume
+    // change event and undo the volume / mute change.
+    ignoreNextVolumeChange = true;
+    setTimeout(() => {
+        ignoreNextVolumeChange = false
+    }, 10)
+
 
     // Make sure we apply the last used volume settings.
     updateVolumeForVideo(video);
