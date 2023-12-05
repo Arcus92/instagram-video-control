@@ -22,7 +22,7 @@
   "permissions": ["storage"],
   "browser_specific_settings": {
     "gecko": {
-      "id": "instagram-video-control@david-schulte.de"
+      "id": "{a831defa-a6c9-4ca9-9593-9ccaf98462d9}"
     }
   }
 }
