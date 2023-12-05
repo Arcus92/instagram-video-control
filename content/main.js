@@ -36,6 +36,26 @@ function registerVideoElement(video) {
         elementAfterVideo.remove();
     }
 
+    // Detect if this video is embedded. We need to apply special rules for embedded videos.
+    const isEmbedded = video.parentElement?.parentElement?.parentElement?.classList?.contains("EmbedVideo") ?? false;
+    if (isEmbedded) {
+        // The pause handler for embedded videos is a layer deeper than on usual videos.
+        // We need to delete this, otherwise the video is covered by these invisible elements and not clickable.
+        while (video.parentElement?.nextElementSibling)
+        {
+            video.parentElement.nextElementSibling.remove();
+        }
+
+        // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
+        // hide the video. We want to give the user the option to replay the video even after it finished.
+        disableAllEventListeners(video, "ended");
+        // The embedded page will also force you to open Instagram once you started the video and then lost focus.
+        // For example: Playing the video and then switching the tab or scrolling down.
+        // This might cause other issues, and we may need to remove this later.
+        disableAllEventListeners(document, "visibilitychange");
+    }
+
+
     video.addEventListener("volumechange", onVolumeChanged);
     video.addEventListener("play", onPlay);
 }
@@ -128,6 +148,14 @@ function checkForVideosAndEnableHtmlControls() {
         unregisterVideoElement(video);
         i--;
     }
+}
+
+// Disables all events for the given element by stop propagation.
+function disableAllEventListeners(element, type) {
+    // There is no way to remove event handlers, so we add a aggressive event, that stops propagation.
+    element.addEventListener(type, (event) => {
+        event.stopImmediatePropagation();
+    }, true);
 }
 
 // Instagram is a single-page-application and loads posts asynchronously. We'll check every second for new videos.
