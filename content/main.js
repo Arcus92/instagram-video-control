@@ -99,6 +99,7 @@ function onVolumeChanged(event) {
 
     playbackVolume = video.volume;
     playbackMuted = video.muted;
+    saveSettings();
 
     // Sync the volume across all other video players.
     updateVolumeForVideos();
@@ -150,6 +151,32 @@ function checkForVideosAndEnableHtmlControls() {
     }
 }
 
+// Returns the storage object for the current browser.
+function storage() {
+    // This is 'browser' in Firefox and 'chrome' in ... Chrome.
+    if (typeof browser === "undefined") {
+        return chrome.storage.sync;
+    }
+    return browser.storage.sync;
+}
+
+// Saves the current volume settings to storage.
+function saveSettings() {
+    storage().set({
+        lastPlaybackVolume: playbackVolume
+    }).then(() => {}, (e) => console.error(e));
+}
+
+// Loads the volume settings from storage.
+function loadSettings() {
+    storage().get("lastPlaybackVolume").then((value) => {
+        if (typeof value?.lastPlaybackVolume === 'number')
+        {
+            playbackVolume = value.lastPlaybackVolume;
+        }
+    }, (e) => console.error(e));
+}
+
 // Disables all events for the given element by stop propagation.
 function disableAllEventListeners(element, type) {
     // There is no way to remove event handlers, so we add a aggressive event, that stops propagation.
@@ -157,6 +184,8 @@ function disableAllEventListeners(element, type) {
         event.stopImmediatePropagation();
     }, true);
 }
+
+loadSettings();
 
 // Instagram is a single-page-application and loads posts asynchronously. We'll check every second for new videos.
 // MutationObserver is too slow, because there are to many nodes and changes on that site.

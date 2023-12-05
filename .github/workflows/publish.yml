@@ -44,12 +44,9 @@ jobs:
           name: release_url
           path: ./release_url.txt
 
-  # Publish all version
+  # Publish
   publish:
     name: Publish
-    strategy:
-      matrix:
-        target: [ 'firefox', 'chrome' ]
     runs-on: ubuntu-latest
     needs: [ release ]
 
@@ -77,18 +74,18 @@ jobs:
 
       # Clean the output folder
       - name: Clean
-        run: rm -rf ./release-${{ matrix.target }}.zip ./release-${{ matrix.target }}
+        run: rm -rf ./release.zip ./release
 
       # Copy files
       - name: Copy files
         run: |
-          mkdir ./release-${{ matrix.target }} &&
-          cp -r ./content/* ./release-${{ matrix.target }} &&
-          cp -r ./${{ matrix.target }}/* ./release-${{ matrix.target }}
+          mkdir ./release &&
+          cp -r ./content/* ./release &&
+          cp -r ./manifest.json ./release
 
       # Create a .zip archive
       - name: Packing archive
-        run: cd ./release-${{ matrix.target }} && zip -r ../release-${{ matrix.target }}.zip * && cd ..
+        run: cd ./release && zip -r ../release.zip * && cd ..
 
       # Upload the release
       - name: Upload release
@@ -98,6 +95,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./release-${{ matrix.target }}.zip
-          asset_name: ${{ steps.get_release_info.outputs.file_name }}-${{ matrix.target }}.zip
+          asset_path: ./release.zip
+          asset_name: ${{ steps.get_release_info.outputs.file_name }}.zip
           asset_content_type: application/zip
