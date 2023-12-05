@@ -15,7 +15,8 @@
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/*"],
-      "js": ["main.js"]
+      "js": ["main.js"],
+      "all_frames": true
     }
   ]
 }
