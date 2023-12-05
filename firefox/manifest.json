@@ -18,5 +18,11 @@
       "js": ["main.js"],
       "all_frames": true
     }
-  ]
+  ],
+  "permissions": ["storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "instagram-video-control@david-schulte.de"
+    }
+  }
 }
