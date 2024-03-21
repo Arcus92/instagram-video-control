@@ -30,10 +30,14 @@ function registerVideoElement(video) {
     // Update volume
     updateVolumeForVideo(video);
 
-    // Remove Instagram controls and the pause handler.
+    // Instead of removing the Instagram controls, we change the height and remove the height of the native video
+    // controls. This lets the user click the bottom of the video / interact with the video controls AND use the
+    // Instagram controls like sharing, following, channel links, etc.
     const elementAfterVideo = video.nextElementSibling;
     if (elementAfterVideo) {
-        elementAfterVideo.remove();
+        if (elementAfterVideo.firstChild instanceof HTMLElement) {
+            elementAfterVideo.firstChild.style.height = "calc(100% - 45px)"; /* 45px is ~ the video control height */
+        }
     }
 
     // Detect if this video is embedded. We need to apply special rules for embedded videos.
