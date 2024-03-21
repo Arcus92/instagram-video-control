@@ -1,0 +1,7 @@
+/*
+  Story controls (answer, like, share). This class name might change in future.
+  I should find a way to detect this in JavaScript.
+*/
+.x1l90r2v {
+    padding-bottom: 52px; /* Expand bottom padding to ensure there is enough space for the video controls */
+}
