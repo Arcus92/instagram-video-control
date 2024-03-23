@@ -36,7 +36,7 @@ function registerVideoElement(video) {
     const elementAfterVideo = video.nextElementSibling;
     if (elementAfterVideo) {
         if (elementAfterVideo.firstChild instanceof HTMLElement) {
-            elementAfterVideo.firstChild.style.height = "calc(100% - 45px)"; /* 45px is ~ the video control height */
+            elementAfterVideo.firstChild.style.height = "calc(100% - 40px)"; /* 40px is ~ the video control height */
         }
     }
 
