@@ -79,11 +79,20 @@ jobs:
       - name: Clean
         run: rm -rf ./release-${{ matrix.target }}.zip ./release-${{ matrix.target }}
 
+      # Compile with Node
+      - name: Compile with node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run tsc
+
       # Copy files
       - name: Copy files
         run: |
           mkdir ./release-${{ matrix.target }} &&
           cp -r ./content/* ./release-${{ matrix.target }} &&
+          cp -r ./dist/js/* ./release-${{ matrix.target }} &&
           cp -r ./${{ matrix.target }}/* ./release-${{ matrix.target }}
 
       # Create a .zip archive

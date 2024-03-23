@@ -1,0 +1,25 @@
+{
+  "name": "instagram-video-control",
+  "version": "1.0.0",
+  "description": "Adds volume and play controls to Instagram videos.",
+  "devDependencies": {
+    "@types/chrome": "^0.0.263",
+    "@types/firefox-webext-browser": "^120.0.3",
+
+    "typescript": "^5.4.3"
+  },
+  "scripts": {
+    "build": "./build.sh",
+    "tsc": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arcus92/instagram-video-control.git"
+  },
+  "author": "David Schulte <mail@david-schulte.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Arcus92/instagram-video-control/issues"
+  },
+  "homepage": "https://github.com/Arcus92/instagram-video-control#readme"
+}

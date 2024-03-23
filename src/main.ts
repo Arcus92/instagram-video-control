@@ -1,4 +1,4 @@
-const registeredVideos = [];
+const registeredVideos: HTMLVideoElement[] = [];
 
 let playbackVolume = 0.0;
 let playbackMuted = true;
@@ -6,24 +6,24 @@ let ignoreNextVolumeChange = false
 
 // Returns if the given video is from the explore page. Video controls in the explore page looks wrong, and we don't
 // want to unmute multiple videos there. We simply ignore them.
-function isVideoInExplorePage(video) {
+function isVideoInExplorePage(video: HTMLVideoElement) {
 
     // Since Instagram is obfuscated, the best way to test for it, is to check for a video embedded in an a-tag.
     // The explore videos are like buttons that takes you to the actual view page.
-    let parent = video.parentNode;
+    let parent = video.parentNode as HTMLElement;
     while (parent)
     {
         if (parent.tagName === 'A') {
             return true;
         }
-        parent = parent.parentNode;
+        parent = parent.parentNode as HTMLElement;
     }
 
     return false;
 }
 
 // Is called when a new video element was detected on the page.
-function registerVideoElement(video) {
+function registerVideoElement(video: HTMLVideoElement) {
     // Enable Html controls
     video.controls = true;
 
@@ -65,7 +65,7 @@ function registerVideoElement(video) {
 }
 
 // Is called when a video element was removed from the page.
-function unregisterVideoElement(video) {
+function unregisterVideoElement(video: HTMLVideoElement) {
     video.removeEventListener("volumechange", onVolumeChanged);
     video.removeEventListener("play", onPlay);
 }
@@ -79,17 +79,17 @@ function updateVolumeForVideos() {
 }
 
 // Applies the stored volume to the given video.
-function updateVolumeForVideo(video) {
+function updateVolumeForVideo(video: HTMLVideoElement) {
     video.volume = playbackVolume;
     video.muted = playbackMuted;
 }
 
 // Is called when the volume was changed of any registered video.
-function onVolumeChanged(event) {
+function onVolumeChanged(event: Event) {
     // We don't want to react to volume changes from the page itself.
     if (!event.isTrusted) return;
 
-    const video = event.target;
+    const video = event.target as HTMLVideoElement;
 
     // Not changed, so no need to update the other videos.
     if (playbackVolume === video.volume && playbackMuted === video.muted)
@@ -110,8 +110,8 @@ function onVolumeChanged(event) {
 }
 
 // Is called when a video is starting playback.
-function onPlay(event) {
-    const video = event.target;
+function onPlay(event: Event) {
+    const video = event.target as HTMLVideoElement;
 
     // Instagram will mute videos in Reels as soon as playback starts. To counter this we will ignore the next volume
     // change event and undo the volume / mute change.
@@ -168,22 +168,22 @@ function storage() {
 function saveSettings() {
     storage().set({
         lastPlaybackVolume: playbackVolume
-    }).then(() => {}, (e) => console.error(e));
+    }).then(() => {}, (e: Error) => console.error(e));
 }
 
 // Loads the volume settings from storage.
 function loadSettings() {
-    storage().get("lastPlaybackVolume").then((value) => {
+    storage().get("lastPlaybackVolume").then((value: any) => {
         if (typeof value?.lastPlaybackVolume === 'number')
         {
             playbackVolume = value.lastPlaybackVolume;
         }
-    }, (e) => console.error(e));
+    }, (e: Error) => console.error(e));
 }
 
 // Disables all events for the given element by stop propagation.
-function disableAllEventListeners(element, type) {
-    // There is no way to remove event handlers, so we add a aggressive event, that stops propagation.
+function disableAllEventListeners(element: HTMLElement | Document, type: string) {
+    // There is no way to remove event handlers, so we add an aggressive event, that stops propagation.
     element.addEventListener(type, (event) => {
         event.stopImmediatePropagation();
     }, true);
