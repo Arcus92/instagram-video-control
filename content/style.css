@@ -1,0 +1,79 @@
+.videoControls {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+
+    display: flex;
+    flex-direction: row;
+
+    padding: 0 12px;
+
+    position: absolute;
+    height: 32px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.videoControlsInReels {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.videoControlElement {
+    margin: 4px;
+}
+
+.videoControlButton {
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #ffffff;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+
+    cursor: pointer;
+
+    width: 16px;
+}
+
+.videoControlText {
+    flex: 0 0 80px;
+    margin: 8px 0;
+    text-align: center;
+    font-size: 0.9em;
+
+    color: #ffffff;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.videoControlBar {
+    padding: 10px 5px;
+
+    cursor: pointer;
+}
+
+.videoControlBarBackground {
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.videoControlBarProgress {
+    background: rgba(255, 255, 255, 0.8);
+
+    width: 0;
+    height: 100%;
+
+    border-radius: 4px;
+}
+
+.videoControlSeekbar {
+    flex: 1;
+}
+
+.videoControlVolume {
+    flex: 0 0 48px;
+}

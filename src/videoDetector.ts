@@ -6,6 +6,7 @@ export class VideoDetector {
     private ignoreNextVolumeChange = false
 
     private registeredVideos: HTMLVideoElement[] = [];
+    private videoControlMap: { [src: string]: HTMLElement } = {};
 
     // Starts the video detector and adds the control bar.
     public start() {
@@ -21,11 +22,11 @@ export class VideoDetector {
 
     // Is called when a new video element was detected on the page.
     private registerVideoElement(video: HTMLVideoElement) {
-        // Enable Html controls
-        video.controls = true;
-
         // Update volume
         this.updateVolumeForVideo(video);
+
+        // Create the custom video control bar
+        this.createVideoControl(video);
 
         // Instead of removing the Instagram controls, we change the height and remove the height of the native video
         // controls. This lets the user click the bottom of the video / interact with the video controls AND use the
@@ -33,7 +34,7 @@ export class VideoDetector {
         const elementAfterVideo = video.nextElementSibling as HTMLElement;
         if (elementAfterVideo) {
             if (elementAfterVideo.firstChild instanceof HTMLElement) {
-                elementAfterVideo.firstChild.style.height = "calc(100% - 40px)";
+                elementAfterVideo.firstChild.style.height = "calc(100% - 32px)";
             }
         }
 
@@ -65,6 +66,134 @@ export class VideoDetector {
     private unregisterVideoElement(video: HTMLVideoElement) {
         video.removeEventListener("volumechange", (event) => this.onVolumeChanged(event));
         video.removeEventListener("play", (event) => this.onPlay(event));
+
+        // Removes the custom controls
+        this.removeVideoControl(video);
+    }
+
+    // Create the video controls with play/pause buttons, seekbar and volume control.
+    private createVideoControl(video: HTMLVideoElement) {
+        const elementAfterVideo = video.nextElementSibling;
+        if (!elementAfterVideo) return;
+
+        let currentElement = video as HTMLElement;
+        let videoType = "reel";
+        while (currentElement) {
+            if (currentElement.tagName === "ARTICLE") {
+                videoType = "post";
+                break;
+            }
+            currentElement = currentElement.parentNode as HTMLElement;
+        }
+
+        const elementVideoControl = document.createElement("div");
+        elementVideoControl.classList.add("videoControls");
+        if (videoType === "reel") {
+            elementVideoControl.classList.add("videoControlsInReels");
+        }
+        elementAfterVideo.appendChild(elementVideoControl);
+        this.videoControlMap[video.src] = elementVideoControl;
+
+        // Play button
+        const elementPlayButton = document.createElement("button");
+        elementPlayButton.classList.add("videoControlElement", "videoControlButton");
+        elementVideoControl.appendChild(elementPlayButton);
+
+        elementPlayButton.onclick = () => {
+            if (video.paused) {
+                video.play().then();
+            } else {
+                video.pause();
+            }
+        };
+
+        function updatePlayButton() {
+            elementPlayButton.innerText = video.paused ? "▶" : "⏸";
+        }
+        updatePlayButton();
+
+        video.addEventListener("play", updatePlayButton);
+        video.addEventListener("pause", updatePlayButton);
+
+        // Position text
+        const elementPosition = document.createElement("div");
+        elementPosition.classList.add("videoControlElement", "videoControlText");
+        elementVideoControl.appendChild(elementPosition);
+
+        // Seekbar
+        const elementSeekbar = document.createElement("div");
+        elementSeekbar.classList.add("videoControlElement", "videoControlBar", "videoControlSeekbar");
+        elementVideoControl.appendChild(elementSeekbar);
+
+        const elementSeekbarBackground = document.createElement("div");
+        elementSeekbarBackground.classList.add("videoControlBarBackground");
+        elementSeekbar.appendChild(elementSeekbarBackground);
+
+        const elementSeekbarProgress = document.createElement("div");
+        elementSeekbarProgress.classList.add("videoControlBarProgress");
+        elementSeekbarBackground.appendChild(elementSeekbarProgress);
+
+        function updateSeekbar() {
+            const progress = video.currentTime / video.duration;
+            elementSeekbarProgress.style.width = `${Math.round(progress * 100)}%`
+
+            elementPosition.innerText = `${Utils.formatTime(video.currentTime)} / ${Utils.formatTime(video.duration)}`;
+        }
+        updateSeekbar();
+        video.addEventListener("timeupdate", updateSeekbar);
+
+        elementSeekbar.addEventListener("click", (event) => {
+            const rect = elementSeekbarBackground.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percentage = Math.max(Math.min(x / rect.width, 1), 0);
+            video.currentTime = percentage * video.duration;
+        });
+
+        // Mute
+        const elementMuteButton = document.createElement("button");
+        elementMuteButton.classList.add("videoControlElement", "videoControlButton");
+        elementMuteButton.innerText = "🔊";
+        elementVideoControl.appendChild(elementMuteButton);
+
+        elementMuteButton.onclick = () => {
+            video.muted = !video.muted;
+        };
+
+        // Volume
+        const elementVolume = document.createElement("div");
+        elementVolume.classList.add("videoControlElement", "videoControlBar", "videoControlVolume");
+        elementVideoControl.appendChild(elementVolume);
+
+        const elementVolumeBackground = document.createElement("div");
+        elementVolumeBackground.classList.add("videoControlBarBackground");
+        elementVolume.appendChild(elementVolumeBackground);
+
+        const elementVolumeProgress = document.createElement("div");
+        elementVolumeProgress.classList.add("videoControlBarProgress");
+        elementVolumeBackground.appendChild(elementVolumeProgress);
+
+        function updateVolume() {
+            elementMuteButton.innerText = video.muted ? "🔇" : "🔊";
+            elementVolumeProgress.style.width = `${Math.round(video.volume * 100)}%`
+        }
+        updateVolume();
+        video.addEventListener("volumechange", updateVolume);
+
+        elementVolume.addEventListener("click", (event) => {
+            const rect = elementVolumeBackground.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            video.volume = Math.max(Math.min(x / rect.width, 1), 0);
+            video.muted = video.volume <= 0;
+        });
+    }
+
+    // Removes the videos controls.
+    private removeVideoControl(video: HTMLVideoElement) {
+        const element = this.videoControlMap[video.src];
+        if (element) {
+            element.remove();
+            delete this.videoControlMap[video.src];
+        }
     }
 
 
@@ -82,7 +211,7 @@ export class VideoDetector {
     }
 
     // Is called when the volume was changed of any registered video.
-    private onVolumeChanged(event: Event){
+    private onVolumeChanged(event: Event) {
         // We don't want to react to volume changes from the page itself.
         if (!event.isTrusted) return;
 
