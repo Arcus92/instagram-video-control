@@ -5,11 +5,13 @@
   "devDependencies": {
     "@types/chrome": "^0.0.263",
     "@types/firefox-webext-browser": "^120.0.3",
-
+    "@types/archiver": "^6.0.2",
+    "archiver": "^7.0.1",
     "typescript": "^5.4.3"
   },
   "scripts": {
-    "build": "./build.sh",
+    "build": "npm run tsc && npm run pack",
+    "pack": "node pack.js",
     "tsc": "tsc"
   },
   "repository": {

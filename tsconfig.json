@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "outDir": "./dist/js",
+    "module": "System",
+    "rootDir": "./src",
+    "outFile": "./dist/js/main.js",
     "types": ["chrome", "firefox-webext-browser"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
