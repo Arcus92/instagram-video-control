@@ -85,7 +85,7 @@ jobs:
         with:
           node-version: '20.x'
       - run: npm ci
-      - run: npm run tsc
+      - run: npm run build
 
       # Copy files
       - name: Copy files
