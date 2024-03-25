@@ -47,9 +47,6 @@ jobs:
   # Publish all version
   publish:
     name: Publish
-    strategy:
-      matrix:
-        target: [ 'firefox', 'chrome' ]
     runs-on: ubuntu-latest
     needs: [ release ]
 
@@ -77,27 +74,36 @@ jobs:
 
       # Clean the output folder
       - name: Clean
-        run: rm -rf ./release-${{ matrix.target }}.zip ./release-${{ matrix.target }}
+        run: rm -rf ./dist
 
-      # Copy files
-      - name: Copy files
-        run: |
-          mkdir ./release-${{ matrix.target }} &&
-          cp -r ./content/* ./release-${{ matrix.target }} &&
-          cp -r ./${{ matrix.target }}/* ./release-${{ matrix.target }}
+      # Compile with Node
+      - name: Compile with Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run build
 
-      # Create a .zip archive
-      - name: Packing archive
-        run: cd ./release-${{ matrix.target }} && zip -r ../release-${{ matrix.target }}.zip * && cd ..
-
-      # Upload the release
-      - name: Upload release
-        id: upload-release-asset
+      # Upload the Firefox extension
+      - name: Upload Firefox extension
+        id: upload-release-asset-firefox
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./release-${{ matrix.target }}.zip
-          asset_name: ${{ steps.get_release_info.outputs.file_name }}-${{ matrix.target }}.zip
+          asset_path: ./dist/firefox.zip
+          asset_name: ${{ steps.get_release_info.outputs.file_name }}-firefox.zip
+          asset_content_type: application/zip
+
+      # Upload the Chrome extension
+      - name: Upload Chrome extension
+        id: upload-release-asset-chrome
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./dist/chrome.zip
+          asset_name: ${{ steps.get_release_info.outputs.file_name }}-chrome.zip
           asset_content_type: application/zip

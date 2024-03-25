@@ -1,0 +1,35 @@
+{
+  "name": "instagram-video-control",
+  "version": "1.0.0",
+  "description": "Adds volume and play controls to Instagram videos.",
+  "devDependencies": {
+    "@types/archiver": "^6.0.2",
+    "@types/chrome": "^0.0.263",
+    "@types/firefox-webext-browser": "^120.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "archiver": "^7.0.1",
+    "eslint": "^8.57.0",
+    "eslint-webpack-plugin": "^4.1.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "build": "npm run compile && npm run pack",
+    "lint": "eslint ./src",
+    "pack": "node pack.js",
+    "compile": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arcus92/instagram-video-control.git"
+  },
+  "author": "David Schulte <mail@david-schulte.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Arcus92/instagram-video-control/issues"
+  },
+  "homepage": "https://github.com/Arcus92/instagram-video-control#readme"
+}
