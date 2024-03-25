@@ -163,9 +163,14 @@ export class VideoPlayer {
             ?.parentElement?.parentElement?.parentElement?.nextElementSibling;
 
         if (socialElement) {
-            // If the inner element is an <textarea>, we now this is a Story video.
-            const textarea = socialElement.firstChild?.firstChild?.firstChild?.firstChild;
-            if (textarea instanceof HTMLTextAreaElement) {
+            // I was checking if a <textarea> exists in the reply section to detect stories. However, you can disable
+            // users from reply to your stories via a privacy setting. This creates Stories without textarea.
+            // The new detection is not as smart:
+            // - In Stories the Like and Share buttons are two div-layers deep followed by a <span>.
+            // - In Reals they are just one div-layer deep.
+            // If the second child is still a <div>, we can assume this is a Story.
+            const socialIconsElement = socialElement.firstChild?.firstChild;
+            if (socialIconsElement instanceof HTMLDivElement) {
                 this.videoType = VideoType.story;
                 this.replyElement = socialElement as HTMLElement;
             }
