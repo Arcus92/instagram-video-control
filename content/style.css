@@ -1,4 +1,4 @@
-.videoControls {
+.ivc-controls {
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
 
     display: flex;
@@ -13,19 +13,19 @@
     bottom: 0;
 }
 
-.videoControlsInReels {
+.ivc-controls.ivc-reel {
     background: rgba(0, 0, 0, 0.35);
 }
 
-.videoControlsInStory {
+.ivc-controls.ivc-story {
     background: rgba(38,38,38,.6);
 }
 
-.videoControlElement {
+.ivc-control-element {
     margin: 4px;
 }
 
-.videoControlButton {
+.ivc-icon-button {
     background: transparent;
     border: none;
     outline: none;
@@ -39,7 +39,7 @@
     width: 16px;
 }
 
-.videoControlText {
+.ivc-control-text {
     flex: 0 0 80px;
     margin: 8px 0;
     text-align: center;
@@ -49,13 +49,13 @@
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
-.videoControlBar {
+.ivc-control-bar {
     padding: 10px 5px;
 
     cursor: pointer;
 }
 
-.videoControlBarBackground {
+.ivc-control-bar-background {
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 
@@ -65,7 +65,7 @@
     height: 100%;
 }
 
-.videoControlBarProgress {
+.ivc-control-bar-progress {
     background: rgba(255, 255, 255, 0.8);
 
     width: 0;
@@ -74,10 +74,10 @@
     border-radius: 4px;
 }
 
-.videoControlSeekbar {
+.ivc-seek-bar {
     flex: 1;
 }
 
-.videoControlVolume {
+.ivc-volume-bar {
     flex: 0 0 48px;
 }

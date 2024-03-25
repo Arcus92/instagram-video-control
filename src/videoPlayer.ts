@@ -176,10 +176,10 @@ export class VideoPlayer {
     // Created elements by the video controls.
     private videoControlElement: HTMLElement | undefined;
     private playButtonElement: HTMLElement | undefined;
-    private seekbarProgressElement: HTMLElement | undefined;
+    private seekBarProgressElement: HTMLElement | undefined;
     private positionTextElement: HTMLElement | undefined;
     private muteButtonElement: HTMLElement | undefined;
-    private volumeProgressElement: HTMLElement | undefined;
+    private volumeBarProgressElement: HTMLElement | undefined;
 
     // Create the video controls with play/pause buttons, seekbar and volume control.
     private createVideoControl() {
@@ -205,18 +205,18 @@ export class VideoPlayer {
 
 
         this.videoControlElement = document.createElement("div");
-        this.videoControlElement.classList.add("videoControls");
+        this.videoControlElement.classList.add("ivc-controls");
         if (this.videoType === VideoType.reel) {
-            this.videoControlElement.classList.add("videoControlsInReels");
+            this.videoControlElement.classList.add("ivc-reel");
         }
         if (this.videoType === VideoType.story) {
-            this.videoControlElement.classList.add("videoControlsInStory");
+            this.videoControlElement.classList.add("ivc-story");
         }
         this.overlayElement.appendChild(this.videoControlElement);
 
         // Play button
         this.playButtonElement = document.createElement("button");
-        this.playButtonElement.classList.add("videoControlElement", "videoControlButton");
+        this.playButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
         this.videoControlElement.appendChild(this.playButtonElement);
 
         this.playButtonElement.onclick = () => {
@@ -229,21 +229,21 @@ export class VideoPlayer {
 
         // Position text
         this.positionTextElement = document.createElement("div");
-        this.positionTextElement.classList.add("videoControlElement", "videoControlText");
+        this.positionTextElement.classList.add("ivc-control-element", "ivc-control-text");
         this.videoControlElement.appendChild(this.positionTextElement);
 
         // Seekbar
         const elementSeekbar = document.createElement("div");
-        elementSeekbar.classList.add("videoControlElement", "videoControlBar", "videoControlSeekbar");
+        elementSeekbar.classList.add("ivc-control-element", "ivc-control-bar", "ivc-seek-bar");
         this.videoControlElement.appendChild(elementSeekbar);
 
         const elementSeekbarBackground = document.createElement("div");
-        elementSeekbarBackground.classList.add("videoControlBarBackground");
+        elementSeekbarBackground.classList.add("ivc-control-bar-background");
         elementSeekbar.appendChild(elementSeekbarBackground);
 
-        this.seekbarProgressElement = document.createElement("div");
-        this.seekbarProgressElement.classList.add("videoControlBarProgress");
-        elementSeekbarBackground.appendChild(this.seekbarProgressElement);
+        this.seekBarProgressElement = document.createElement("div");
+        this.seekBarProgressElement.classList.add("ivc-control-bar-progress");
+        elementSeekbarBackground.appendChild(this.seekBarProgressElement);
 
         elementSeekbar.addEventListener("click", (event) => {
             const rect = elementSeekbarBackground.getBoundingClientRect();
@@ -254,7 +254,7 @@ export class VideoPlayer {
 
         // Mute
         this.muteButtonElement = document.createElement("button");
-        this.muteButtonElement.classList.add("videoControlElement", "videoControlButton");
+        this.muteButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
         this.videoControlElement.appendChild(this.muteButtonElement);
 
         this.muteButtonElement.onclick = () => {
@@ -263,16 +263,16 @@ export class VideoPlayer {
 
         // Volume
         const elementVolume = document.createElement("div");
-        elementVolume.classList.add("videoControlElement", "videoControlBar", "videoControlVolume");
+        elementVolume.classList.add("ivc-control-element", "ivc-control-bar", "ivc-volume-bar");
         this.videoControlElement.appendChild(elementVolume);
 
         const elementVolumeBackground = document.createElement("div");
-        elementVolumeBackground.classList.add("videoControlBarBackground");
+        elementVolumeBackground.classList.add("ivc-control-bar-background");
         elementVolume.appendChild(elementVolumeBackground);
 
-        this.volumeProgressElement = document.createElement("div");
-        this.volumeProgressElement.classList.add("videoControlBarProgress");
-        elementVolumeBackground.appendChild(this.volumeProgressElement);
+        this.volumeBarProgressElement = document.createElement("div");
+        this.volumeBarProgressElement.classList.add("ivc-control-bar-progress");
+        elementVolumeBackground.appendChild(this.volumeBarProgressElement);
 
         elementVolume.addEventListener("click", (event) => {
             const rect = elementVolumeBackground.getBoundingClientRect();
@@ -293,19 +293,19 @@ export class VideoPlayer {
     }
 
     private updatePositionControl() {
-        if (!this.seekbarProgressElement || !this.positionTextElement) return;
+        if (!this.seekBarProgressElement || !this.positionTextElement) return;
 
         const progress = this.videoElement.currentTime / this.videoElement.duration;
-        this.seekbarProgressElement.style.width = `${Math.round(progress * 100)}%`
+        this.seekBarProgressElement.style.width = `${Math.round(progress * 100)}%`
 
         this.positionTextElement.innerText =
             `${Utils.formatTime(this.videoElement.currentTime)} / ${Utils.formatTime(this.videoElement.duration)}`;
     }
 
     private updateVolumeControl() {
-        if (!this.muteButtonElement || !this.volumeProgressElement) return;
+        if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
         this.muteButtonElement.innerText = this.videoElement.muted ? "🔇" : "🔊";
-        this.volumeProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
+        this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
     }
 
     //#endregion
