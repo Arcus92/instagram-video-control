@@ -1,24 +1,18 @@
 import {Utils} from "./utils";
 import {VideoType} from "./videoType";
+import {PlaybackManager} from "./playbackManager";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
 
+    // The playback manager to report events to.
+    public readonly playbackManager: PlaybackManager;
+
     // The original video HTML element.
     public readonly videoElement: HTMLVideoElement;
 
-    // The video origin.
-    public videoType: VideoType = VideoType.feed;
-
-    // Is the video on an embedded (iframe) page.
-    public isEmbedded: boolean = false;
-
-    // The native Instagram overlay element.
-    private overlayElement: HTMLElement | undefined;
-
-    // The native Instagram reply element for stories.
-    private replyElement: HTMLElement | undefined;
-    public constructor(videoElement: HTMLVideoElement) {
+    public constructor(playbackManager: PlaybackManager, videoElement: HTMLVideoElement) {
+        this.playbackManager = playbackManager;
         this.videoElement = videoElement;
     }
 
@@ -31,6 +25,40 @@ export class VideoPlayer {
 
         this.createVideoControl();
 
+        this.registerEvents();
+    }
+
+    // Detaches the custom player from the video tag. Removes all custom element and events.
+    public detach() {
+        this.unregisterEvents();
+    }
+
+    //#region Events
+
+    // If we add a handler to a class function in TypeScript, we are losing the `this` context.
+    // We can use lambda function to get around this.
+    // However, we need to store the lambda function, so we can remove it on detach.
+    // If you - yes, you - know a better way to implement this, please call me.
+
+    private onPlayHandler: (() => void) | undefined;
+    private onPauseHandler: (() => void) | undefined;
+    private onTimeUpdateHandler: (() => void) | undefined;
+    private onVolumeChangeHandler: (() => void) | undefined;
+
+    // Register all video events.
+    private registerEvents() {
+
+        // Creating our event handlers
+        this.onPlayHandler = () => this.onPlay();
+        this.onPauseHandler = () => this.onPause();
+        this.onTimeUpdateHandler = () => this.onTimeUpdate();
+        this.onVolumeChangeHandler = () => this.onVolumeChange();
+
+        this.videoElement.addEventListener("play", this.onPlayHandler);
+        this.videoElement.addEventListener("pause", this.onPauseHandler);
+        this.videoElement.addEventListener("timeupdate", this.onTimeUpdateHandler);
+        this.videoElement.addEventListener("volumechange", this.onVolumeChangeHandler);
+
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
             // hide the video. We want to give the user the option to replay the video even after it finished.
@@ -42,10 +70,57 @@ export class VideoPlayer {
         }
     }
 
-    // Detaches the custom player from the video tag. Removes all custom element and events.
-    public detach() {
-
+    // Unregisters all video events.
+    private unregisterEvents() {
+        if (this.onPlayHandler) this.videoElement.removeEventListener("play", this.onPlayHandler);
+        if (this.onPauseHandler) this.videoElement.removeEventListener("pause", this.onPauseHandler);
+        if (this.onTimeUpdateHandler) this.videoElement.removeEventListener("timeupdate", this.onTimeUpdateHandler);
+        if (this.onVolumeChangeHandler) this.videoElement.removeEventListener("volumechange", this.onVolumeChangeHandler);
     }
+
+    // Handles video play event.
+    private onPlay() {
+        this.updatePlayControl();
+
+        this.playbackManager.notifyVideoPlay(this.videoElement);
+    }
+
+    // Handles video pause event.
+    private onPause() {
+        this.updatePlayControl();
+    }
+
+    // Handles video time update event.
+    private onTimeUpdate() {
+        this.updatePositionControl();
+    }
+
+    // Handles video volume changes.
+    private onVolumeChange() {
+        this.updateVolumeControl();
+
+        // We don't want to react to volume changes from the page itself.
+        //if (!event.isTrusted) return;
+
+        this.playbackManager.notifyVideoVolumeChange(this.videoElement);
+    }
+
+    //#endregion
+
+    //#region Video
+
+    // The video origin.
+    public videoType: VideoType = VideoType.feed;
+
+    // Is the video on an embedded (iframe) page.
+    public isEmbedded: boolean = false;
+
+    // The native Instagram overlay element.
+    private overlayElement: HTMLElement | undefined;
+
+    // The native Instagram reply element for stories.
+    private replyElement: HTMLElement | undefined;
+
 
     // Detects the video type and finds all native components.
     private detectVideo() {
@@ -94,6 +169,17 @@ export class VideoPlayer {
         }
     }
 
+    // #endregion
+
+    // #region Controls
+
+    // Created elements by the video controls.
+    private videoControlElement: HTMLElement | undefined;
+    private playButtonElement: HTMLElement | undefined;
+    private seekbarProgressElement: HTMLElement | undefined;
+    private positionTextElement: HTMLElement | undefined;
+    private muteButtonElement: HTMLElement | undefined;
+    private volumeProgressElement: HTMLElement | undefined;
 
     // Create the video controls with play/pause buttons, seekbar and volume control.
     private createVideoControl() {
@@ -118,22 +204,22 @@ export class VideoPlayer {
         // Creating the actual player...
 
 
-        const elementVideoControl = document.createElement("div");
-        elementVideoControl.classList.add("videoControls");
+        this.videoControlElement = document.createElement("div");
+        this.videoControlElement.classList.add("videoControls");
         if (this.videoType === VideoType.reel) {
-            elementVideoControl.classList.add("videoControlsInReels");
+            this.videoControlElement.classList.add("videoControlsInReels");
         }
         if (this.videoType === VideoType.story) {
-            elementVideoControl.classList.add("videoControlsInStory");
+            this.videoControlElement.classList.add("videoControlsInStory");
         }
-        this.overlayElement.appendChild(elementVideoControl);
+        this.overlayElement.appendChild(this.videoControlElement);
 
         // Play button
-        const elementPlayButton = document.createElement("button");
-        elementPlayButton.classList.add("videoControlElement", "videoControlButton");
-        elementVideoControl.appendChild(elementPlayButton);
+        this.playButtonElement = document.createElement("button");
+        this.playButtonElement.classList.add("videoControlElement", "videoControlButton");
+        this.videoControlElement.appendChild(this.playButtonElement);
 
-        elementPlayButton.onclick = () => {
+        this.playButtonElement.onclick = () => {
             if (video.paused) {
                 video.play().then();
             } else {
@@ -141,40 +227,23 @@ export class VideoPlayer {
             }
         };
 
-        function updatePlayButton() {
-            elementPlayButton.innerText = video.paused ? "▶" : "⏸";
-        }
-        updatePlayButton();
-
-        video.addEventListener("play", updatePlayButton);
-        video.addEventListener("pause", updatePlayButton);
-
         // Position text
-        const elementPosition = document.createElement("div");
-        elementPosition.classList.add("videoControlElement", "videoControlText");
-        elementVideoControl.appendChild(elementPosition);
+        this.positionTextElement = document.createElement("div");
+        this.positionTextElement.classList.add("videoControlElement", "videoControlText");
+        this.videoControlElement.appendChild(this.positionTextElement);
 
         // Seekbar
         const elementSeekbar = document.createElement("div");
         elementSeekbar.classList.add("videoControlElement", "videoControlBar", "videoControlSeekbar");
-        elementVideoControl.appendChild(elementSeekbar);
+        this.videoControlElement.appendChild(elementSeekbar);
 
         const elementSeekbarBackground = document.createElement("div");
         elementSeekbarBackground.classList.add("videoControlBarBackground");
         elementSeekbar.appendChild(elementSeekbarBackground);
 
-        const elementSeekbarProgress = document.createElement("div");
-        elementSeekbarProgress.classList.add("videoControlBarProgress");
-        elementSeekbarBackground.appendChild(elementSeekbarProgress);
-
-        function updateSeekbar() {
-            const progress = video.currentTime / video.duration;
-            elementSeekbarProgress.style.width = `${Math.round(progress * 100)}%`
-
-            elementPosition.innerText = `${Utils.formatTime(video.currentTime)} / ${Utils.formatTime(video.duration)}`;
-        }
-        updateSeekbar();
-        video.addEventListener("timeupdate", updateSeekbar);
+        this.seekbarProgressElement = document.createElement("div");
+        this.seekbarProgressElement.classList.add("videoControlBarProgress");
+        elementSeekbarBackground.appendChild(this.seekbarProgressElement);
 
         elementSeekbar.addEventListener("click", (event) => {
             const rect = elementSeekbarBackground.getBoundingClientRect();
@@ -184,34 +253,26 @@ export class VideoPlayer {
         });
 
         // Mute
-        const elementMuteButton = document.createElement("button");
-        elementMuteButton.classList.add("videoControlElement", "videoControlButton");
-        elementMuteButton.innerText = "🔊";
-        elementVideoControl.appendChild(elementMuteButton);
+        this.muteButtonElement = document.createElement("button");
+        this.muteButtonElement.classList.add("videoControlElement", "videoControlButton");
+        this.videoControlElement.appendChild(this.muteButtonElement);
 
-        elementMuteButton.onclick = () => {
+        this.muteButtonElement.onclick = () => {
             video.muted = !video.muted;
         };
 
         // Volume
         const elementVolume = document.createElement("div");
         elementVolume.classList.add("videoControlElement", "videoControlBar", "videoControlVolume");
-        elementVideoControl.appendChild(elementVolume);
+        this.videoControlElement.appendChild(elementVolume);
 
         const elementVolumeBackground = document.createElement("div");
         elementVolumeBackground.classList.add("videoControlBarBackground");
         elementVolume.appendChild(elementVolumeBackground);
 
-        const elementVolumeProgress = document.createElement("div");
-        elementVolumeProgress.classList.add("videoControlBarProgress");
-        elementVolumeBackground.appendChild(elementVolumeProgress);
-
-        function updateVolume() {
-            elementMuteButton.innerText = video.muted ? "🔇" : "🔊";
-            elementVolumeProgress.style.width = `${Math.round(video.volume * 100)}%`
-        }
-        updateVolume();
-        video.addEventListener("volumechange", updateVolume);
+        this.volumeProgressElement = document.createElement("div");
+        this.volumeProgressElement.classList.add("videoControlBarProgress");
+        elementVolumeBackground.appendChild(this.volumeProgressElement);
 
         elementVolume.addEventListener("click", (event) => {
             const rect = elementVolumeBackground.getBoundingClientRect();
@@ -219,6 +280,33 @@ export class VideoPlayer {
             video.volume = Math.max(Math.min(x / rect.width, 1), 0);
             video.muted = video.volume <= 0;
         });
+
+        // Init update
+        this.updatePlayControl();
+        this.updatePositionControl();
+        this.updateVolumeControl();
     }
 
+    private updatePlayControl() {
+        if (!this.playButtonElement) return;
+        this.playButtonElement.innerText = this.videoElement.paused ? "▶" : "⏸";
+    }
+
+    private updatePositionControl() {
+        if (!this.seekbarProgressElement || !this.positionTextElement) return;
+
+        const progress = this.videoElement.currentTime / this.videoElement.duration;
+        this.seekbarProgressElement.style.width = `${Math.round(progress * 100)}%`
+
+        this.positionTextElement.innerText =
+            `${Utils.formatTime(this.videoElement.currentTime)} / ${Utils.formatTime(this.videoElement.duration)}`;
+    }
+
+    private updateVolumeControl() {
+        if (!this.muteButtonElement || !this.volumeProgressElement) return;
+        this.muteButtonElement.innerText = this.videoElement.muted ? "🔇" : "🔊";
+        this.volumeProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
+    }
+
+    //#endregion
 }
