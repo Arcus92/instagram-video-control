@@ -10,6 +10,8 @@ export class Utils {
 
     // Returns a readable timestamp a format like "m:ss".
     public static formatTime(totalSeconds: number): string {
+        if (isNaN(totalSeconds)) return '0:00';
+
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = Math.floor(totalSeconds - minutes * 60);
 
