@@ -110,7 +110,7 @@ export class VideoPlayer {
     //#region Video
 
     // The video origin.
-    public videoType: VideoType = VideoType.feed;
+    public videoType: VideoType = VideoType.post;
 
     // Is the video on an embedded (iframe) page.
     public isEmbedded: boolean = false;
@@ -120,6 +120,9 @@ export class VideoPlayer {
 
     // The native Instagram reply element for stories.
     private replyElement: HTMLElement | undefined;
+
+    // The native mute button.
+    private muteElement: HTMLElement | undefined;
 
 
     // Detects the video type and finds all native components.
@@ -131,9 +134,9 @@ export class VideoPlayer {
         let currentElement = this.videoElement as HTMLElement;
         while (currentElement) {
 
-            // If we find an <article> tag, we know this is a feed video.
+            // If we find an <article> tag, we know this is a post in the main feed.
             if (currentElement.tagName === 'ARTICLE') {
-                this.videoType = VideoType.feed;
+                this.videoType = VideoType.post;
                 break;
             }
 
@@ -165,6 +168,28 @@ export class VideoPlayer {
             if (textarea instanceof HTMLTextAreaElement) {
                 this.videoType = VideoType.story;
                 this.replyElement = socialElement as HTMLElement;
+            }
+        }
+
+        // Finds the native mute button in posts.
+        const nativeControlsElement = this.overlayElement.firstChild as HTMLElement;
+        if (nativeControlsElement) {
+            // Normal posts have a simpler structure. All the different elements are on the first level.
+            if (nativeControlsElement.childElementCount > 1) {
+
+                // The position of the mute button can change. It is not always the second element.
+                // But it is the first element that contains a <button> tag.
+                // The second <button> tag is the marked accounts icon.
+                for (const element of nativeControlsElement.children) {
+                    if (!(element instanceof HTMLElement)) continue;
+
+                    // Check if this contains a button.
+                    if (element.firstChild instanceof HTMLButtonElement) {
+                        this.videoType = VideoType.post;
+                        this.muteElement = element;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -200,6 +225,10 @@ export class VideoPlayer {
             this.replyElement.style.marginBottom = '32px';
         }
 
+        // Hide the native mute button.
+        if (this.muteElement) {
+            this.muteElement.style.display = 'none';
+        }
 
         // Creating the actual player...
 
