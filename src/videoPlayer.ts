@@ -121,6 +121,9 @@ export class VideoPlayer {
     // The native Instagram reply element for stories.
     private replyElement: HTMLElement | undefined;
 
+    // The native clickable areas for mobile Story controls.
+    private clickEventElement: HTMLElement | undefined;
+
     // The native mute button.
     private muteElement: HTMLElement | undefined;
 
@@ -156,6 +159,19 @@ export class VideoPlayer {
         this.overlayElement = this.videoElement.nextElementSibling as HTMLElement;
 
         this.replyElement = undefined;
+        this.clickEventElement = undefined;
+
+        // Navigate to the overlay buttons. They are five layers deep in the structure.
+        // The overlay buttons are used for Stories in mobile mode. These are two hidden links that overlay the video.
+        // If you click left you go to the previous Story element. If you click right you go to the next one.
+        // These are only present in the mobile view (aka small screen width) mode. Otherwise, this element still
+        // exists, but it is empty.
+        const clickEventElement = this.videoElement
+            ?.parentElement?.parentElement?.parentElement?.parentElement
+            ?.parentElement?.nextElementSibling;
+        if (clickEventElement instanceof HTMLElement) {
+            this.clickEventElement = clickEventElement;
+        }
 
         // Navigate to the social buttons. They are seven layers deep in the structure.
         const socialElement = this.videoElement
@@ -171,7 +187,15 @@ export class VideoPlayer {
             // If the second child is still a <div>, we can assume this is a Story.
             const socialIconsElement = socialElement.firstChild?.firstChild;
             if (socialIconsElement instanceof HTMLDivElement) {
-                this.videoType = VideoType.story;
+                // There is another issue. Stories have a different layout and controls scheme when viewed on a slim
+                // device / viewport. Only the mobile layout has two clickable areas (next and previous buttons).
+                if (this.clickEventElement &&
+                    this.clickEventElement.childElementCount > 0) {
+                    this.videoType = VideoType.mobileStory;
+                } else {
+                    // No clickable elements are used. We are not in mobile layout.
+                    this.videoType = VideoType.story;
+                }
                 this.replyElement = socialElement as HTMLElement;
             }
         }
@@ -227,7 +251,16 @@ export class VideoPlayer {
 
         // For Stories, we also add a margin to the reply element to not overlay the controls.
         if (this.replyElement) {
-            this.replyElement.style.marginBottom = '32px';
+            // The social controls in mobile Stories are placed below the post and don't overlap by default.
+            if (this.videoType !== VideoType.mobileStory) {
+                this.replyElement.style.marginBottom = '32px';
+            }
+        }
+
+        // If clickable overlays are used, we want to add a margin, so we can interact with our controls without
+        // activating the overlay buttons.
+        if (this.clickEventElement) {
+            this.clickEventElement.style.marginBottom = '32px';
         }
 
         // Hide the native mute button.
