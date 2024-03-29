@@ -1,0 +1,30 @@
+body {
+    font-family: sans-serif;
+    font-size: 14px;
+
+    background-color: #eee;
+    color: #222;
+
+    min-width: 420px;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #222;
+        color: #eee;
+    }
+}
+
+a {
+    color: #888;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+ul.options-list {
+    list-style: none;
+    padding: 0;
+}
