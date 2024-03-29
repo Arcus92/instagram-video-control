@@ -18,8 +18,8 @@
   },
   "scripts": {
     "build": "npm run compile && npm run pack",
-    "lint": "eslint ./src",
-    "pack": "node pack.js",
+    "lint": "eslint ./content/src",
+    "pack": "node ./pack.js",
     "compile": "webpack"
   },
   "repository": {

@@ -5,7 +5,7 @@ const childProcess = require('child_process');
 
 const distPath = path.join(__dirname, 'dist');
 const sourcePath = path.join(__dirname, 'dist', 'js');
-const contentPath = path.join(__dirname, 'content');
+const staticPath = path.join(__dirname, 'content', 'static');
 
 // Getting the version from the package.json
 const versionBuffer = childProcess.execSync("npm pkg get version --parseable", { encoding: 'utf8' });
@@ -17,7 +17,7 @@ for (const platformName of platformNames) {
     console.log(`Packing plugin for ${platformName}...`);
     const platformDistPath = path.join(distPath, platformName);
     const platformDistManifestPath = path.join(distPath, platformName, 'manifest.json');
-    const platformManifestPath = path.join(__dirname, platformName, 'manifest.json');
+    const platformManifestPath = path.join(__dirname, 'content', 'manifest', `${platformName}.json`);
     const platformZipPath = path.join(distPath, platformName + '.zip');
 
     // Clear output directory
@@ -28,7 +28,7 @@ for (const platformName of platformNames) {
     }
 
     // Copy content. TypeScript must be compiled by now.
-    fs.cpSync(contentPath, platformDistPath, { recursive: true });
+    fs.cpSync(staticPath, platformDistPath, { recursive: true });
     fs.cpSync(sourcePath, platformDistPath, { recursive: true });
 
     // Copy manifest and replacing the version.

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
-    "rootDir": "./src",
+    "rootDir": "./content/src/",
     "outDir": "./dist/js/",
     "sourceMap": true,
     "types": ["chrome", "firefox-webext-browser"],
