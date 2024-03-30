@@ -17,4 +17,13 @@ export class Utils {
 
         return `${minutes}:${seconds >= 10 ? seconds : '0' + seconds}`;
     }
+
+    // Returns the n-th parent of the given element.
+    public static elementParent(element: HTMLElement, layers: number = 1): HTMLElement | undefined {
+        for (let i=0; i<layers; i++) {
+            if (!(element.parentElement instanceof HTMLElement)) return undefined;
+            element = element.parentElement;
+        }
+        return element;
+    }
 }

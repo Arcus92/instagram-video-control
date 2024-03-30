@@ -44,6 +44,7 @@ export class VideoPlayer {
     private onPauseHandler: (() => void) | undefined;
     private onTimeUpdateHandler: (() => void) | undefined;
     private onVolumeChangeHandler: (() => void) | undefined;
+    private onFullscreenChangeHandler: (() => void) | undefined;
 
     // Register all video events.
     private registerEvents() {
@@ -53,11 +54,13 @@ export class VideoPlayer {
         this.onPauseHandler = () => this.onPause();
         this.onTimeUpdateHandler = () => this.onTimeUpdate();
         this.onVolumeChangeHandler = () => this.onVolumeChange();
+        this.onFullscreenChangeHandler = () => this.onFullscreenChange();
 
         this.videoElement.addEventListener("play", this.onPlayHandler);
         this.videoElement.addEventListener("pause", this.onPauseHandler);
         this.videoElement.addEventListener("timeupdate", this.onTimeUpdateHandler);
         this.videoElement.addEventListener("volumechange", this.onVolumeChangeHandler);
+        document.addEventListener("fullscreenchange", this.onFullscreenChangeHandler)
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
@@ -105,6 +108,11 @@ export class VideoPlayer {
         this.playbackManager.notifyVideoVolumeChange(this.videoElement);
     }
 
+    // Handles fullscreen changes.
+    private onFullscreenChange() {
+        this.updateFullscreenControl()
+    }
+
     //#endregion
 
     //#region Video
@@ -114,6 +122,9 @@ export class VideoPlayer {
 
     // Is the video on an embedded (iframe) page.
     public isEmbedded: boolean = false;
+
+    // The native root element of the video area with all controls.
+    private videoRootElement: HTMLElement | undefined;
 
     // The native Instagram overlay element.
     private overlayElement: HTMLElement | undefined;
@@ -166,17 +177,15 @@ export class VideoPlayer {
         // If you click left you go to the previous Story element. If you click right you go to the next one.
         // These are only present in the mobile view (aka small screen width) mode. Otherwise, this element still
         // exists, but it is empty.
-        const clickEventElement = this.videoElement
-            ?.parentElement?.parentElement?.parentElement?.parentElement
-            ?.parentElement?.nextElementSibling;
+        const clickEventElement =
+            Utils.elementParent(this.videoElement, 5)?.nextElementSibling;
         if (clickEventElement instanceof HTMLElement) {
             this.clickEventElement = clickEventElement;
         }
 
         // Navigate to the social buttons. They are seven layers deep in the structure.
-        const socialElement = this.videoElement
-            ?.parentElement?.parentElement?.parentElement?.parentElement
-            ?.parentElement?.parentElement?.parentElement?.nextElementSibling;
+        const socialElement =
+            Utils.elementParent(this.videoElement, 7)?.nextElementSibling;
 
         if (socialElement) {
             // I was checking if a <textarea> exists in the reply section to detect stories. However, you can disable
@@ -221,6 +230,13 @@ export class VideoPlayer {
                 }
             }
         }
+
+        // Finds the video root element used for fullscreen.
+        const videoRootElement =
+            Utils.elementParent(this.videoElement, 1);
+        if (videoRootElement instanceof HTMLElement) {
+            this.videoRootElement = videoRootElement;
+        }
     }
 
     // #endregion
@@ -234,6 +250,7 @@ export class VideoPlayer {
     private positionTextElement: HTMLElement | undefined;
     private muteButtonElement: HTMLElement | undefined;
     private volumeBarProgressElement: HTMLElement | undefined;
+    private fullscreenButtonElement: HTMLElement | undefined;
 
     // Create the video controls with play/pause buttons, seekbar and volume control.
     private createVideoControl() {
@@ -281,10 +298,14 @@ export class VideoPlayer {
         }
         this.overlayElement.appendChild(this.videoControlElement);
 
+        const contentElement = document.createElement("div");
+        contentElement.classList.add("ivc-controls-content");
+        this.videoControlElement.appendChild(contentElement);
+
         // Play button
         this.playButtonElement = document.createElement("button");
         this.playButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
-        this.videoControlElement.appendChild(this.playButtonElement);
+        contentElement.appendChild(this.playButtonElement);
 
         this.playButtonElement.onclick = () => {
             if (video.paused) {
@@ -297,12 +318,12 @@ export class VideoPlayer {
         // Position text
         this.positionTextElement = document.createElement("div");
         this.positionTextElement.classList.add("ivc-control-element", "ivc-control-text");
-        this.videoControlElement.appendChild(this.positionTextElement);
+        contentElement.appendChild(this.positionTextElement);
 
         // Seekbar
         const elementSeekbar = document.createElement("div");
         elementSeekbar.classList.add("ivc-control-element", "ivc-control-bar", "ivc-seek-bar");
-        this.videoControlElement.appendChild(elementSeekbar);
+        contentElement.appendChild(elementSeekbar);
 
         const elementSeekbarBackground = document.createElement("div");
         elementSeekbarBackground.classList.add("ivc-control-bar-background");
@@ -322,7 +343,7 @@ export class VideoPlayer {
         // Mute
         this.muteButtonElement = document.createElement("button");
         this.muteButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
-        this.videoControlElement.appendChild(this.muteButtonElement);
+        contentElement.appendChild(this.muteButtonElement);
 
         this.muteButtonElement.onclick = () => {
             video.muted = !video.muted;
@@ -331,7 +352,7 @@ export class VideoPlayer {
         // Volume
         const elementVolume = document.createElement("div");
         elementVolume.classList.add("ivc-control-element", "ivc-control-bar", "ivc-volume-bar");
-        this.videoControlElement.appendChild(elementVolume);
+        contentElement.appendChild(elementVolume);
 
         const elementVolumeBackground = document.createElement("div");
         elementVolumeBackground.classList.add("ivc-control-bar-background");
@@ -348,10 +369,30 @@ export class VideoPlayer {
             video.muted = video.volume <= 0;
         });
 
+
+        // Full screen
+        this.fullscreenButtonElement = document.createElement("button");
+        this.fullscreenButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        contentElement.appendChild(this.fullscreenButtonElement);
+
+        this.fullscreenButtonElement.onclick = () => {
+            if (!this.videoRootElement) return;
+
+            // Toggle fullscreen
+            if (document.fullscreenElement) {
+                document.exitFullscreen().then();
+            } else {
+                console.log(this.videoRootElement);
+                this.videoRootElement.requestFullscreen().then();
+            }
+        };
+
+
         // Init update
         this.updatePlayControl();
         this.updatePositionControl();
         this.updateVolumeControl();
+        this.updateFullscreenControl();
     }
 
     private updatePlayControl() {
@@ -373,6 +414,14 @@ export class VideoPlayer {
         if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
         this.muteButtonElement.innerText = this.videoElement.muted ? "🔇" : "🔊";
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
+    }
+
+    private updateFullscreenControl() {
+        if (!this.fullscreenButtonElement) return;
+        this.fullscreenButtonElement.innerText = document.fullscreenElement ? "✕" : "⤡";
+
+        // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
+        this.fullscreenButtonElement.style.visibility = document.fullscreenEnabled ? 'visible' : 'collapse';
     }
 
     //#endregion
