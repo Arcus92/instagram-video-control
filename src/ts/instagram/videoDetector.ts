@@ -1,4 +1,4 @@
-import {Settings} from "./settings";
+import {Settings} from "../shared/settings";
 import {VideoPlayer} from "./videoPlayer";
 import {PlaybackManager} from "./playbackManager";
 

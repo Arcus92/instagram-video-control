@@ -1,4 +1,4 @@
-import {Utils} from "./utils";
+import {Utils} from "../shared/utils";
 import {VideoType} from "./videoType";
 import {PlaybackManager} from "./playbackManager";
 

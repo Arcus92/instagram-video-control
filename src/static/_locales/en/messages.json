@@ -1,5 +1,14 @@
 {
   "settings": {
     "message": "Settings"
+  },
+  "option_show_fullscreen": {
+    "message": "Show fullscreen button"
+  },
+  "option_show_playback_speed": {
+    "message": "Show playback speed button"
+  },
+  "view_on_github": {
+    "message": "View on GitHub"
   }
 }
