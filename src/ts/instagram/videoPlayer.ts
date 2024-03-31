@@ -423,7 +423,7 @@ export class VideoPlayer {
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
         const isVisible = document.fullscreenEnabled && Settings.shared.showFullscreenButton;
-        this.fullscreenButtonElement.style.visibility = isVisible ? 'visible' : 'collapse';
+        this.fullscreenButtonElement.style.display = isVisible ? 'block' : 'none';
     }
 
     // Is called when any control setting was changed. We should update all dynamic controls.
