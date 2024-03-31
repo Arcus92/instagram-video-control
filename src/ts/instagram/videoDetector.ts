@@ -8,14 +8,21 @@ export class VideoDetector implements PlaybackManager {
     // The extension settings.
     private readonly settings = Settings.shared;
 
-
     // List of all video players by source.
     private videosBySource: { [source: string]: VideoPlayer } = {}
 
-    // Starts the video detector and adds the control bar.
-    public start() {
-        this.settings.load();
+    // Initialize the video detector.
+    public async init() {
+        // Loads the settings and subscribe for setting changes.
+        await this.settings.init();
+        this.settings.changed.subscribe((name) => this.onSettingChanged(name));
 
+        // Starts the detector.
+        this.start();
+    }
+
+    // Starts the video detector and adds the control bar.
+    private start() {
         // Instagram is a single-page-application and loads posts asynchronously. We'll check every second for new videos.
         // MutationObserver is too slow, because there are to many nodes and changes on that site.
         setInterval(() => {
@@ -60,7 +67,33 @@ export class VideoDetector implements PlaybackManager {
         }
     }
 
+    //#region Settings
+
+    // An extension setting was changed.
+    private onSettingChanged(name: string) {
+        switch (name) {
+            case 'showFullscreenButton':
+                this.updateControlSettingForVideos();
+                break;
+        }
+    }
+
+    // Notify all players that a control setting was changed.
+    private updateControlSettingForVideos() {
+        for (const source in this.videosBySource) {
+            const videoPlayer = this.videosBySource[source];
+            videoPlayer.updateControlSetting();
+        }
+    }
+
+    //#endregion Settings
+
     //#region Volume
+
+    // Stores the last muted state. We can not load it from the settings. We cannot unmute and autoplay in modern
+    // browsers. Instagram will always autoplay. If we unmute by default, without user interaction, the video will stop.
+    private lastPlaybackMuted: boolean = true;
+
 
     // Sometimes Instagram resets the volume on play. We want to ignore it, since it isn't a user event.
     private ignoreNextVolumeChange = false;
@@ -76,7 +109,7 @@ export class VideoDetector implements PlaybackManager {
     // Applies the stored volume to the given video.
     private updateVolumeForVideo(video: HTMLVideoElement) {
         video.volume = this.settings.lastPlaybackVolume;
-        video.muted = this.settings.lastPlaybackMuted;
+        video.muted = this.lastPlaybackMuted;
     }
 
     //#endregion
@@ -101,7 +134,7 @@ export class VideoDetector implements PlaybackManager {
     public notifyVideoVolumeChange(video: HTMLVideoElement) {
         // Not changed, so no need to update the other videos.
         if (this.settings.lastPlaybackVolume === video.volume &&
-            this.settings.lastPlaybackMuted === video.muted)
+            this.lastPlaybackMuted === video.muted)
             return;
 
         // To fix an issue with Reels, we sometimes have to ignore and undo volume events.
@@ -111,8 +144,7 @@ export class VideoDetector implements PlaybackManager {
         }
 
         this.settings.lastPlaybackVolume = video.volume;
-        this.settings.lastPlaybackMuted = video.muted;
-        this.settings.save();
+        this.lastPlaybackMuted = video.muted;
 
         // Sync the volume across all other video players.
         this.updateVolumeForVideos();

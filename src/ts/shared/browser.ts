@@ -13,11 +13,16 @@ export class Browser {
 
     // Returns the storage object for the current browser.
     public static get storage() {
-        return this.current.storage.sync;
+        return this.current.storage;
     }
 
     // Returns the internationalization object for the current browser.
     public static get i18n() {
         return this.current.i18n;
+    }
+
+    // Returns the extension manifest.
+    public static getManifest() {
+        return this.current.runtime.getManifest();
     }
 }

@@ -1,6 +1,7 @@
 import {Utils} from "../shared/utils";
 import {VideoType} from "./videoType";
 import {PlaybackManager} from "./playbackManager";
+import {Settings} from "../shared/settings";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -421,7 +422,13 @@ export class VideoPlayer {
         this.fullscreenButtonElement.innerText = document.fullscreenElement ? "✕" : "⤡";
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
-        this.fullscreenButtonElement.style.visibility = document.fullscreenEnabled ? 'visible' : 'collapse';
+        const isVisible = document.fullscreenEnabled && Settings.shared.showFullscreenButton;
+        this.fullscreenButtonElement.style.visibility = isVisible ? 'visible' : 'collapse';
+    }
+
+    // Is called when any control setting was changed. We should update all dynamic controls.
+    public updateControlSetting() {
+        this.updateFullscreenControl();
     }
 
     //#endregion

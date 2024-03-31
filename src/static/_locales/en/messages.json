@@ -10,5 +10,8 @@
   },
   "view_on_github": {
     "message": "View on GitHub"
+  },
+  "report_an_issue": {
+    "message": "Report an Issue"
   }
 }
