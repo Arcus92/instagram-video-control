@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Video Control for Instagram",
+  "version": "{VERSION}",
+
+  "description": "Adds volume and play controls to Instagram videos.",
+  "author": "mail@david-schulte.de",
+  "homepage_url": "https://github.com/Arcus92/instagram-video-control/",
+  "default_locale": "en",
+
+  "icons": {
+    "48": "icons/dark/icon-48.png",
+    "64": "icons/dark/icon-64.png",
+    "128": "icons/dark/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["js/instagram.js"],
+      "css": ["styles/instagram.css"],
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_title": "__MSG_settings__",
+    "default_popup": "html/popup.html",
+    "default_icon": {
+      "16": "icons/dark/icon-16.png",
+      "32": "icons/dark/icon-32.png"
+    },
+    "theme_icons": [{
+      "light": "icons/light/icon-16.png",
+      "dark": "icons/dark/icon-16.png",
+      "size": 16
+    },{
+      "light": "icons/light/icon-32.png",
+      "dark": "icons/dark/icon-32.png",
+      "size": 32
+    }]
+  },
+  "permissions": ["storage"]
+}

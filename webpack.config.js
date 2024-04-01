@@ -2,11 +2,14 @@ const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
-    entry: './src/main.ts',
+    entry: {
+        instagram: './src/ts/instagram/index.ts',
+        popup: './src/ts/popup/index.ts',
+    },
     mode: 'development',
     devtool: 'inline-source-map',
     output: {
-        filename: 'main.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist', 'js'),
     },
     resolve: {

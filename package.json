@@ -1,6 +1,6 @@
 {
   "name": "instagram-video-control",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Adds volume and play controls to Instagram videos.",
   "devDependencies": {
     "@types/archiver": "^6.0.2",
@@ -18,8 +18,8 @@
   },
   "scripts": {
     "build": "npm run compile && npm run pack",
-    "lint": "eslint ./src",
-    "pack": "node pack.js",
+    "lint": "eslint ./src/ts",
+    "pack": "node ./pack.js",
     "compile": "webpack"
   },
   "repository": {

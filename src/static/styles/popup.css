@@ -1,0 +1,48 @@
+body {
+    font-family: sans-serif;
+    font-size: 14px;
+
+    background-color: #fff;
+    color: #111;
+
+    min-width: 420px;
+    padding: 0 1em;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111;
+        color: #fff;
+    }
+}
+
+header {
+    margin-bottom: 1em;
+}
+
+header .title {
+    margin: 0;
+}
+header .subtitle {
+    margin: 0;
+}
+
+a {
+    color: #888;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+ul.options-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.options-list label {
+    user-select: none;
+    cursor: pointer;
+}

@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "message": "Settings"
+  },
+  "option_show_time_code": {
+    "message": "Show time code"
+  },
+  "option_show_fullscreen": {
+    "message": "Show fullscreen button"
+  },
+  "option_show_playback_speed": {
+    "message": "Show playback speed button"
+  },
+  "option_show_picture_in_picture": {
+    "message": "Show Picture-in-Picture button"
+  },
+  "view_on_github": {
+    "message": "View on GitHub"
+  },
+  "report_an_issue": {
+    "message": "Report an Issue"
+  }
+}
