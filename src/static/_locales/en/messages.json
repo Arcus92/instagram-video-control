@@ -11,6 +11,9 @@
   "option_show_playback_speed": {
     "message": "Show playback speed button"
   },
+  "option_show_picture_in_picture": {
+    "message": "Show Picture-in-Picture button"
+  },
   "view_on_github": {
     "message": "View on GitHub"
   },

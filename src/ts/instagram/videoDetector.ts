@@ -74,6 +74,7 @@ export class VideoDetector implements PlaybackManager {
         switch (name) {
             case 'showTimeCodeText':
             case 'showFullscreenButton':
+            case 'showPictureInPictureButton':
                 this.updateControlSettingForVideos();
                 break;
         }

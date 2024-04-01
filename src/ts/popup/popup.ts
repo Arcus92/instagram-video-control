@@ -25,9 +25,24 @@ export class Popup {
             (e) => e.checked = this.settings.showTimeCodeText);
 
         // Fullscreen option
-        this.initSettingControl('option_show_fullscreen',
-            (e) => this.settings.showFullscreenButton = e.checked,
-            (e) => e.checked = this.settings.showFullscreenButton);
+        if (Browser.isFullscreenSupported) {
+            this.initSettingControl('option_show_fullscreen',
+                (e) => this.settings.showFullscreenButton = e.checked,
+                (e) => e.checked = this.settings.showFullscreenButton);
+        } else {
+            // Hide the setting if not supported.
+            this.hideSettingControl('option_show_fullscreen');
+        }
+
+        // Picture-in-Picture option
+        if (Browser.isPictureInPictureSupported) {
+            this.initSettingControl('option_show_picture_in_picture',
+                (e) => this.settings.showPictureInPictureButton = e.checked,
+                (e) => e.checked = this.settings.showPictureInPictureButton);
+        } else {
+            // Hide the setting if not supported.
+            this.hideSettingControl('option_show_picture_in_picture');
+        }
     }
 
     // Generic handler for setting changes.
@@ -53,6 +68,13 @@ export class Popup {
 
         // Init default value
         restore(element);
+    }
+
+    // Hide a setting.
+    private hideSettingControl(name: string) {
+        const element = document.querySelector(`li:has(input[name="${name}"])`) as HTMLElement;
+        if (!element) return;
+        element.style.display = 'none';
     }
 
 

@@ -46,6 +46,8 @@ export class VideoPlayer {
     private onTimeUpdateHandler: (() => void) | undefined;
     private onVolumeChangeHandler: (() => void) | undefined;
     private onFullscreenChangeHandler: (() => void) | undefined;
+    private onEnterPictureInPicture: (() => void) | undefined;
+    private onLeavePictureInPicture: (() => void) | undefined;
 
     // Register all video events.
     private registerEvents() {
@@ -56,12 +58,16 @@ export class VideoPlayer {
         this.onTimeUpdateHandler = () => this.onTimeUpdate();
         this.onVolumeChangeHandler = () => this.onVolumeChange();
         this.onFullscreenChangeHandler = () => this.onFullscreenChange();
+        this.onEnterPictureInPicture = () => this.onPictureInPictureChange();
+        this.onLeavePictureInPicture = () => this.onPictureInPictureChange();
 
         this.videoElement.addEventListener("play", this.onPlayHandler);
         this.videoElement.addEventListener("pause", this.onPauseHandler);
         this.videoElement.addEventListener("timeupdate", this.onTimeUpdateHandler);
         this.videoElement.addEventListener("volumechange", this.onVolumeChangeHandler);
-        document.addEventListener("fullscreenchange", this.onFullscreenChangeHandler)
+        document.addEventListener("fullscreenchange", this.onFullscreenChangeHandler);
+        this.videoElement.addEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
+        this.videoElement.addEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
@@ -80,6 +86,9 @@ export class VideoPlayer {
         if (this.onPauseHandler) this.videoElement.removeEventListener("pause", this.onPauseHandler);
         if (this.onTimeUpdateHandler) this.videoElement.removeEventListener("timeupdate", this.onTimeUpdateHandler);
         if (this.onVolumeChangeHandler) this.videoElement.removeEventListener("volumechange", this.onVolumeChangeHandler);
+        if (this.onFullscreenChangeHandler) document.removeEventListener("fullscreenchange", this.onFullscreenChangeHandler);
+        if (this.onEnterPictureInPicture) this.videoElement.removeEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
+        if (this.onLeavePictureInPicture) this.videoElement.removeEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
     }
 
     // Handles video play event.
@@ -111,7 +120,12 @@ export class VideoPlayer {
 
     // Handles fullscreen changes.
     private onFullscreenChange() {
-        this.updateFullscreenControl()
+        this.updateFullscreenControl();
+    }
+
+    // Handles Picture-in-Picture changes.
+    private onPictureInPictureChange() {
+        this.updatePictureInPictureControl();
     }
 
     //#endregion
@@ -252,6 +266,7 @@ export class VideoPlayer {
     private muteButtonElement: HTMLElement | undefined;
     private volumeBarProgressElement: HTMLElement | undefined;
     private fullscreenButtonElement: HTMLElement | undefined;
+    private pictureInPictureButtonElement: HTMLElement | undefined;
 
     // Create the video controls with play/pause buttons, seekbar and volume control.
     private createVideoControl() {
@@ -383,8 +398,23 @@ export class VideoPlayer {
             if (document.fullscreenElement) {
                 document.exitFullscreen().then();
             } else {
-                console.log(this.videoRootElement);
                 this.videoRootElement.requestFullscreen().then();
+            }
+        };
+
+        // Picture-in-Picture
+        this.pictureInPictureButtonElement = document.createElement("button");
+        this.pictureInPictureButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        contentElement.appendChild(this.pictureInPictureButtonElement);
+
+        this.pictureInPictureButtonElement.onclick = () => {
+            if (!this.videoElement) return;
+
+            // Toggle Picture-in-picture
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture().then();
+            } else {
+                this.videoElement.requestPictureInPicture().then();
             }
         };
 
@@ -394,6 +424,7 @@ export class VideoPlayer {
         this.updatePositionControl();
         this.updateVolumeControl();
         this.updateFullscreenControl();
+        this.updatePictureInPictureControl();
     }
 
     private updatePlayControl() {
@@ -428,10 +459,20 @@ export class VideoPlayer {
             document.fullscreenEnabled && Settings.shared.showFullscreenButton);
     }
 
+    private updatePictureInPictureControl() {
+        if (!this.pictureInPictureButtonElement) return;
+        this.pictureInPictureButtonElement.innerText = document.pictureInPictureElement ? "✕" : "🖼";
+
+        // Only show the PiP button if it is available in the current context. It is not available in Firefox!
+        this.setElementVisibility(this.pictureInPictureButtonElement,
+            document.pictureInPictureEnabled && Settings.shared.showPictureInPictureButton);
+    }
+
     // Is called when any control setting was changed. We should update all dynamic controls.
     public updateControlSetting() {
         this.updatePositionControl();
         this.updateFullscreenControl();
+        this.updatePictureInPictureControl();
     }
 
     // Changes the visibility of a control element.

@@ -10,10 +10,13 @@ export class Settings {
 
     //#region Data
 
-    private readonly names: string[] = ["lastPlaybackVolume", "showTimeCodeText", "showFullscreenButton"];
+    private readonly names: string[] = [
+        "lastPlaybackVolume", "showTimeCodeText", "showFullscreenButton", "showPictureInPictureButton"
+    ];
     private _lastPlaybackVolume: number = 0.0;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
+    private _showPictureInPictureButton: boolean = false;
 
     // The last playback volume.
     public get lastPlaybackVolume(): number {
@@ -46,6 +49,17 @@ export class Settings {
         this._showFullscreenButton = value;
 
         this.onChange('showFullscreenButton');
+    }
+
+    // Should the picture-in-picture button be visible in the player controls?
+    public get showPictureInPictureButton(): boolean {
+        return this._showPictureInPictureButton;
+    }
+    public set showPictureInPictureButton(value: boolean) {
+        if (this._showPictureInPictureButton === value) return;
+        this._showPictureInPictureButton = value;
+
+        this.onChange('showPictureInPictureButton');
     }
 
     //#endregion Data
@@ -99,6 +113,10 @@ export class Settings {
         {
             this._showFullscreenButton = data.showFullscreenButton;
         }
+        if (typeof data.showPictureInPictureButton === 'boolean')
+        {
+            this._showPictureInPictureButton = data.showPictureInPictureButton;
+        }
     }
 
     // Saves the current volume settings to storage.
@@ -106,7 +124,8 @@ export class Settings {
         await Browser.storage.sync.set({
             lastPlaybackVolume: this._lastPlaybackVolume,
             showTimeCode: this._showTimeCodeText,
-            showFullscreenButton: this._showFullscreenButton
+            showFullscreenButton: this._showFullscreenButton,
+            showPictureInPictureButton: this._showPictureInPictureButton
         });
     }
 
@@ -127,6 +146,10 @@ export class Settings {
         if (typeof changes.showFullscreenButton?.newValue === 'boolean')
         {
             this.showFullscreenButton = changes.showFullscreenButton?.newValue;
+        }
+        if (typeof changes.showPictureInPictureButton?.newValue === 'boolean')
+        {
+            this.showPictureInPictureButton = changes.showPictureInPictureButton?.newValue;
         }
     }
 

@@ -25,4 +25,14 @@ export class Browser {
     public static getManifest() {
         return this.current.runtime.getManifest();
     }
+
+    // Returns if fullscreen is supported in this browser. Should be supported in Chrome and Firefox.
+    public static get isFullscreenSupported() {
+        return typeof document.fullscreenEnabled !== 'undefined';
+    }
+
+    // Returns if PiP is supported in this browser. Currently only Chrome supports it.
+    public static get isPictureInPictureSupported() {
+        return typeof document.pictureInPictureEnabled !== 'undefined';
+    }
 }
