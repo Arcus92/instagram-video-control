@@ -6,6 +6,9 @@
     left: 0;
     right: 0;
     bottom: 0;
+
+    /* Allow click-through for the control bar, so the user can access the video context menu between the elements.  */
+    pointer-events: none;
 }
 
 .ivc-controls.ivc-reel {
@@ -30,6 +33,9 @@
 
 .ivc-control-element {
     margin: 4px;
+
+    /* Enable pointer events for the elements again. */
+    pointer-events: initial;
 }
 
 .ivc-icon-button {
