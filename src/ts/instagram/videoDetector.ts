@@ -72,6 +72,7 @@ export class VideoDetector implements PlaybackManager {
     // An extension setting was changed.
     private onSettingChanged(name: string) {
         switch (name) {
+            case 'showTimeCodeText':
             case 'showFullscreenButton':
                 this.updateControlSettingForVideos();
                 break;

@@ -17,36 +17,44 @@ export class Popup {
         this.initSettingControls();
     }
 
-    // The option to enable/disable the fullscreen button.
-    private optionShowFullscreenElement: HTMLInputElement | undefined;
-
     // Finds all setting controls, sets up the values and events.
     private initSettingControls() {
-        // Fullscreen option
-        this.optionShowFullscreenElement = document.querySelector('input[name="option_show_fullscreen"]') as HTMLInputElement;
-        if (this.optionShowFullscreenElement) {
-            this.optionShowFullscreenElement.addEventListener('change', () => {
-                if (this.optionShowFullscreenElement) {
-                    this.settings.showFullscreenButton = this.optionShowFullscreenElement.checked;
-                }
-            });
-        }
+        // Time code option
+        this.initSettingControl('option_show_time_code',
+            (e) => this.settings.showTimeCodeText = e.checked,
+            (e) => e.checked = this.settings.showTimeCodeText);
 
-        // Update the initial values.
-        this.updateSettingValues();
+        // Fullscreen option
+        this.initSettingControl('option_show_fullscreen',
+            (e) => this.settings.showFullscreenButton = e.checked,
+            (e) => e.checked = this.settings.showFullscreenButton);
+    }
+
+    // Generic handler for setting changes.
+    private initSettingControl(name: string,
+                               store: (e: HTMLInputElement) => void,
+                               restore: (e: HTMLInputElement) => void) {
+        const element = document.querySelector(`input[name="${name}"]`) as HTMLInputElement;
+        if (!element) return;
+
+        // Handling the control updates
+        element.addEventListener('change', () => {
+            if (element) {
+                store(element);
+            }
+        });
 
         // Listen for future setting changes.
         this.settings.changed.subscribe(() => {
-            this.updateSettingValues();
+            if (element) {
+                restore(element);
+            }
         });
+
+        // Init default value
+        restore(element);
     }
 
-    // Applies the settings values to the controls.
-    private updateSettingValues() {
-        if (this.optionShowFullscreenElement) {
-            this.optionShowFullscreenElement.checked = this.settings.showFullscreenButton;
-        }
-    }
 
     // Replaces the content of all tags like `<span data-locale="test"></span>` with translated locale text.
     private replaceLocaleTags() {

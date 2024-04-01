@@ -10,8 +10,9 @@ export class Settings {
 
     //#region Data
 
-    private readonly names: string[] = ["lastPlaybackVolume", "showFullscreenButton"];
+    private readonly names: string[] = ["lastPlaybackVolume", "showTimeCodeText", "showFullscreenButton"];
     private _lastPlaybackVolume: number = 0.0;
+    private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
 
     // The last playback volume.
@@ -25,7 +26,18 @@ export class Settings {
         this.onChange('lastPlaybackVolume');
     }
 
-    // Should the fullscreen button be visible in the player controls.
+    // Should the time code text be visible in the player controls?
+    public get showTimeCodeText(): boolean {
+        return this._showTimeCodeText;
+    }
+    public set showTimeCodeText(value: boolean) {
+        if (this._showTimeCodeText === value) return;
+        this._showTimeCodeText = value;
+
+        this.onChange('showTimeCodeText');
+    }
+
+    // Should the fullscreen button be visible in the player controls?
     public get showFullscreenButton(): boolean {
         return this._showFullscreenButton;
     }
@@ -79,6 +91,10 @@ export class Settings {
         {
             this._lastPlaybackVolume = data.lastPlaybackVolume;
         }
+        if (typeof data.showTimeCode === 'boolean')
+        {
+            this._showTimeCodeText = data.showTimeCode;
+        }
         if (typeof data.showFullscreenButton === 'boolean')
         {
             this._showFullscreenButton = data.showFullscreenButton;
@@ -89,6 +105,7 @@ export class Settings {
     private async save() {
         await Browser.storage.sync.set({
             lastPlaybackVolume: this._lastPlaybackVolume,
+            showTimeCode: this._showTimeCodeText,
             showFullscreenButton: this._showFullscreenButton
         });
     }
@@ -102,6 +119,10 @@ export class Settings {
         if (typeof changes.lastPlaybackVolume?.newValue === 'number')
         {
             this.lastPlaybackVolume = changes.lastPlaybackVolume?.newValue;
+        }
+        if (typeof changes.showTimeCode?.newValue === 'boolean')
+        {
+            this.showTimeCodeText = changes.showTimeCode?.newValue;
         }
         if (typeof changes.showFullscreenButton?.newValue === 'boolean')
         {

@@ -2,6 +2,9 @@
   "settings": {
     "message": "Settings"
   },
+  "option_show_time_code": {
+    "message": "Show time code"
+  },
   "option_show_fullscreen": {
     "message": "Show fullscreen button"
   },

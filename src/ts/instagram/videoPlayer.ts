@@ -409,6 +409,8 @@ export class VideoPlayer {
 
         this.positionTextElement.innerText =
             `${Utils.formatTime(this.videoElement.currentTime)} / ${Utils.formatTime(this.videoElement.duration)}`;
+
+        this.setElementVisibility(this.positionTextElement, Settings.shared.showTimeCodeText);
     }
 
     private updateVolumeControl() {
@@ -422,13 +424,19 @@ export class VideoPlayer {
         this.fullscreenButtonElement.innerText = document.fullscreenElement ? "✕" : "⤡";
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
-        const isVisible = document.fullscreenEnabled && Settings.shared.showFullscreenButton;
-        this.fullscreenButtonElement.style.display = isVisible ? 'block' : 'none';
+        this.setElementVisibility(this.fullscreenButtonElement,
+            document.fullscreenEnabled && Settings.shared.showFullscreenButton);
     }
 
     // Is called when any control setting was changed. We should update all dynamic controls.
     public updateControlSetting() {
+        this.updatePositionControl();
         this.updateFullscreenControl();
+    }
+
+    // Changes the visibility of a control element.
+    private setElementVisibility(element: HTMLElement, visible: boolean) {
+        element.style.display = visible ? 'block' : 'none';
     }
 
     //#endregion
