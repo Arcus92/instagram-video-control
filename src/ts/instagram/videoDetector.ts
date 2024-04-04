@@ -1,4 +1,4 @@
-import {Settings} from "../shared/settings";
+import {Settings, SettingsData} from "../shared/settings";
 import {VideoPlayer} from "./videoPlayer";
 import {PlaybackManager} from "./playbackManager";
 
@@ -70,12 +70,15 @@ export class VideoDetector implements PlaybackManager {
     //#region Settings
 
     // An extension setting was changed.
-    private onSettingChanged(name: string) {
+    private onSettingChanged(name: keyof SettingsData) {
         switch (name) {
             case 'showTimeCodeText':
             case 'showFullscreenButton':
             case 'showPictureInPictureButton':
                 this.updateControlSettingForVideos();
+                break;
+            case 'videoControlMode':
+                this.updateControlModeForVideos();
                 break;
         }
     }
@@ -85,6 +88,14 @@ export class VideoDetector implements PlaybackManager {
         for (const source in this.videosBySource) {
             const videoPlayer = this.videosBySource[source];
             videoPlayer.updateControlSetting();
+        }
+    }
+
+    // Notify all players that a control mode was changed.
+    private updateControlModeForVideos() {
+        for (const source in this.videosBySource) {
+            const videoPlayer = this.videosBySource[source];
+            videoPlayer.updateControlMode();
         }
     }
 

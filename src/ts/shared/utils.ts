@@ -26,4 +26,16 @@ export class Utils {
         }
         return element;
     }
+
+    // Maps an object with its keys to a new object using the mapper function.
+    public static mapObject<T, TResult>(
+        data: { [p: string]: T },
+        mapper: (value: T) => TResult
+    ): { [p: string]: TResult } {
+        const newData: { [p: string]: TResult } = {};
+        for (const key in data) {
+            newData[key] = mapper(data[key]);
+        }
+        return newData;
+    }
 }

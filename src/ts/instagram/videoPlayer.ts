@@ -2,6 +2,7 @@ import {Utils} from "../shared/utils";
 import {VideoType} from "./videoType";
 import {PlaybackManager} from "./playbackManager";
 import {Settings} from "../shared/settings";
+import {VideoControlMode} from "../shared/videoControlMode";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -32,6 +33,8 @@ export class VideoPlayer {
     // Detaches the custom player from the video tag. Removes all custom element and events.
     public detach() {
         this.unregisterEvents();
+
+        this.removeVideoControl();
     }
 
     //#region Events
@@ -268,41 +271,50 @@ export class VideoPlayer {
     private fullscreenButtonElement: HTMLElement | undefined;
     private pictureInPictureButtonElement: HTMLElement | undefined;
 
-    // Create the video controls with play/pause buttons, seekbar and volume control.
+    // Creates the video controls.
     private createVideoControl() {
+        switch (Settings.shared.videoControlMode) {
+            case VideoControlMode.native:
+                this.createNativeVideoControl();
+                break;
+            case VideoControlMode.custom:
+                this.createCustomVideoControl();
+                break;
+        }
+    }
+
+    // Adjust the existing element for the control bar.
+    private adjustExistingVideoControls(controlHeight: number) {
         if (!this.overlayElement) return;
-        const video = this.videoElement;
-
-
-        // Adjusting the existing controls...
-
 
         // Removes the height of the controls from the inner overlay to not block mouse clicks.
         if (this.overlayElement.firstChild instanceof HTMLElement) {
-            this.overlayElement.firstChild.style.height = "calc(100% - 32px)";
+            this.overlayElement.firstChild.style.height = `calc(100% - ${controlHeight}px)`;
         }
 
         // For Stories, we also add a margin to the reply element to not overlay the controls.
         if (this.replyElement) {
             // The social controls in mobile Stories are placed below the post and don't overlap by default.
             if (this.videoType !== VideoType.mobileStory) {
-                this.replyElement.style.marginBottom = '32px';
+                this.replyElement.style.marginBottom = `${controlHeight}px`;
             }
         }
 
         // If clickable overlays are used, we want to add a margin, so we can interact with our controls without
         // activating the overlay buttons.
         if (this.clickEventElement) {
-            this.clickEventElement.style.marginBottom = '32px';
+            this.clickEventElement.style.marginBottom = `${controlHeight}px`;
         }
 
         // Hide the native mute button.
         if (this.muteElement) {
             this.muteElement.style.display = 'none';
         }
+    }
 
-        // Creating the actual player...
-
+    // Create the control background with the given height (used for native and custom controls).
+    private createVideoControlBackground(controlHeight: number) {
+        if (!this.overlayElement) return;
 
         this.videoControlElement = document.createElement("div");
         this.videoControlElement.classList.add("ivc-controls");
@@ -312,7 +324,36 @@ export class VideoPlayer {
         if (this.videoType === VideoType.story) {
             this.videoControlElement.classList.add("ivc-story");
         }
+        this.videoControlElement.style.height = `${controlHeight}px`;
         this.overlayElement.appendChild(this.videoControlElement);
+    }
+
+    // Enables the native browser controls.
+    private createNativeVideoControl() {
+        if (!this.overlayElement) return;
+        const video = this.videoElement;
+
+        // The controls in Chrome are higher than in Firefox.
+        const controlHeight = window.chrome ? 70 : 40;
+
+        this.adjustExistingVideoControls(controlHeight);
+        this.createVideoControlBackground(controlHeight);
+
+        video.controls = true;
+    }
+
+    // Create the video controls with play/pause buttons, seekbar and volume control.
+    private createCustomVideoControl() {
+        if (!this.overlayElement) return;
+        const video = this.videoElement;
+
+        const controlHeight = 32;
+
+        this.adjustExistingVideoControls(controlHeight);
+        this.createVideoControlBackground(controlHeight);
+
+        // Creating the actual player...
+        if (!this.videoControlElement) return;
 
         const contentElement = document.createElement("div");
         contentElement.classList.add("ivc-controls-content");
@@ -427,6 +468,39 @@ export class VideoPlayer {
         this.updatePictureInPictureControl();
     }
 
+    // Removes the video controls
+    private removeVideoControl() {
+        const video = this.videoElement;
+
+        // Remove controls
+        video.controls = false;
+
+        // Restore overlay margin
+        if (this.overlayElement && this.overlayElement.firstChild instanceof HTMLElement) {
+            this.overlayElement.firstChild.style.height = '';
+        }
+
+        // Restore reply controls
+        if (this.replyElement) {
+            this.replyElement.style.marginBottom = '';
+        }
+
+        // Restore click handler
+        if (this.clickEventElement) {
+            this.clickEventElement.style.marginBottom = '';
+        }
+
+        // Restore original mute button
+        if (this.muteElement) {
+            this.muteElement.style.display = '';
+        }
+
+        if (this.videoControlElement) {
+            this.videoControlElement.remove();
+            this.videoControlElement = undefined;
+        }
+    }
+
     private updatePlayControl() {
         if (!this.playButtonElement) return;
         this.playButtonElement.innerText = this.videoElement.paused ? "▶" : "⏸";
@@ -473,6 +547,12 @@ export class VideoPlayer {
         this.updatePositionControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+    }
+
+    // Is called when the control mode was changed. This rebuilds the UI.
+    public updateControlMode() {
+        this.detach();
+        this.attach();
     }
 
     // Changes the visibility of a control element.
