@@ -1,6 +1,6 @@
 {
   "name": "instagram-video-control",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Adds volume and play controls to Instagram videos.",
   "devDependencies": {
     "@types/archiver": "^6.0.2",
