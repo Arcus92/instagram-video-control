@@ -1,22 +1,46 @@
 import {Browser} from "./browser";
+import {EventDispatcher} from "./eventDispatcher";
+import {VideoControlMode} from "./videoControlMode";
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
-import {EventDispatcher} from "./eventDispatcher";
+import {Utils} from "./utils";
+
+// Settings data struct.
+export interface SettingsData {
+    videoControlMode: VideoControlMode;
+    lastPlaybackVolume: number;
+    showTimeCodeText: boolean;
+    showFullscreenButton: boolean;
+    showPictureInPictureButton: boolean;
+}
 
 // Handle extension settings.
-export class Settings {
+export class Settings implements SettingsData {
     // The shares setting instance.
     public static shared: Settings = new Settings();
 
     //#region Data
 
     private readonly names: string[] = [
-        "lastPlaybackVolume", "showTimeCodeText", "showFullscreenButton", "showPictureInPictureButton"
+        'videoControlMode', 'lastPlaybackVolume', 'showTimeCodeText', 'showFullscreenButton',
+        'showPictureInPictureButton'
     ];
+    private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
+
+    // The video control mode
+    public get videoControlMode(): VideoControlMode {
+        return this._videoControlMode;
+    }
+    public set videoControlMode(value: VideoControlMode) {
+        if (this._videoControlMode === value) return;
+        this._videoControlMode = value;
+
+        this.onChange('videoControlMode');
+    }
 
     // The last playback volume.
     public get lastPlaybackVolume(): number {
@@ -87,69 +111,56 @@ export class Settings {
     //#region Changes
 
     // The setting changed event is called, whenever a setting was changed in or outside of this class.
-    public readonly changed= new EventDispatcher<string>();
+    public readonly changed= new EventDispatcher<keyof SettingsData>();
 
     // Invokes the change event.
-    private onChange(name: string) {
+    private onChange(name: keyof SettingsData) {
         // Invokes the change event.
         this.changed.invoke(name);
 
-        // Write to storage.
-        this.save().then();
+        // Write changes to storage.
+        const change: { [p: string]: unknown } = {};
+        change[name] = this[name];
+        Browser.storage.sync.set(change).then();
     }
 
     // Loads the volume settings from storage.
     private async load() {
         const data = await Browser.storage.sync.get(this.names);
-        if (typeof data.lastPlaybackVolume === 'number')
-        {
-            this._lastPlaybackVolume = data.lastPlaybackVolume;
-        }
-        if (typeof data.showTimeCode === 'boolean')
-        {
-            this._showTimeCodeText = data.showTimeCode;
-        }
-        if (typeof data.showFullscreenButton === 'boolean')
-        {
-            this._showFullscreenButton = data.showFullscreenButton;
-        }
-        if (typeof data.showPictureInPictureButton === 'boolean')
-        {
-            this._showPictureInPictureButton = data.showPictureInPictureButton;
-        }
-    }
-
-    // Saves the current volume settings to storage.
-    private async save() {
-        await Browser.storage.sync.set({
-            lastPlaybackVolume: this._lastPlaybackVolume,
-            showTimeCode: this._showTimeCodeText,
-            showFullscreenButton: this._showFullscreenButton,
-            showPictureInPictureButton: this._showPictureInPictureButton
-        });
+        this.storeValues(data);
     }
 
     // Event that is called whenever a settings was changed from the storage.
     private onStorageChanged(changes: { [p: string]: StorageChangeChrome | StorageChangeBrowser }, area: string) {
         if (area !== 'sync') return;
 
+        // Converts the changes structure to a simple key-value pair.
+        const data = Utils.mapObject(changes,
+            (change) => change.newValue);
+        this.storeValues(data);
+    }
 
-        // Update our local values.
-        if (typeof changes.lastPlaybackVolume?.newValue === 'number')
+    // Stores the data in the settings.
+    private storeValues(data: { [p: string]: unknown }) {
+        if (typeof data.videoControlMode === 'string')
         {
-            this.lastPlaybackVolume = changes.lastPlaybackVolume?.newValue;
+            this.videoControlMode = data.videoControlMode as VideoControlMode;
         }
-        if (typeof changes.showTimeCode?.newValue === 'boolean')
+        if (typeof data.lastPlaybackVolume === 'number')
         {
-            this.showTimeCodeText = changes.showTimeCode?.newValue;
+            this.lastPlaybackVolume = data.lastPlaybackVolume;
         }
-        if (typeof changes.showFullscreenButton?.newValue === 'boolean')
+        if (typeof data.showTimeCodeText === 'boolean')
         {
-            this.showFullscreenButton = changes.showFullscreenButton?.newValue;
+            this.showTimeCodeText = data.showTimeCodeText;
         }
-        if (typeof changes.showPictureInPictureButton?.newValue === 'boolean')
+        if (typeof data.showFullscreenButton === 'boolean')
         {
-            this.showPictureInPictureButton = changes.showPictureInPictureButton?.newValue;
+            this.showFullscreenButton = data.showFullscreenButton;
+        }
+        if (typeof data.showPictureInPictureButton === 'boolean')
+        {
+            this.showPictureInPictureButton = data.showPictureInPictureButton;
         }
     }
 

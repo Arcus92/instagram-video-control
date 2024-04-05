@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
     <title>Video Controls for Instagram</title>
 
     <link rel="stylesheet" href="../styles/popup.css" />
@@ -14,6 +16,15 @@
     </header>
     <main>
         <ul class="options-list">
+            <li>
+                <label>
+                    <select name="option_video_control_mode">
+                        <option value="custom" data-locale="option_use_custom_controls"></option>
+                        <option value="native" data-locale="option_use_browser_controls"></option>
+                        <option value="disabled" data-locale="option_do_not_use_controls"></option>
+                    </select>
+                </label>
+            </li>
             <li>
                 <label>
                     <input type="checkbox" name="option_show_time_code"/>

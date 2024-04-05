@@ -1,4 +1,10 @@
 {
+  "extension_name": {
+    "message": "Video Control for Instagram"
+  },
+  "extension_description": {
+    "message": "Adds volume and play controls to Instagram videos."
+  },
   "settings": {
     "message": "Settings"
   },
@@ -13,6 +19,15 @@
   },
   "option_show_picture_in_picture": {
     "message": "Show Picture-in-Picture button"
+  },
+  "option_use_custom_controls": {
+    "message": "Custom video controls"
+  },
+  "option_use_browser_controls": {
+    "message": "Native browser controls"
+  },
+  "option_do_not_use_controls": {
+    "message": "No video controls (Instagram native)"
   },
   "view_on_github": {
     "message": "View on GitHub"

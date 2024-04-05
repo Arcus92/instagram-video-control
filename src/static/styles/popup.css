@@ -5,17 +5,9 @@ body {
     background-color: #fff;
     color: #111;
 
-    min-width: 420px;
     padding: 0 1em;
 }
 
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #111;
-        color: #fff;
-    }
-}
 
 header {
     margin-bottom: 1em;
@@ -42,7 +34,30 @@ ul.options-list {
     padding: 0;
 }
 
+ul.options-list li {
+    margin: 0.5em 0;
+}
+
 ul.options-list label {
     user-select: none;
     cursor: pointer;
+}
+
+ul.options-list li select {
+    background-color: #fff;
+    color: #111;
+    border: #888 solid 1px;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111;
+        color: #fff;
+    }
+
+    ul.options-list li select {
+        background-color: #111;
+        color: #fff;
+    }
 }
