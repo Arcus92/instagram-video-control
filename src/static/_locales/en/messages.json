@@ -1,4 +1,10 @@
 {
+  "extension_name": {
+    "message": "Video Control for Instagram"
+  },
+  "extension_description": {
+    "message": "Adds volume and play controls to Instagram videos."
+  },
   "settings": {
     "message": "Settings"
   },

@@ -13,6 +13,7 @@
     "eslint-webpack-plugin": "^4.1.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.3",
+    "web-ext": "^7.11.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
   },
@@ -20,7 +21,10 @@
     "build": "npm run compile && npm run pack",
     "lint": "eslint ./src/ts",
     "pack": "node ./pack.js",
-    "compile": "webpack"
+    "compile": "webpack",
+    "start:firefox": "web-ext run --target firefox-desktop --source-dir ./dist/firefox --start-url https://www.instagram.com",
+    "start:firefox-android": "web-ext run --target firefox-android --source-dir ./dist/firefox --start-url https://www.instagram.com",
+    "start:chromium": "web-ext run --target chromium --source-dir ./dist/chrome --start-url https://www.instagram.com"
   },
   "repository": {
     "type": "git",
