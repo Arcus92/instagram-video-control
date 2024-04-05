@@ -28,7 +28,7 @@
     margin: 0 auto;
 
     height: 100%;
-    padding: 0 12px;
+    padding: 0 4px;
 }
 
 .ivc-control-element {
@@ -48,8 +48,12 @@
     font-weight: bold;
 
     cursor: pointer;
+    padding: 2px;
+}
 
-    width: 16px;
+.ivc-icon-button img {
+    width: 20px;
+    height: 20px;
 }
 
 .ivc-control-text {

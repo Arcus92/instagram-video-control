@@ -3,6 +3,7 @@ import {VideoType} from "./videoType";
 import {PlaybackManager} from "./playbackManager";
 import {Settings} from "../shared/settings";
 import {VideoControlMode} from "../shared/videoControlMode";
+import {Browser} from "../shared/browser";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -271,6 +272,17 @@ export class VideoPlayer {
     private fullscreenButtonElement: HTMLElement | undefined;
     private pictureInPictureButtonElement: HTMLElement | undefined;
 
+    // Cache of the created image tags for the icons.
+    private static imagePlay =  `<img src="${Browser.getUrl('images/play.svg')}" alt="" />`;
+    private static imagePause =  `<img src="${Browser.getUrl('images/pause.svg')}" alt="" />`;
+    private static imageFullscreenEnter =  `<img src="${Browser.getUrl('images/fullscreen-enter.svg')}" alt="" />`;
+    private static imageFullscreenExit =  `<img src="${Browser.getUrl('images/fullscreen-exit.svg')}" alt="" />`;
+    private static imageSpeakerOn =  `<img src="${Browser.getUrl('images/speaker-on.svg')}" alt="" />`;
+    private static imageSpeakerOff =  `<img src="${Browser.getUrl('images/speaker-off.svg')}" alt="" />`;
+    private static imagePictureInPictureEnter =  `<img src="${Browser.getUrl('images/picture-in-picture-enter.svg')}" alt="" />`;
+    private static imagePictureInPictureExit =  `<img src="${Browser.getUrl('images/picture-in-picture-exit.svg')}" alt="" />`;
+
+
     // Creates the video controls.
     private createVideoControl() {
         switch (Settings.shared.videoControlMode) {
@@ -426,23 +438,6 @@ export class VideoPlayer {
             video.muted = video.volume <= 0;
         });
 
-
-        // Full screen
-        this.fullscreenButtonElement = document.createElement("button");
-        this.fullscreenButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
-        contentElement.appendChild(this.fullscreenButtonElement);
-
-        this.fullscreenButtonElement.onclick = () => {
-            if (!this.videoRootElement) return;
-
-            // Toggle fullscreen
-            if (document.fullscreenElement) {
-                document.exitFullscreen().then();
-            } else {
-                this.videoRootElement.requestFullscreen().then();
-            }
-        };
-
         // Picture-in-Picture
         this.pictureInPictureButtonElement = document.createElement("button");
         this.pictureInPictureButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
@@ -459,6 +454,21 @@ export class VideoPlayer {
             }
         };
 
+        // Full screen
+        this.fullscreenButtonElement = document.createElement("button");
+        this.fullscreenButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        contentElement.appendChild(this.fullscreenButtonElement);
+
+        this.fullscreenButtonElement.onclick = () => {
+            if (!this.videoRootElement) return;
+
+            // Toggle fullscreen
+            if (document.fullscreenElement) {
+                document.exitFullscreen().then();
+            } else {
+                this.videoRootElement.requestFullscreen().then();
+            }
+        };
 
         // Init update
         this.updatePlayControl();
@@ -503,7 +513,8 @@ export class VideoPlayer {
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
-        this.playButtonElement.innerText = this.videoElement.paused ? "▶" : "⏸";
+        this.playButtonElement.innerHTML = this.videoElement.paused ?
+            VideoPlayer.imagePlay : VideoPlayer.imagePause;
     }
 
     private updatePositionControl() {
@@ -520,13 +531,15 @@ export class VideoPlayer {
 
     private updateVolumeControl() {
         if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
-        this.muteButtonElement.innerText = this.videoElement.muted ? "🔇" : "🔊";
+        this.muteButtonElement.innerHTML = this.videoElement.muted ?
+            VideoPlayer.imageSpeakerOff : VideoPlayer.imageSpeakerOn;
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
     }
 
     private updateFullscreenControl() {
         if (!this.fullscreenButtonElement) return;
-        this.fullscreenButtonElement.innerText = document.fullscreenElement ? "✕" : "⤡";
+        this.fullscreenButtonElement.innerHTML = document.fullscreenElement ?
+            VideoPlayer.imageFullscreenExit : VideoPlayer.imageFullscreenEnter;
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
         this.setElementVisibility(this.fullscreenButtonElement,
@@ -535,7 +548,8 @@ export class VideoPlayer {
 
     private updatePictureInPictureControl() {
         if (!this.pictureInPictureButtonElement) return;
-        this.pictureInPictureButtonElement.innerText = document.pictureInPictureElement ? "✕" : "🖼";
+        this.pictureInPictureButtonElement.innerHTML = document.pictureInPictureElement ?
+            VideoPlayer.imagePictureInPictureExit : VideoPlayer.imagePictureInPictureEnter;
 
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
         this.setElementVisibility(this.pictureInPictureButtonElement,
