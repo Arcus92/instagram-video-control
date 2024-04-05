@@ -37,6 +37,7 @@
       "size": 32
     }]
   },
+  "web_accessible_resources": ["images/*.svg"],
   "permissions": ["storage"],
   "browser_specific_settings": {
     "gecko": {

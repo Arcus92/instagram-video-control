@@ -26,6 +26,11 @@ export class Browser {
         return this.current.runtime.getManifest();
     }
 
+    // Returns an url to an extension resource shared via 'web_accessible_resources'.
+    public static getUrl(path: string): string {
+        return this.current.runtime.getURL(path);
+    }
+
     // Returns if fullscreen is supported in this browser. Should be supported in Chrome and Firefox.
     public static get isFullscreenSupported() {
         return typeof document.fullscreenEnabled !== 'undefined';
