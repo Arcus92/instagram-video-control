@@ -157,6 +157,9 @@ export class VideoPlayer {
     // The native mute button.
     private muteElement: HTMLElement | undefined;
 
+    // The overlay elements used for Reels on mobile.
+    private mobileOverlayElement: HTMLElement | undefined;
+
 
     // Detects the video type and finds all native components.
     private detectVideo() {
@@ -251,6 +254,13 @@ export class VideoPlayer {
             }
         }
 
+        // Detect the mobile controls for Reels.
+        const mobileOverlayElement =
+            Utils.elementParent(this.videoElement, 4)?.nextElementSibling?.firstChild as HTMLElement;
+        if (mobileOverlayElement) {
+            this.mobileOverlayElement = mobileOverlayElement;
+        }
+
         // Finds the video root element used for fullscreen.
         const videoRootElement =
             Utils.elementParent(this.videoElement, 1);
@@ -311,6 +321,11 @@ export class VideoPlayer {
             if (this.videoType !== VideoType.mobileStory) {
                 this.replyElement.style.marginBottom = `${controlHeight}px`;
             }
+        }
+
+        // For Reels on mobile, these are different elements with absolut position.
+        if (this.mobileOverlayElement) {
+            this.mobileOverlayElement.style.bottom = `${controlHeight}px`;
         }
 
         // If clickable overlays are used, we want to add a margin, so we can interact with our controls without
@@ -494,6 +509,11 @@ export class VideoPlayer {
         // Restore reply controls
         if (this.replyElement) {
             this.replyElement.style.marginBottom = '';
+        }
+
+        // Restore Reels controls
+        if (this.mobileOverlayElement) {
+            this.mobileOverlayElement.style.bottom = '';
         }
 
         // Restore click handler
