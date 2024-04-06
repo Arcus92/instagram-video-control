@@ -208,7 +208,7 @@ export class VideoPlayer {
         // Navigate to the social buttons. They are seven layers deep in the structure.
         // Instagram added a new layer, so we need an additional `firstChild`.
         const socialElement =
-            Utils.elementParent(this.videoElement, 7)?.nextElementSibling?.firstChild;
+            Utils.elementParent(this.videoElement, 7)?.nextElementSibling;
 
         if (socialElement) {
             // I was checking if a <textarea> exists in the reply section to detect stories. However, you can disable
@@ -228,7 +228,7 @@ export class VideoPlayer {
                     // No clickable elements are used. We are not in mobile layout.
                     this.videoType = VideoType.story;
                 }
-                this.replyElement = socialElement as HTMLElement;
+                this.replyElement = socialElement?.firstChild as HTMLElement;
             }
         }
 
