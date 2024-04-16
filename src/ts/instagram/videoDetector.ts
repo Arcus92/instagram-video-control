@@ -136,7 +136,7 @@ export class VideoDetector implements PlaybackManager {
         this.ignoreNextVolumeChange = true;
         setTimeout(() => {
             this.ignoreNextVolumeChange = false
-        }, 10)
+        }, 50)
 
 
         // Make sure we apply the last used volume settings.
