@@ -1,5 +1,5 @@
 import {Browser} from "../shared/browser";
-import {Settings} from "../shared/settings";
+import {Settings, SettingsData} from "../shared/settings";
 import {VideoControlMode} from "../shared/videoControlMode";
 
 // Code class for the settings menu in the extension icon.
@@ -11,9 +11,11 @@ export class Popup {
     // Initialize the settings popup.
     public async init() {
         this.replaceLocaleTags();
+        this.showBrowserTags();
 
         // Loads the settings.
         await this.settings.init();
+        this.settings.changed.subscribe((name) => this.onSettingChange(name));
 
         this.initSettingControls();
     }
@@ -30,6 +32,11 @@ export class Popup {
             (e) => this.settings.showTimeCodeText = e.checked,
             (e) => e.checked = this.settings.showTimeCodeText);
 
+        // Auto unmute on playback
+        this.initSettingInputElement('option_auto_unmute_playback',
+            (e) => this.settings.autoUnmutePlayback = e.checked,
+            (e) => e.checked = this.settings.autoUnmutePlayback);
+
         // Fullscreen option
         if (Browser.isFullscreenSupported) {
             this.initSettingInputElement('option_show_fullscreen',
@@ -37,7 +44,7 @@ export class Popup {
                 (e) => e.checked = this.settings.showFullscreenButton);
         } else {
             // Hide the setting if not supported.
-            this.hideSettingControl('option_show_fullscreen');
+            this.setSettingControlVisibility('option_show_fullscreen', false);
         }
 
         // Picture-in-Picture option
@@ -47,8 +54,10 @@ export class Popup {
                 (e) => e.checked = this.settings.showPictureInPictureButton);
         } else {
             // Hide the setting if not supported.
-            this.hideSettingControl('option_show_picture_in_picture');
+            this.setSettingControlVisibility('option_show_picture_in_picture', false);
         }
+
+        this.updateOptionAutoUnmuteHint();
     }
 
     // Handler for setting changes of input elements.
@@ -91,10 +100,17 @@ export class Popup {
     }
 
     // Hide a setting.
-    private hideSettingControl(name: string) {
+    private setSettingControlVisibility(name: string, visibility: boolean) {
         const element = document.querySelector(`li:has(input[name="${name}"])`) as HTMLElement;
         if (!element) return;
-        element.style.display = 'none';
+        element.style.display = visibility ? 'inherit' : 'none';
+    }
+
+    // Hide a setting hint.
+    private setSettingHintVisibility(name: string, visibility: boolean) {
+        const element = document.querySelector(`li:has(input[name="${name}"]) .hint`) as HTMLElement;
+        if (!element) return;
+        element.style.display = visibility ? 'inherit' : 'none';
     }
 
 
@@ -110,6 +126,43 @@ export class Popup {
 
             element.innerText = this.translate(locale)
         }
+    }
+
+    // Shows all browser tags like `<div data-browser="firefox">` for the current platform. Hides all other elements.
+    private showBrowserTags() {
+        const elements = document.querySelectorAll('[data-browser]');
+        if (!elements) return;
+        for (const element of elements) {
+            if (!(element instanceof HTMLElement)) continue;
+
+            const browser = element.dataset.browser ?? '';
+            let visible = false;
+
+            if (browser === 'firefox' && Browser.isFirefox()) {
+                visible = true;
+            }
+            if (browser === 'chrome' && Browser.isChrome()) {
+                visible = true;
+            }
+
+            // Removes the element if not visible
+            if (!visible) {
+                element.remove();
+            }
+        }
+    }
+
+    // A setting was changed.
+    private onSettingChange(name: keyof SettingsData) {
+        switch (name) {
+            case 'autoUnmutePlayback':
+                this.updateOptionAutoUnmuteHint();
+                break;
+        }
+    }
+
+    private updateOptionAutoUnmuteHint() {
+        this.setSettingHintVisibility('option_auto_unmute_playback', this.settings.autoUnmutePlayback);
     }
 
     // Translates the locale into a text.

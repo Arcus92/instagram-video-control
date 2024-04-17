@@ -5,9 +5,9 @@ body {
     background-color: #fff;
     color: #111;
 
+    min-width: 400px;
     padding: 0 1em;
 }
-
 
 header {
     margin-bottom: 1em;
@@ -49,6 +49,18 @@ ul.options-list li select {
     border: #888 solid 1px;
 }
 
+ul.options-list li .hint {
+    color: #9e7300;
+    margin: 0.5em;
+    max-width: 400px;
+    font-style: italic;
+    font-size: 90%;
+}
+
+ul.options-list li .hint ul {
+    padding: 0 0 0 1.5em;
+}
+
 /* Dark theme */
 @media (prefers-color-scheme: dark) {
     body {
@@ -59,5 +71,9 @@ ul.options-list li select {
     ul.options-list li select {
         background-color: #111;
         color: #fff;
+    }
+
+    ul.options-list li .hint {
+        color: #ffba00;
     }
 }

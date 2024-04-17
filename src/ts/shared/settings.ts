@@ -9,6 +9,7 @@ import {Utils} from "./utils";
 export interface SettingsData {
     videoControlMode: VideoControlMode;
     lastPlaybackVolume: number;
+    autoUnmutePlayback: boolean;
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
@@ -22,11 +23,12 @@ export class Settings implements SettingsData {
     //#region Data
 
     private readonly names: string[] = [
-        'videoControlMode', 'lastPlaybackVolume', 'showTimeCodeText', 'showFullscreenButton',
+        'videoControlMode', 'lastPlaybackVolume', 'autoUnmutePlayback', 'showTimeCodeText', 'showFullscreenButton',
         'showPictureInPictureButton'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
+    private _autoUnmutePlayback: boolean = false;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
@@ -51,6 +53,17 @@ export class Settings implements SettingsData {
         this._lastPlaybackVolume = value;
 
         this.onChange('lastPlaybackVolume');
+    }
+
+    // Should the playback be unmuted on page load?
+    public get autoUnmutePlayback(): boolean {
+        return this._autoUnmutePlayback;
+    }
+    public set autoUnmutePlayback(value: boolean) {
+        if (this._autoUnmutePlayback === value) return;
+        this._autoUnmutePlayback = value;
+
+        this.onChange('autoUnmutePlayback');
     }
 
     // Should the time code text be visible in the player controls?
@@ -149,6 +162,10 @@ export class Settings implements SettingsData {
         if (typeof data.lastPlaybackVolume === 'number')
         {
             this.lastPlaybackVolume = data.lastPlaybackVolume;
+        }
+        if (typeof data.autoUnmutePlayback === 'boolean')
+        {
+            this.autoUnmutePlayback = data.autoUnmutePlayback;
         }
         if (typeof data.showTimeCodeText === 'boolean')
         {

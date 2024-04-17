@@ -1,6 +1,7 @@
 import {Settings, SettingsData} from "../shared/settings";
 import {VideoPlayer} from "./videoPlayer";
 import {PlaybackManager} from "./playbackManager";
+import {Browser} from "../shared/browser";
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
@@ -17,6 +18,11 @@ export class VideoDetector implements PlaybackManager {
         await this.settings.init();
         this.settings.changed.subscribe((name) => this.onSettingChanged(name));
 
+        // If the user really want's to unmute the videos on page-load, we let him do that.
+        if (this.settings.autoUnmutePlayback) {
+            this.checkAndEnableAutoplayWithAudio();
+        }
+
         // Starts the detector.
         this.start();
     }
@@ -29,7 +35,6 @@ export class VideoDetector implements PlaybackManager {
             this.checkForVideosAndAttachControls();
         }, 1000);
     }
-
 
     // Checks the page for new or removed video players and attaches / detaches them.
     private checkForVideosAndAttachControls() {
@@ -105,6 +110,7 @@ export class VideoDetector implements PlaybackManager {
 
     // Stores the last muted state. We can not load it from the settings. We cannot unmute and autoplay in modern
     // browsers. Instagram will always autoplay. If we unmute by default, without user interaction, the video will stop.
+    // It is possible to overwrite this using `this.settings.autoUnmutePlayback` in the settings menu.
     private lastPlaybackMuted: boolean = true;
 
 
@@ -123,6 +129,53 @@ export class VideoDetector implements PlaybackManager {
     private updateVolumeForVideo(video: HTMLVideoElement) {
         video.volume = this.settings.lastPlaybackVolume;
         video.muted = this.lastPlaybackMuted;
+    }
+
+    //#endregion
+
+    //#region Autoplay
+
+    private checkAndEnableAutoplayWithAudio() {
+        // Check if autoplay is available.
+        this.checkForAutoplay((autoplayEnabled) => {
+            // Failed...
+            if (!autoplayEnabled) {
+                console.error('The browser is blocking autoplay with audio. Make sure to enable autoplay in the website settings!');
+                return;
+            }
+
+            // Disable the mute for all videos.
+            this.lastPlaybackMuted = false;
+        });
+
+    }
+
+    // This checks if audio-autoplay is allowed for this website.
+    private checkForAutoplay(callback: (autoplayEnabled: boolean) => void) {
+        // I know the is this new experimental api `Navigator.getAutoplayPolicy()` and this is just a hack.
+        // However, this has the benefit of requesting autoplay in Firefox. This adds the website permission settings
+        // icon to the url bar, where the user can actually enable audio autoplay.
+        // How it works: We simply add a silent audio track to the page, enable unmuted autoplay and check if it starts
+        // playback within 100ms.
+        const audio = document.createElement('audio');
+        audio.style.display = 'none';
+        audio.autoplay = true;
+        audio.defaultMuted = false;
+        audio.src = Browser.getUrl('audio/silence.mp3');
+        document.body.appendChild(audio);
+
+        const timerId = setTimeout(() => {
+            audio.remove();
+
+            callback(false);
+        }, 100);
+
+        audio.addEventListener('play', () => {
+            audio.remove();
+            clearTimeout(timerId);
+
+            callback(true);
+        });
     }
 
     //#endregion

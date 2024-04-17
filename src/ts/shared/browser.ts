@@ -2,6 +2,17 @@
 export class Browser {
     private constructor() { }
 
+    // Returns if the current browser is Firefox.
+    public static isFirefox(): boolean {
+        return /firefox/i.test(navigator.userAgent);
+    }
+
+    // Returns if the current browser is Chromium based.
+    public static isChrome(): boolean {
+        // Somehow `chrome` is set for extensions in Firefox?!
+        return typeof chrome !== 'undefined' && !this.isFirefox();
+    }
+
     // Returns the current browser object for Chrome and Firefox.
     private static get current() {
         // This is 'browser' in Firefox and 'chrome' in ... Chrome.

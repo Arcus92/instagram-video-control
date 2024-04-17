@@ -29,6 +29,27 @@
   "option_do_not_use_controls": {
     "message": "No video controls (Instagram native)"
   },
+  "option_auto_unmute_playback": {
+    "message": "Autoplay with audio on page load"
+  },
+  "option_auto_unmute_playback_hint": {
+    "message": "Please allow autoplay with audio in your browser's website settings:"
+  },
+  "enable_autoplay_in_step_1": {
+    "message": "Goto Instagram.com."
+  },
+  "enable_autoplay_in_step_2": {
+    "message": "Click the website settings icon in the url bar."
+  },
+  "enable_autoplay_in_step_3_firefox": {
+    "message": "Select 'Allow Audio and Video' as Autoplay option."
+  },
+  "enable_autoplay_in_step_3_chrome": {
+    "message": "Click 'Site settings'."
+  },
+  "enable_autoplay_in_step_4_chrome": {
+    "message": "Scroll to 'Sound' and select 'Allow'."
+  },
   "view_on_github": {
     "message": "View on GitHub"
   },
