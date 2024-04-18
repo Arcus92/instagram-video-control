@@ -38,7 +38,7 @@
     }]
   },
   "web_accessible_resources": [{
-    "resources": ["images/*.svg"],
+    "resources": ["images/*.svg", "audio/*.mp3"],
     "matches": ["https://www.instagram.com/*"]
   }],
   "permissions": ["storage"]
