@@ -52,6 +52,8 @@ export class VideoPlayer {
     private onFullscreenChangeHandler: (() => void) | undefined;
     private onEnterPictureInPicture: (() => void) | undefined;
     private onLeavePictureInPicture: (() => void) | undefined;
+    private onMouseEnterHandler: (() => void) | undefined;
+    private onMouseLeaveHandler: (() => void) | undefined;
 
     // Register all video events.
     private registerEvents() {
@@ -64,6 +66,8 @@ export class VideoPlayer {
         this.onFullscreenChangeHandler = () => this.onFullscreenChange();
         this.onEnterPictureInPicture = () => this.onPictureInPictureChange();
         this.onLeavePictureInPicture = () => this.onPictureInPictureChange();
+        this.onMouseEnterHandler = () => this.onMouseEnter();
+        this.onMouseLeaveHandler = () => this.onMouseLeave();
 
         this.videoElement.addEventListener("play", this.onPlayHandler);
         this.videoElement.addEventListener("pause", this.onPauseHandler);
@@ -72,6 +76,8 @@ export class VideoPlayer {
         document.addEventListener("fullscreenchange", this.onFullscreenChangeHandler);
         this.videoElement.addEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
         this.videoElement.addEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
+        this.videoRootElement?.addEventListener("mouseenter", this.onMouseEnterHandler);
+        this.videoRootElement?.addEventListener("mouseleave", this.onMouseLeaveHandler);
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
@@ -93,6 +99,8 @@ export class VideoPlayer {
         if (this.onFullscreenChangeHandler) document.removeEventListener("fullscreenchange", this.onFullscreenChangeHandler);
         if (this.onEnterPictureInPicture) this.videoElement.removeEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
         if (this.onLeavePictureInPicture) this.videoElement.removeEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
+        if (this.onMouseEnterHandler) this.videoRootElement?.removeEventListener("mouseenter", this.onMouseEnterHandler);
+        if (this.onMouseLeaveHandler) this.videoRootElement?.removeEventListener("mouseleave", this.onMouseLeaveHandler);
     }
 
     // Handles video play event.
@@ -130,6 +138,16 @@ export class VideoPlayer {
     // Handles Picture-in-Picture changes.
     private onPictureInPictureChange() {
         this.updatePictureInPictureControl();
+    }
+
+    // Mouse enters the player element.
+    private onMouseEnter() {
+        this.setHover(true);
+    }
+
+    // Mouse leaves the player element.
+    private onMouseLeave() {
+        this.setHover(false);
     }
 
     //#endregion
@@ -312,8 +330,8 @@ export class VideoPlayer {
         }
     }
 
-    // Adjust the existing element for the control bar.
-    private adjustExistingVideoControls(controlHeight: number) {
+    // Adjust the control bar height for the background and all native elements.
+    private adjustVideoControlHeight(controlHeight: number) {
         if (!this.overlayElement) return;
 
         // Removes the height of the controls from the inner overlay to not block mouse clicks.
@@ -344,10 +362,15 @@ export class VideoPlayer {
         if (this.muteElement) {
             this.muteElement.style.display = 'none';
         }
+
+        // Adjusting the controller background.
+        if (this.videoControlElement) {
+            this.videoControlElement.style.height = `${controlHeight}px`;
+        }
     }
 
-    // Create the control background with the given height (used for native and custom controls).
-    private createVideoControlBackground(controlHeight: number) {
+    // Create the control background.
+    private createVideoControlBackground() {
         if (!this.overlayElement) return;
 
         this.videoControlElement = document.createElement("div");
@@ -358,22 +381,19 @@ export class VideoPlayer {
         if (this.videoType === VideoType.story) {
             this.videoControlElement.classList.add("ivc-story");
         }
-        this.videoControlElement.style.height = `${controlHeight}px`;
         this.overlayElement.appendChild(this.videoControlElement);
     }
 
     // Enables the native browser controls.
     private createNativeVideoControl() {
         if (!this.overlayElement) return;
-        const video = this.videoElement;
 
         // The controls in Chrome are higher than in Firefox.
         const controlHeight = window.chrome ? 70 : 40;
 
-        this.adjustExistingVideoControls(controlHeight);
-        this.createVideoControlBackground(controlHeight);
-
-        video.controls = true;
+        this.createVideoControlBackground();
+        this.adjustVideoControlHeight(controlHeight);
+        this.updateControlBarVisibility();
     }
 
     // Create the video controls with play/pause buttons, seekbar and volume control.
@@ -383,8 +403,8 @@ export class VideoPlayer {
 
         const controlHeight = 32;
 
-        this.adjustExistingVideoControls(controlHeight);
-        this.createVideoControlBackground(controlHeight);
+        this.createVideoControlBackground();
+        this.adjustVideoControlHeight(controlHeight);
 
         // Creating the actual player...
         if (!this.videoControlElement) return;
@@ -502,6 +522,7 @@ export class VideoPlayer {
         this.updateVolumeControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+        this.updateControlBarVisibility();
     }
 
     // Removes the video controls
@@ -587,11 +608,38 @@ export class VideoPlayer {
             document.pictureInPictureEnabled && Settings.shared.showPictureInPictureButton);
     }
 
+    // Mouse is hovering the player element.
+    private hover: boolean = false;
+    private setHover(hover: boolean) {
+        this.hover = hover;
+        this.updateControlBarVisibility();
+    }
+
+    // Changes the visibility of the video controls.
+    private setControlBarVisibility(visibility: boolean) {
+        switch (Settings.shared.videoControlMode) {
+            case VideoControlMode.native:
+                if (!this.videoElement) return;
+                this.videoElement.controls = visibility;
+                break;
+            case VideoControlMode.custom:
+                if (!this.videoControlElement) return;
+                this.videoControlElement.classList.toggle('hidden', !visibility);
+                break;
+        }
+    }
+
+    private updateControlBarVisibility() {
+        const visibility = !Settings.shared.autoHideControlBar || this.hover;
+        this.setControlBarVisibility(visibility);
+    }
+
     // Is called when any control setting was changed. We should update all dynamic controls.
     public updateControlSetting() {
         this.updatePositionControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+        this.updateControlBarVisibility();
     }
 
     // Is called when the control mode was changed. This rebuilds the UI.

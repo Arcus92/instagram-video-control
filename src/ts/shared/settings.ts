@@ -13,6 +13,7 @@ export interface SettingsData {
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
+    autoHideControlBar: boolean;
 }
 
 // Handle extension settings.
@@ -24,7 +25,7 @@ export class Settings implements SettingsData {
 
     private readonly names: string[] = [
         'videoControlMode', 'lastPlaybackVolume', 'autoUnmutePlayback', 'showTimeCodeText', 'showFullscreenButton',
-        'showPictureInPictureButton'
+        'showPictureInPictureButton', 'autoHideControlBar'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
@@ -32,6 +33,7 @@ export class Settings implements SettingsData {
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
+    private _autoHideControlBar: boolean = false;
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
@@ -97,6 +99,17 @@ export class Settings implements SettingsData {
         this._showPictureInPictureButton = value;
 
         this.onChange('showPictureInPictureButton');
+    }
+
+    // If enabled, the controls will hide if the mouse is outside the video area.
+    public get autoHideControlBar(): boolean {
+        return this._autoHideControlBar;
+    }
+    public set autoHideControlBar(value: boolean) {
+        if (this._autoHideControlBar === value) return;
+        this._autoHideControlBar = value;
+
+        this.onChange('autoHideControlBar');
     }
 
     //#endregion Data
@@ -178,6 +191,10 @@ export class Settings implements SettingsData {
         if (typeof data.showPictureInPictureButton === 'boolean')
         {
             this.showPictureInPictureButton = data.showPictureInPictureButton;
+        }
+        if (typeof data.autoHideControlBar === 'boolean')
+        {
+            this.autoHideControlBar = data.autoHideControlBar;
         }
     }
 

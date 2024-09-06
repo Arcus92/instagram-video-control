@@ -29,6 +29,13 @@
 
     height: 100%;
     padding: 0 4px;
+
+    opacity: 100%;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.ivc-controls.hidden .ivc-controls-content {
+    opacity: 0;
 }
 
 .ivc-control-element {
