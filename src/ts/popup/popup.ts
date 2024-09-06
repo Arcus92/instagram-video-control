@@ -27,6 +27,11 @@ export class Popup {
             (e) => this.settings.videoControlMode = e.value as VideoControlMode,
             (e) => e.value = this.settings.videoControlMode);
 
+        // Auto hide control bar
+        this.initSettingInputElement('option_auto_hide_control_bar',
+          (e) => this.settings.autoHideControlBar = e.checked,
+          (e) => e.checked = this.settings.autoHideControlBar);
+
         // Time code option
         this.initSettingInputElement('option_show_time_code',
             (e) => this.settings.showTimeCodeText = e.checked,

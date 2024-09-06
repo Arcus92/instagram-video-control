@@ -32,6 +32,9 @@
   "option_auto_unmute_playback": {
     "message": "Autoplay with audio on page load"
   },
+  "option_auto_hide_control_bar": {
+    "message": "Hide control bar"
+  },
   "option_auto_unmute_playback_hint": {
     "message": "Please allow autoplay with audio in your browser's website settings:"
   },
