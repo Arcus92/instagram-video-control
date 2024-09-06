@@ -275,24 +275,30 @@ export class VideoPlayer {
 
     // Created elements by the video controls.
     private videoControlElement: HTMLElement | undefined;
-    private playButtonElement: HTMLElement | undefined;
+    private playButtonElement: HTMLButtonElement | undefined;
     private seekBarProgressElement: HTMLElement | undefined;
     private positionTextElement: HTMLElement | undefined;
-    private muteButtonElement: HTMLElement | undefined;
+    private muteButtonElement: HTMLButtonElement | undefined;
     private volumeBarProgressElement: HTMLElement | undefined;
-    private fullscreenButtonElement: HTMLElement | undefined;
-    private pictureInPictureButtonElement: HTMLElement | undefined;
+    private fullscreenButtonElement: HTMLButtonElement | undefined;
+    private pictureInPictureButtonElement: HTMLButtonElement | undefined;
 
     // Cache of the created image tags for the icons.
-    private static imagePlay =  `<img src="${Browser.getUrl('images/play.svg')}" alt="" />`;
-    private static imagePause =  `<img src="${Browser.getUrl('images/pause.svg')}" alt="" />`;
-    private static imageFullscreenEnter =  `<img src="${Browser.getUrl('images/fullscreen-enter.svg')}" alt="" />`;
-    private static imageFullscreenExit =  `<img src="${Browser.getUrl('images/fullscreen-exit.svg')}" alt="" />`;
-    private static imageSpeakerOn =  `<img src="${Browser.getUrl('images/speaker-on.svg')}" alt="" />`;
-    private static imageSpeakerOff =  `<img src="${Browser.getUrl('images/speaker-off.svg')}" alt="" />`;
-    private static imagePictureInPictureEnter =  `<img src="${Browser.getUrl('images/picture-in-picture-enter.svg')}" alt="" />`;
-    private static imagePictureInPictureExit =  `<img src="${Browser.getUrl('images/picture-in-picture-exit.svg')}" alt="" />`;
+    private static imagePlay = Browser.getUrl('images/play.svg');
+    private static imagePause =  Browser.getUrl('images/pause.svg');
+    private static imageFullscreenEnter =  Browser.getUrl('images/fullscreen-enter.svg');
+    private static imageFullscreenExit =  Browser.getUrl('images/fullscreen-exit.svg');
+    private static imageSpeakerOn =  Browser.getUrl('images/speaker-on.svg');
+    private static imageSpeakerOff =  Browser.getUrl('images/speaker-off.svg');
+    private static imagePictureInPictureEnter =  Browser.getUrl('images/picture-in-picture-enter.svg');
+    private static imagePictureInPictureExit =  Browser.getUrl('images/picture-in-picture-exit.svg');
 
+    // Changes the icon of a button containing an image element.
+    private static setButtonIcon(button: HTMLButtonElement, url: string) {
+        const img = button.firstChild as HTMLImageElement;
+        if (!img) return;
+        img.src = url;
+    }
 
     // Creates the video controls.
     private createVideoControl() {
@@ -390,6 +396,7 @@ export class VideoPlayer {
         // Play button
         this.playButtonElement = document.createElement("button");
         this.playButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.playButtonElement.appendChild(document.createElement("img"));
         contentElement.appendChild(this.playButtonElement);
 
         this.playButtonElement.onclick = () => {
@@ -428,6 +435,7 @@ export class VideoPlayer {
         // Mute
         this.muteButtonElement = document.createElement("button");
         this.muteButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.muteButtonElement.appendChild(document.createElement("img"));
         contentElement.appendChild(this.muteButtonElement);
 
         this.muteButtonElement.onclick = () => {
@@ -457,6 +465,7 @@ export class VideoPlayer {
         // Picture-in-Picture
         this.pictureInPictureButtonElement = document.createElement("button");
         this.pictureInPictureButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.pictureInPictureButtonElement.appendChild(document.createElement("img"));
         contentElement.appendChild(this.pictureInPictureButtonElement);
 
         this.pictureInPictureButtonElement.onclick = () => {
@@ -473,6 +482,7 @@ export class VideoPlayer {
         // Full screen
         this.fullscreenButtonElement = document.createElement("button");
         this.fullscreenButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.fullscreenButtonElement.appendChild(document.createElement("img"));
         contentElement.appendChild(this.fullscreenButtonElement);
 
         this.fullscreenButtonElement.onclick = () => {
@@ -534,8 +544,8 @@ export class VideoPlayer {
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
-        this.playButtonElement.innerHTML = this.videoElement.paused ?
-            VideoPlayer.imagePlay : VideoPlayer.imagePause;
+        VideoPlayer.setButtonIcon(this.playButtonElement, this.videoElement.paused ?
+          VideoPlayer.imagePlay : VideoPlayer.imagePause);
     }
 
     private updatePositionControl() {
@@ -552,15 +562,15 @@ export class VideoPlayer {
 
     private updateVolumeControl() {
         if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
-        this.muteButtonElement.innerHTML = this.videoElement.muted ?
-            VideoPlayer.imageSpeakerOff : VideoPlayer.imageSpeakerOn;
+        VideoPlayer.setButtonIcon(this.muteButtonElement, this.videoElement.muted ?
+          VideoPlayer.imageSpeakerOff : VideoPlayer.imageSpeakerOn);
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
     }
 
     private updateFullscreenControl() {
         if (!this.fullscreenButtonElement) return;
-        this.fullscreenButtonElement.innerHTML = document.fullscreenElement ?
-            VideoPlayer.imageFullscreenExit : VideoPlayer.imageFullscreenEnter;
+        VideoPlayer.setButtonIcon(this.fullscreenButtonElement, document.fullscreenElement ?
+          VideoPlayer.imageFullscreenExit : VideoPlayer.imageFullscreenEnter);
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
         this.setElementVisibility(this.fullscreenButtonElement,
@@ -569,8 +579,8 @@ export class VideoPlayer {
 
     private updatePictureInPictureControl() {
         if (!this.pictureInPictureButtonElement) return;
-        this.pictureInPictureButtonElement.innerHTML = document.pictureInPictureElement ?
-            VideoPlayer.imagePictureInPictureExit : VideoPlayer.imagePictureInPictureEnter;
+        VideoPlayer.setButtonIcon(this.pictureInPictureButtonElement, document.pictureInPictureElement ?
+          VideoPlayer.imagePictureInPictureExit : VideoPlayer.imagePictureInPictureEnter);
 
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
         this.setElementVisibility(this.pictureInPictureButtonElement,
