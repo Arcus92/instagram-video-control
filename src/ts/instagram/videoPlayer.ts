@@ -113,6 +113,12 @@ export class VideoPlayer {
     // Handles video pause event.
     private onPause() {
         this.updatePlayControl();
+
+        // If not registered, the site will show a 'you need to log in to replay' banner.
+        // This makes sure it is removed, so you regain control.
+        setTimeout(() => {
+            this.removeNotRegisteredOverlayElement();
+        });
     }
 
     // Handles video time update event.
@@ -606,6 +612,18 @@ export class VideoPlayer {
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
         this.setElementVisibility(this.pictureInPictureButtonElement,
             document.pictureInPictureEnabled && Settings.shared.showPictureInPictureButton);
+    }
+
+    private removeNotRegisteredOverlayElement() {
+        const nativeControlsElement = this.overlayElement?.firstChild as HTMLElement;
+        if (nativeControlsElement) {
+            // The site adds an overlay still frame when playback ends and forces you to log in to re-watch.
+            // We'll remove that.
+            if (nativeControlsElement.firstChild instanceof HTMLImageElement) {
+                const thumbnailElement = nativeControlsElement.firstChild;
+                thumbnailElement.remove();
+            }
+        }
     }
 
     // Mouse is hovering the player element.
