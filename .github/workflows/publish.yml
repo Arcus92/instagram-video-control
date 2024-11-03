@@ -66,7 +66,7 @@ jobs:
         id: get_release_info
         run: |
           echo "file_name=${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
-          value=`cat release_url/release_url.txt`
+          value=`cat release_url.txt`
           echo "upload_url=$value" >> $GITHUB_OUTPUT
         env:
           TAG_REF_NAME: ${{ github.ref }}
