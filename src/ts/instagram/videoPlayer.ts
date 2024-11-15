@@ -29,6 +29,8 @@ export class VideoPlayer {
         this.createVideoControl();
 
         this.registerEvents();
+
+        this.initHover();
     }
 
     // Detaches the custom player from the video tag. Removes all custom element and events.
@@ -631,6 +633,14 @@ export class VideoPlayer {
     private setHover(hover: boolean) {
         this.hover = hover;
         this.updateControlBarVisibility();
+    }
+
+    // Checks if the mouse already hovers over the video on initialization. Otherwise, the controls would only show up
+    // when the mouse exits and enters again.
+    private initHover() {
+        if (!this.videoRootElement) return;
+        const hover = this.videoRootElement.matches(':hover');
+        this.setHover(hover);
     }
 
     // Changes the visibility of the video controls.
