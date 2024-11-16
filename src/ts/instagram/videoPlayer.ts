@@ -311,13 +311,13 @@ export class VideoPlayer {
 
     // Cache of the created image tags for the icons.
     private static imagePlay = Browser.getUrl('images/play.svg');
-    private static imagePause =  Browser.getUrl('images/pause.svg');
-    private static imageFullscreenEnter =  Browser.getUrl('images/fullscreen-enter.svg');
-    private static imageFullscreenExit =  Browser.getUrl('images/fullscreen-exit.svg');
-    private static imageSpeakerOn =  Browser.getUrl('images/speaker-on.svg');
-    private static imageSpeakerOff =  Browser.getUrl('images/speaker-off.svg');
-    private static imagePictureInPictureEnter =  Browser.getUrl('images/picture-in-picture-enter.svg');
-    private static imagePictureInPictureExit =  Browser.getUrl('images/picture-in-picture-exit.svg');
+    private static imagePause = Browser.getUrl('images/pause.svg');
+    private static imageFullscreenEnter = Browser.getUrl('images/fullscreen-enter.svg');
+    private static imageFullscreenExit = Browser.getUrl('images/fullscreen-exit.svg');
+    private static imageSpeakerOn = Browser.getUrl('images/speaker-on.svg');
+    private static imageSpeakerOff = Browser.getUrl('images/speaker-off.svg');
+    private static imagePictureInPictureEnter = Browser.getUrl('images/picture-in-picture-enter.svg');
+    private static imagePictureInPictureExit = Browser.getUrl('images/picture-in-picture-exit.svg');
 
     // Changes the icon of a button containing an image element.
     private static setButtonIcon(button: HTMLButtonElement, url: string) {
@@ -453,12 +453,10 @@ export class VideoPlayer {
         this.seekBarProgressElement.classList.add("ivc-control-bar-progress");
         elementSeekbarBackground.appendChild(this.seekBarProgressElement);
 
-        elementSeekbar.addEventListener("click", (event) => {
-            const rect = elementSeekbarBackground.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const percentage = Math.max(Math.min(x / rect.width, 1), 0);
-            video.currentTime = percentage * video.duration;
-        });
+        VideoPlayer.addDragEventToBar(elementSeekbar, elementSeekbarBackground, this.seekBarProgressElement,
+            /* invokeOnDrag */ false, (value) => {
+                video.currentTime = value * video.duration;
+            });
 
         // Mute
         this.muteButtonElement = document.createElement("button");
@@ -483,12 +481,11 @@ export class VideoPlayer {
         this.volumeBarProgressElement.classList.add("ivc-control-bar-progress");
         elementVolumeBackground.appendChild(this.volumeBarProgressElement);
 
-        elementVolume.addEventListener("click", (event) => {
-            const rect = elementVolumeBackground.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            video.volume = Math.max(Math.min(x / rect.width, 1), 0);
-            video.muted = video.volume <= 0;
-        });
+        VideoPlayer.addDragEventToBar(elementVolume, elementVolumeBackground, this.volumeBarProgressElement,
+            /* invokeOnDrag */ true, (value) => {
+                video.volume = value;
+                video.muted = video.volume <= 0;
+            });
 
         // Picture-in-Picture
         this.pictureInPictureButtonElement = document.createElement("button");
@@ -574,7 +571,7 @@ export class VideoPlayer {
     private updatePlayControl() {
         if (!this.playButtonElement) return;
         VideoPlayer.setButtonIcon(this.playButtonElement, this.videoElement.paused ?
-          VideoPlayer.imagePlay : VideoPlayer.imagePause);
+            VideoPlayer.imagePlay : VideoPlayer.imagePause);
     }
 
     private updatePositionControl() {
@@ -592,14 +589,14 @@ export class VideoPlayer {
     private updateVolumeControl() {
         if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
         VideoPlayer.setButtonIcon(this.muteButtonElement, this.videoElement.muted ?
-          VideoPlayer.imageSpeakerOff : VideoPlayer.imageSpeakerOn);
+            VideoPlayer.imageSpeakerOff : VideoPlayer.imageSpeakerOn);
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
     }
 
     private updateFullscreenControl() {
         if (!this.fullscreenButtonElement) return;
         VideoPlayer.setButtonIcon(this.fullscreenButtonElement, document.fullscreenElement ?
-          VideoPlayer.imageFullscreenExit : VideoPlayer.imageFullscreenEnter);
+            VideoPlayer.imageFullscreenExit : VideoPlayer.imageFullscreenEnter);
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
         this.setElementVisibility(this.fullscreenButtonElement,
@@ -609,7 +606,7 @@ export class VideoPlayer {
     private updatePictureInPictureControl() {
         if (!this.pictureInPictureButtonElement) return;
         VideoPlayer.setButtonIcon(this.pictureInPictureButtonElement, document.pictureInPictureElement ?
-          VideoPlayer.imagePictureInPictureExit : VideoPlayer.imagePictureInPictureEnter);
+            VideoPlayer.imagePictureInPictureExit : VideoPlayer.imagePictureInPictureEnter);
 
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
         this.setElementVisibility(this.pictureInPictureButtonElement,
@@ -630,6 +627,7 @@ export class VideoPlayer {
 
     // Mouse is hovering the player element.
     private hover: boolean = false;
+
     private setHover(hover: boolean) {
         this.hover = hover;
         this.updateControlBarVisibility();
@@ -679,6 +677,57 @@ export class VideoPlayer {
     // Changes the visibility of a control element.
     private setElementVisibility(element: HTMLElement, visible: boolean) {
         element.style.display = visible ? 'block' : 'none';
+    }
+
+    // Handles click and drag events to the bars elements (e.g. seekbar, volume bar).
+    private static addDragEventToBar(element: HTMLElement, elementBackground: HTMLElement, elementProgress: HTMLElement,
+                                     invokeOnDrag: boolean, callback: (value: number) => void) {
+
+        // Sub function to submit the current bar value
+        const onValueChanged = (event: MouseEvent | TouchEvent, invoke: boolean) => {
+            const rect = elementBackground.getBoundingClientRect();
+
+            const clientX = event instanceof MouseEvent ? event.clientX : event.changedTouches[0].clientX;
+            const relativeX = clientX - rect.left;
+            const value = Math.max(Math.min(relativeX / rect.width, 1), 0);
+
+            elementProgress.style.width = `${Math.round(value * 100)}%`;
+
+            if (invoke)
+                callback(value);
+        };
+
+        // Handle click event
+
+        element.addEventListener("click", (event) => {
+            onValueChanged(event, true);
+        });
+
+        // Handle drag event
+
+        let isDragging = false;
+        const onDragStart = () => {
+            isDragging = true;
+        }
+        const onDragEnd = (event: MouseEvent | TouchEvent) => {
+            if (!isDragging) return;
+            onValueChanged(event, true);
+            isDragging = false;
+        }
+        const onDrag = (event: MouseEvent | TouchEvent) => {
+            if (!isDragging) return;
+            onValueChanged(event, invokeOnDrag);
+        }
+
+        element.addEventListener("mousedown", onDragStart);
+        element.addEventListener("touchstart", onDragStart);
+
+        element.addEventListener("mousemove", onDrag);
+        element.addEventListener("touchmove", onDrag);
+
+        element.addEventListener("mouseup", onDragEnd);
+        element.addEventListener("touchend", onDragEnd);
+        element.addEventListener("mouseleave", onDragEnd);
     }
 
     //#endregion
