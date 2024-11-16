@@ -453,12 +453,10 @@ export class VideoPlayer {
         this.seekBarProgressElement.classList.add("ivc-control-bar-progress");
         elementSeekbarBackground.appendChild(this.seekBarProgressElement);
 
-        elementSeekbar.addEventListener("click", (event) => {
-            const rect = elementSeekbarBackground.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const percentage = Math.max(Math.min(x / rect.width, 1), 0);
-            video.currentTime = percentage * video.duration;
-        });
+        VideoPlayer.addDragEventToBar(elementSeekbar, elementSeekbarBackground, this.seekBarProgressElement,
+            /* invokeOnDrag */ false, (value) => {
+                video.currentTime = value * video.duration;
+            });
 
         // Mute
         this.muteButtonElement = document.createElement("button");
@@ -483,12 +481,11 @@ export class VideoPlayer {
         this.volumeBarProgressElement.classList.add("ivc-control-bar-progress");
         elementVolumeBackground.appendChild(this.volumeBarProgressElement);
 
-        elementVolume.addEventListener("click", (event) => {
-            const rect = elementVolumeBackground.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            video.volume = Math.max(Math.min(x / rect.width, 1), 0);
-            video.muted = video.volume <= 0;
-        });
+        VideoPlayer.addDragEventToBar(elementVolume, elementVolumeBackground, this.volumeBarProgressElement,
+            /* invokeOnDrag */ true, (value) => {
+                video.volume = value;
+                video.muted = video.volume <= 0;
+            });
 
         // Picture-in-Picture
         this.pictureInPictureButtonElement = document.createElement("button");
@@ -680,6 +677,57 @@ export class VideoPlayer {
     // Changes the visibility of a control element.
     private setElementVisibility(element: HTMLElement, visible: boolean) {
         element.style.display = visible ? 'block' : 'none';
+    }
+
+    // Handles click and drag events to the bars elements (e.g. seekbar, volume bar).
+    private static addDragEventToBar(element: HTMLElement, elementBackground: HTMLElement, elementProgress: HTMLElement,
+                                     invokeOnDrag: boolean, callback: (value: number) => void) {
+
+        // Sub function to submit the current bar value
+        const onValueChanged = (event: MouseEvent | TouchEvent, invoke: boolean) => {
+            const rect = elementBackground.getBoundingClientRect();
+
+            const clientX = event instanceof MouseEvent ? event.clientX : event.changedTouches[0].clientX;
+            const relativeX = clientX - rect.left;
+            const value = Math.max(Math.min(relativeX / rect.width, 1), 0);
+
+            elementProgress.style.width = `${Math.round(value * 100)}%`;
+
+            if (invoke)
+                callback(value);
+        };
+
+        // Handle click event
+
+        element.addEventListener("click", (event) => {
+            onValueChanged(event, true);
+        });
+
+        // Handle drag event
+
+        let isDragging = false;
+        const onDragStart = () => {
+            isDragging = true;
+        }
+        const onDragEnd = (event: MouseEvent | TouchEvent) => {
+            if (!isDragging) return;
+            onValueChanged(event, true);
+            isDragging = false;
+        }
+        const onDrag = (event: MouseEvent | TouchEvent) => {
+            if (!isDragging) return;
+            onValueChanged(event, invokeOnDrag);
+        }
+
+        element.addEventListener("mousedown", onDragStart);
+        element.addEventListener("touchstart", onDragStart);
+
+        element.addEventListener("mousemove", onDrag);
+        element.addEventListener("touchmove", onDrag);
+
+        element.addEventListener("mouseup", onDragEnd);
+        element.addEventListener("touchend", onDragEnd);
+        element.addEventListener("mouseleave", onDragEnd);
     }
 
     //#endregion
