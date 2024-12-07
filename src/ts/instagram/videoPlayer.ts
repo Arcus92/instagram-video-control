@@ -42,44 +42,18 @@ export class VideoPlayer {
 
     //#region Events
 
-    // If we add a handler to a class function in TypeScript, we are losing the `this` context.
-    // We can use lambda function to get around this.
-    // However, we need to store the lambda function, so we can remove it on detach.
-    // If you - yes, you - know a better way to implement this, please call me.
-
-    private onPlayHandler: (() => void) | undefined;
-    private onPauseHandler: (() => void) | undefined;
-    private onTimeUpdateHandler: (() => void) | undefined;
-    private onVolumeChangeHandler: (() => void) | undefined;
-    private onFullscreenChangeHandler: (() => void) | undefined;
-    private onEnterPictureInPicture: (() => void) | undefined;
-    private onLeavePictureInPicture: (() => void) | undefined;
-    private onMouseEnterHandler: (() => void) | undefined;
-    private onMouseLeaveHandler: (() => void) | undefined;
-
     // Register all video events.
     private registerEvents() {
 
-        // Creating our event handlers
-        this.onPlayHandler = () => this.onPlay();
-        this.onPauseHandler = () => this.onPause();
-        this.onTimeUpdateHandler = () => this.onTimeUpdate();
-        this.onVolumeChangeHandler = () => this.onVolumeChange();
-        this.onFullscreenChangeHandler = () => this.onFullscreenChange();
-        this.onEnterPictureInPicture = () => this.onPictureInPictureChange();
-        this.onLeavePictureInPicture = () => this.onPictureInPictureChange();
-        this.onMouseEnterHandler = () => this.onMouseEnter();
-        this.onMouseLeaveHandler = () => this.onMouseLeave();
-
-        this.videoElement.addEventListener("play", this.onPlayHandler);
-        this.videoElement.addEventListener("pause", this.onPauseHandler);
-        this.videoElement.addEventListener("timeupdate", this.onTimeUpdateHandler);
-        this.videoElement.addEventListener("volumechange", this.onVolumeChangeHandler);
-        document.addEventListener("fullscreenchange", this.onFullscreenChangeHandler);
-        this.videoElement.addEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
-        this.videoElement.addEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
-        this.videoRootElement?.addEventListener("mouseenter", this.onMouseEnterHandler);
-        this.videoRootElement?.addEventListener("mouseleave", this.onMouseLeaveHandler);
+        this.videoElement.addEventListener("play", this.onPlay);
+        this.videoElement.addEventListener("pause", this.onPause);
+        this.videoElement.addEventListener("timeupdate", this.onTimeUpdate);
+        this.videoElement.addEventListener("volumechange", this.onVolumeChange);
+        document.addEventListener("fullscreenchange", this.onFullscreenChange);
+        this.videoElement.addEventListener("enterpictureinpicture", this.onPictureInPictureChange);
+        this.videoElement.addEventListener("leavepictureinpicture", this.onPictureInPictureChange);
+        this.videoRootElement?.addEventListener("mouseenter", this.onMouseEnter);
+        this.videoRootElement?.addEventListener("mouseleave", this.onMouseLeave);
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
@@ -94,26 +68,26 @@ export class VideoPlayer {
 
     // Unregisters all video events.
     private unregisterEvents() {
-        if (this.onPlayHandler) this.videoElement.removeEventListener("play", this.onPlayHandler);
-        if (this.onPauseHandler) this.videoElement.removeEventListener("pause", this.onPauseHandler);
-        if (this.onTimeUpdateHandler) this.videoElement.removeEventListener("timeupdate", this.onTimeUpdateHandler);
-        if (this.onVolumeChangeHandler) this.videoElement.removeEventListener("volumechange", this.onVolumeChangeHandler);
-        if (this.onFullscreenChangeHandler) document.removeEventListener("fullscreenchange", this.onFullscreenChangeHandler);
-        if (this.onEnterPictureInPicture) this.videoElement.removeEventListener("enterpictureinpicture", this.onEnterPictureInPicture);
-        if (this.onLeavePictureInPicture) this.videoElement.removeEventListener("leavepictureinpicture", this.onLeavePictureInPicture);
-        if (this.onMouseEnterHandler) this.videoRootElement?.removeEventListener("mouseenter", this.onMouseEnterHandler);
-        if (this.onMouseLeaveHandler) this.videoRootElement?.removeEventListener("mouseleave", this.onMouseLeaveHandler);
+        this.videoElement.removeEventListener("play", this.onPlay);
+        this.videoElement.removeEventListener("pause", this.onPause);
+        this.videoElement.removeEventListener("timeupdate", this.onTimeUpdate);
+        this.videoElement.removeEventListener("volumechange", this.onVolumeChange);
+        document.removeEventListener("fullscreenchange", this.onFullscreenChange);
+        this.videoElement.removeEventListener("enterpictureinpicture", this.onPictureInPictureChange);
+        this.videoElement.removeEventListener("leavepictureinpicture", this.onPictureInPictureChange);
+        this.videoRootElement?.removeEventListener("mouseenter", this.onMouseEnter);
+        this.videoRootElement?.removeEventListener("mouseleave", this.onMouseLeave);
     }
 
     // Handles video play event.
-    private onPlay() {
+    private onPlay = () => {
         this.updatePlayControl();
 
         this.playbackManager.notifyVideoPlay(this.videoElement);
     }
 
     // Handles video pause event.
-    private onPause() {
+    private onPause = () => {
         this.updatePlayControl();
 
         // If not registered, the site will show a 'you need to log in to replay' banner.
@@ -124,12 +98,12 @@ export class VideoPlayer {
     }
 
     // Handles video time update event.
-    private onTimeUpdate() {
+    private onTimeUpdate = () => {
         this.updatePositionControl();
     }
 
     // Handles video volume changes.
-    private onVolumeChange() {
+    private onVolumeChange = () => {
         this.updateVolumeControl();
 
         // We don't want to react to volume changes from the page itself.
@@ -139,22 +113,22 @@ export class VideoPlayer {
     }
 
     // Handles fullscreen changes.
-    private onFullscreenChange() {
+    private onFullscreenChange = () => {
         this.updateFullscreenControl();
     }
 
     // Handles Picture-in-Picture changes.
-    private onPictureInPictureChange() {
+    private onPictureInPictureChange = () => {
         this.updatePictureInPictureControl();
     }
 
     // Mouse enters the player element.
-    private onMouseEnter() {
+    private onMouseEnter = () => {
         this.setHover(true);
     }
 
     // Mouse leaves the player element.
-    private onMouseLeave() {
+    private onMouseLeave = () => {
         this.setHover(false);
     }
 
