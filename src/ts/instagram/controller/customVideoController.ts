@@ -154,7 +154,7 @@ export class CustomVideoController extends VideoController {
         this.updatePlayControl();
     }
     public override onTimeUpdate() {
-        this.updatePlayControl();
+        this.updatePositionControl();
     }
     public override onVolumeChange() {
         this.updateVolumeControl();
