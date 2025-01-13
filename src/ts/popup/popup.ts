@@ -1,6 +1,7 @@
 import {Browser} from "../shared/browser";
 import {Settings, SettingsData} from "../shared/settings";
 import {VideoControlMode} from "../shared/videoControlMode";
+import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -37,10 +38,10 @@ export class Popup {
             (e) => this.settings.showTimeCodeText = e.checked,
             (e) => e.checked = this.settings.showTimeCodeText);
 
-        // Auto unmute on playback
-        this.initSettingInputElement('option_auto_unmute_playback',
-            (e) => this.settings.autoUnmutePlayback = e.checked,
-            (e) => e.checked = this.settings.autoUnmutePlayback);
+        // Auto play option
+        this.initSettingSelectElement('option_autoplay_mode',
+            (e) => this.settings.autoplayMode = e.value as VideoAutoplayMode,
+            (e) => e.value = this.settings.autoplayMode);
 
         // Fullscreen option
         if (Browser.isFullscreenSupported) {
@@ -106,14 +107,14 @@ export class Popup {
 
     // Hide a setting.
     private setSettingControlVisibility(name: string, visibility: boolean) {
-        const element = document.querySelector(`li:has(input[name="${name}"])`) as HTMLElement;
+        const element = document.querySelector(`li:has([name="${name}"])`) as HTMLElement;
         if (!element) return;
         element.style.display = visibility ? 'inherit' : 'none';
     }
 
     // Hide a setting hint.
     private setSettingHintVisibility(name: string, visibility: boolean) {
-        const element = document.querySelector(`li:has(input[name="${name}"]) .hint`) as HTMLElement;
+        const element = document.querySelector(`li:has([name="${name}"]) .hint`) as HTMLElement;
         if (!element) return;
         element.style.display = visibility ? 'inherit' : 'none';
     }
@@ -160,14 +161,14 @@ export class Popup {
     // A setting was changed.
     private onSettingChange(name: keyof SettingsData) {
         switch (name) {
-            case 'autoUnmutePlayback':
+            case 'autoplayMode':
                 this.updateOptionAutoUnmuteHint();
                 break;
         }
     }
 
     private updateOptionAutoUnmuteHint() {
-        this.setSettingHintVisibility('option_auto_unmute_playback', this.settings.autoUnmutePlayback);
+        this.setSettingHintVisibility('option_autoplay_mode', this.settings.autoplayMode === VideoAutoplayMode.unmuted);
     }
 
     // Translates the locale into a text.

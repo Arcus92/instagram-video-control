@@ -1,15 +1,16 @@
 import {Browser} from "./browser";
 import {EventDispatcher} from "./eventDispatcher";
 import {VideoControlMode} from "./videoControlMode";
+import {Utils} from "./utils";
+import {VideoAutoplayMode} from "./videoAutoplayMode";
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
-import {Utils} from "./utils";
 
 // Settings data struct.
 export interface SettingsData {
     videoControlMode: VideoControlMode;
     lastPlaybackVolume: number;
-    autoUnmutePlayback: boolean;
+    autoplayMode: VideoAutoplayMode;
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
@@ -24,12 +25,12 @@ export class Settings implements SettingsData {
     //#region Data
 
     private readonly names: string[] = [
-        'videoControlMode', 'lastPlaybackVolume', 'autoUnmutePlayback', 'showTimeCodeText', 'showFullscreenButton',
+        'videoControlMode', 'lastPlaybackVolume', 'autoplayMode', 'showTimeCodeText', 'showFullscreenButton',
         'showPictureInPictureButton', 'autoHideControlBar'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
-    private _autoUnmutePlayback: boolean = false;
+    private _autoplayMode: VideoAutoplayMode = VideoAutoplayMode.muted;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
@@ -57,15 +58,15 @@ export class Settings implements SettingsData {
         this.onChange('lastPlaybackVolume');
     }
 
-    // Should the playback be unmuted on page load?
-    public get autoUnmutePlayback(): boolean {
-        return this._autoUnmutePlayback;
+    // The autoplayer option (muted, unmuted, stopped)
+    public get autoplayMode(): VideoAutoplayMode {
+        return this._autoplayMode;
     }
-    public set autoUnmutePlayback(value: boolean) {
-        if (this._autoUnmutePlayback === value) return;
-        this._autoUnmutePlayback = value;
+    public set autoplayMode(value: VideoAutoplayMode) {
+        if (this._autoplayMode === value) return;
+        this._autoplayMode = value;
 
-        this.onChange('autoUnmutePlayback');
+        this.onChange('autoplayMode');
     }
 
     // Should the time code text be visible in the player controls?
@@ -176,9 +177,9 @@ export class Settings implements SettingsData {
         {
             this.lastPlaybackVolume = data.lastPlaybackVolume;
         }
-        if (typeof data.autoUnmutePlayback === 'boolean')
+        if (typeof data.autoplayMode === 'string')
         {
-            this.autoUnmutePlayback = data.autoUnmutePlayback;
+            this.autoplayMode = data.autoplayMode as VideoAutoplayMode;
         }
         if (typeof data.showTimeCodeText === 'boolean')
         {

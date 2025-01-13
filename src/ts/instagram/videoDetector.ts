@@ -2,6 +2,7 @@ import {Settings, SettingsData} from "../shared/settings";
 import {VideoPlayer} from "./videoPlayer";
 import {PlaybackManager} from "./playbackManager";
 import {Browser} from "../shared/browser";
+import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
@@ -19,8 +20,12 @@ export class VideoDetector implements PlaybackManager {
         this.settings.changed.subscribe((name) => this.onSettingChanged(name));
 
         // If the user really want's to unmute the videos on page-load, we let him do that.
-        if (this.settings.autoUnmutePlayback) {
+        if (this.settings.autoplayMode === VideoAutoplayMode.unmuted) {
             this.checkAndEnableAutoplayWithAudio();
+        } else if (this.settings.autoplayMode === VideoAutoplayMode.stopped) {
+            // When autoplay is disabled, we can unmute by default. Videos only start on user-interaction so nobody
+            // will be annoyed with sudden audio playback.
+            this.lastPlaybackMuted = false;
         }
 
         // Starts the detector.
