@@ -6,6 +6,7 @@ import {VideoControlMode} from "../shared/videoControlMode";
 import {VideoController} from "./controller/videoController";
 import {NativeVideoController} from "./controller/nativeVideoController";
 import {CustomVideoController} from "./controller/customVideoController";
+import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -15,6 +16,9 @@ export class VideoPlayer {
 
     // The original video HTML element.
     public readonly videoElement: HTMLVideoElement;
+
+    // Has the user already interacted with the video player?
+    private userInteractedWithVideo: boolean = false;
 
     public constructor(playbackManager: PlaybackManager, videoElement: HTMLVideoElement) {
         this.playbackManager = playbackManager;
@@ -33,6 +37,8 @@ export class VideoPlayer {
         this.registerEvents();
 
         this.initHover();
+
+        this.checkAutoplay();
     }
 
     // Detaches the custom player from the video tag. Removes all custom element and events.
@@ -56,6 +62,7 @@ export class VideoPlayer {
         this.videoElement.addEventListener("leavepictureinpicture", this.onPictureInPictureChange);
         this.videoRootElement?.addEventListener("mouseenter", this.onMouseEnter);
         this.videoRootElement?.addEventListener("mouseleave", this.onMouseLeave);
+        this.nativeControlsElement?.addEventListener("click", this.onNativeControlClick);
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
@@ -79,6 +86,7 @@ export class VideoPlayer {
         this.videoElement.removeEventListener("leavepictureinpicture", this.onPictureInPictureChange);
         this.videoRootElement?.removeEventListener("mouseenter", this.onMouseEnter);
         this.videoRootElement?.removeEventListener("mouseleave", this.onMouseLeave);
+        this.nativeControlsElement?.removeEventListener("click", this.onNativeControlClick);
     }
 
     // Handles video play event.
@@ -86,6 +94,8 @@ export class VideoPlayer {
         this.videoController?.onPlay();
 
         this.playbackManager.notifyVideoPlay(this.videoElement);
+
+        this.checkAutoplay();
     }
 
     // Handles video pause event.
@@ -134,6 +144,26 @@ export class VideoPlayer {
         this.videoController?.setHover(false);
     }
 
+    // Mouse clicked the native player element
+    private onNativeControlClick = () => {
+        if (this.userInteractedWithVideo) return;
+        this.userInteractedWithVideo = true;
+
+        // There is an issue with stopped playback and the Reel player. Instagram assumes that playback autostarts and
+        // that the big play button is invisible on load.
+        // On stopped playback the video is paused and need player interaction to start. The first click toggles video
+        // playback and because Instagram assumes the video is already playing the video is stopped and the big play
+        // button is shown again. A second click is required to start playback.
+        // The following code bypasses the second click on the first interaction by just starting the video again.
+        // This will make the play button quickly pop-in and pop-out, but it's the best we can do to make it seamless.
+        if (this.videoElement.paused) {
+            setTimeout(() => {
+                this.videoElement.play().then();
+            });
+
+        }
+    }
+
     //#endregion
 
     //#region Video
@@ -149,6 +179,9 @@ export class VideoPlayer {
 
     // The native Instagram overlay element.
     public overlayElement: HTMLElement | undefined;
+
+    // The native Instagram control element.
+    public nativeControlsElement: HTMLElement | undefined;
 
     // The native Instagram reply element for stories.
     public replyElement: HTMLElement | undefined;
@@ -192,6 +225,7 @@ export class VideoPlayer {
 
         // Detect the native overlay.
         this.overlayElement = this.videoElement.nextElementSibling as HTMLElement;
+        this.nativeControlsElement = this.overlayElement?.firstChild as HTMLElement;
 
         this.replyElement = undefined;
         this.clickEventElement = undefined;
@@ -235,15 +269,14 @@ export class VideoPlayer {
         }
 
         // Finds the native mute button in posts.
-        const nativeControlsElement = this.overlayElement.firstChild as HTMLElement;
-        if (nativeControlsElement) {
+        if (this.nativeControlsElement) {
             // Normal posts have a simpler structure. All the different elements are on the first level.
-            if (nativeControlsElement.childElementCount > 1) {
+            if (this.nativeControlsElement.childElementCount > 1) {
 
                 // The position of the mute button can change. It is not always the second element.
                 // But it is the first element that contains a <button> tag.
                 // The second <button> tag is the marked accounts icon.
-                for (const element of nativeControlsElement.children) {
+                for (const element of this.nativeControlsElement.children) {
                     if (!(element instanceof HTMLElement)) continue;
 
                     // Check if this contains a button.
@@ -300,12 +333,11 @@ export class VideoPlayer {
 
 
     private removeNotRegisteredOverlayElement() {
-        const nativeControlsElement = this.overlayElement?.firstChild as HTMLElement;
-        if (nativeControlsElement) {
+        if (this.nativeControlsElement) {
             // The site adds an overlay still frame when playback ends and forces you to log in to re-watch.
             // We'll remove that.
-            if (nativeControlsElement.firstChild instanceof HTMLImageElement) {
-                const thumbnailElement = nativeControlsElement.firstChild;
+            if (this.nativeControlsElement.firstChild instanceof HTMLImageElement) {
+                const thumbnailElement = this.nativeControlsElement.firstChild;
                 thumbnailElement.remove();
             }
         }
@@ -328,6 +360,15 @@ export class VideoPlayer {
     public updateControlMode() {
         this.detach();
         this.attach();
+    }
+
+    // Checks the autoplay setting and pauses the video if needed.
+    private checkAutoplay() {
+        if (Settings.shared.autoplayMode === VideoAutoplayMode.stopped && !this.userInteractedWithVideo) {
+            this.videoElement.pause();
+            this.videoElement.currentTime = 0; // Jump back to start
+            this.videoElement.muted = false; // Continue with audio
+        }
     }
 
     //#endregion Controls

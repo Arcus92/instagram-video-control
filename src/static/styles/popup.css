@@ -49,6 +49,10 @@ ul.options-list li select {
     border: #888 solid 1px;
 }
 
+ul.options-list li .title {
+    font-weight: bold;
+}
+
 ul.options-list li .hint {
     color: #9e7300;
     margin: 0.5em;

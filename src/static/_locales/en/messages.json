@@ -20,6 +20,9 @@
   "option_show_picture_in_picture": {
     "message": "Show Picture-in-Picture button"
   },
+  "option_video_control_mode": {
+    "message": "Controls"
+  },
   "option_use_custom_controls": {
     "message": "Custom video controls"
   },
@@ -29,8 +32,17 @@
   "option_do_not_use_controls": {
     "message": "No video controls (Instagram native)"
   },
-  "option_auto_unmute_playback": {
-    "message": "Autoplay with audio on page load"
+  "option_autoplay_mode": {
+    "message": "Autoplay"
+  },
+  "option_autoplay_muted": {
+    "message": "Autoplay without audio (Instagram default)"
+  },
+  "option_autoplay_unmuted": {
+    "message": "Autoplay with audio"
+  },
+  "option_autoplay_stopped": {
+    "message": "Autoplay disabled"
   },
   "option_auto_hide_control_bar": {
     "message": "Hide control bar"

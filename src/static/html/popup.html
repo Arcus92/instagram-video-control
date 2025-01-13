@@ -18,6 +18,7 @@
         <ul class="options-list">
             <li>
                 <label>
+                    <span class="title"><span data-locale="option_video_control_mode"></span>: </span>
                     <select name="option_video_control_mode">
                         <option value="custom" data-locale="option_use_custom_controls"></option>
                         <option value="native" data-locale="option_use_browser_controls"></option>
@@ -51,8 +52,12 @@
             </li>
             <li>
                 <label>
-                    <input type="checkbox" name="option_auto_unmute_playback"/>
-                    <span data-locale="option_auto_unmute_playback"></span>
+                    <span class="title"><span data-locale="option_autoplay_mode"></span>: </span>
+                    <select name="option_autoplay_mode">
+                        <option value="muted" data-locale="option_autoplay_muted"></option>
+                        <option value="unmuted" data-locale="option_autoplay_unmuted"></option>
+                        <option value="stopped" data-locale="option_autoplay_stopped"></option>
+                    </select>
                 </label>
                 <div class="hint">
                     <span data-locale="option_auto_unmute_playback_hint"></span>
