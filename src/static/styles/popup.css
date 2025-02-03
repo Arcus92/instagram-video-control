@@ -13,11 +13,15 @@ header {
     margin-bottom: 1em;
 }
 
-header .title {
-    margin: 0;
-}
+header .title,
 header .subtitle {
     margin: 0;
+}
+
+main h1,
+main h2,
+main h3 {
+    margin: 1em 0 0;
 }
 
 a {

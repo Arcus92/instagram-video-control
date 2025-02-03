@@ -8,6 +8,12 @@
   "settings": {
     "message": "Settings"
   },
+  "control_settings": {
+    "message": "Controls"
+  },
+  "playback_settings": {
+    "message": "Playback"
+  },
   "option_show_time_code": {
     "message": "Show time code"
   },
