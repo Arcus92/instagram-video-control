@@ -15,6 +15,7 @@ export interface SettingsData {
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
     autoHideControlBar: boolean;
+    loopPlayback: boolean;
 }
 
 // Handle extension settings.
@@ -26,7 +27,7 @@ export class Settings implements SettingsData {
 
     private readonly names: string[] = [
         'videoControlMode', 'lastPlaybackVolume', 'autoplayMode', 'showTimeCodeText', 'showFullscreenButton',
-        'showPictureInPictureButton', 'autoHideControlBar'
+        'showPictureInPictureButton', 'autoHideControlBar', 'loopPlayback'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
@@ -35,6 +36,7 @@ export class Settings implements SettingsData {
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
     private _autoHideControlBar: boolean = false;
+    private _loopPlayback: boolean = true;
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
@@ -111,6 +113,17 @@ export class Settings implements SettingsData {
         this._autoHideControlBar = value;
 
         this.onChange('autoHideControlBar');
+    }
+
+    // If enabled, the videos will auto-loop at the end of playback (Instagram default).
+    public get loopPlayback(): boolean {
+        return this._loopPlayback;
+    }
+    public set loopPlayback(value: boolean) {
+        if (this._loopPlayback === value) return;
+        this._loopPlayback = value;
+
+        this.onChange('loopPlayback');
     }
 
     //#endregion Data
@@ -196,6 +209,10 @@ export class Settings implements SettingsData {
         if (typeof data.autoHideControlBar === 'boolean')
         {
             this.autoHideControlBar = data.autoHideControlBar;
+        }
+        if (typeof data.loopPlayback === 'boolean')
+        {
+            this.loopPlayback = data.loopPlayback;
         }
     }
 

@@ -86,6 +86,7 @@ export class VideoDetector implements PlaybackManager {
             case 'showFullscreenButton':
             case 'showPictureInPictureButton':
             case 'autoHideControlBar':
+            case 'loopPlayback':
                 this.updateControlSettingForVideos();
                 break;
             case 'videoControlMode':

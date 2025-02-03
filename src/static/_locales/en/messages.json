@@ -65,6 +65,9 @@
   "enable_autoplay_in_step_4_chrome": {
     "message": "Scroll to 'Sound' and select 'Allow'."
   },
+  "option_loop_playback": {
+    "message": "Loop videos"
+  },
   "view_on_github": {
     "message": "View on GitHub"
   },
