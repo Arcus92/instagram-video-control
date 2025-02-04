@@ -15,10 +15,10 @@
         <p class="subtitle" data-locale="__version__"></p>
     </header>
     <main>
+        <h3 data-locale="control_settings"></h3>
         <ul class="options-list">
             <li>
                 <label>
-                    <span class="title"><span data-locale="option_video_control_mode"></span>: </span>
                     <select name="option_video_control_mode">
                         <option value="custom" data-locale="option_use_custom_controls"></option>
                         <option value="native" data-locale="option_use_browser_controls"></option>
@@ -50,9 +50,12 @@
                     <span data-locale="option_show_picture_in_picture"></span>
                 </label>
             </li>
+        </ul>
+
+        <h3 data-locale="playback_settings"></h3>
+        <ul class="options-list">
             <li>
                 <label>
-                    <span class="title"><span data-locale="option_autoplay_mode"></span>: </span>
                     <select name="option_autoplay_mode">
                         <option value="muted" data-locale="option_autoplay_muted"></option>
                         <option value="unmuted" data-locale="option_autoplay_unmuted"></option>
@@ -69,6 +72,12 @@
                         <li data-browser="chrome"><span data-locale="enable_autoplay_in_step_4_chrome"></span></li>
                     </ul>
                 </div>
+            </li>
+            <li>
+                <label>
+                    <input type="checkbox" name="option_loop_playback"/>
+                    <span data-locale="option_loop_playback"></span>
+                </label>
             </li>
         </ul>
     </main>

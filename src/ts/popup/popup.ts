@@ -63,6 +63,11 @@ export class Popup {
             this.setSettingControlVisibility('option_show_picture_in_picture', false);
         }
 
+        // Loop playback option (can be used to disable default auto-loop on Instagram)
+        this.initSettingInputElement('option_loop_playback',
+          (e) => this.settings.loopPlayback = e.checked,
+          (e) => e.checked = this.settings.loopPlayback);
+
         this.updateOptionAutoUnmuteHint();
     }
 

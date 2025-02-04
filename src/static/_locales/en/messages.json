@@ -8,6 +8,12 @@
   "settings": {
     "message": "Settings"
   },
+  "control_settings": {
+    "message": "Controls"
+  },
+  "playback_settings": {
+    "message": "Playback"
+  },
   "option_show_time_code": {
     "message": "Show time code"
   },
@@ -64,6 +70,9 @@
   },
   "enable_autoplay_in_step_4_chrome": {
     "message": "Scroll to 'Sound' and select 'Allow'."
+  },
+  "option_loop_playback": {
+    "message": "Loop videos"
   },
   "view_on_github": {
     "message": "View on GitHub"

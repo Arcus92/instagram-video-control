@@ -39,6 +39,7 @@ export class VideoPlayer {
         this.initHover();
 
         this.checkAutoplay();
+        this.updateLoopSetting();
     }
 
     // Detaches the custom player from the video tag. Removes all custom element and events.
@@ -55,6 +56,7 @@ export class VideoPlayer {
 
         this.videoElement.addEventListener("play", this.onPlay);
         this.videoElement.addEventListener("pause", this.onPause);
+        this.videoElement.addEventListener("ended", this.onEnded);
         this.videoElement.addEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.addEventListener("volumechange", this.onVolumeChange);
         document.addEventListener("fullscreenchange", this.onFullscreenChange);
@@ -79,6 +81,7 @@ export class VideoPlayer {
     private unregisterEvents() {
         this.videoElement.removeEventListener("play", this.onPlay);
         this.videoElement.removeEventListener("pause", this.onPause);
+        this.videoElement.removeEventListener("ended", this.onEnded);
         this.videoElement.removeEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.removeEventListener("volumechange", this.onVolumeChange);
         document.removeEventListener("fullscreenchange", this.onFullscreenChange);
@@ -107,6 +110,14 @@ export class VideoPlayer {
         setTimeout(() => {
             this.removeNotRegisteredOverlayElement();
         });
+    }
+
+    // Handles video end-of-playback event.
+    private onEnded = () => {
+        // Instagram handles the re-start on loops manually and ignores the `loop` property. We simply pause again.
+        if (!this.videoElement.loop) {
+            this.videoElement.pause();
+        }
     }
 
     // Handles video time update event.
@@ -354,6 +365,8 @@ export class VideoPlayer {
     // Is called when any control setting was changed. We should update all dynamic controls.
     public updateControlSetting() {
         this.videoController?.onUpdateSettings();
+
+        this.updateLoopSetting();
     }
 
     // Is called when the control mode was changed. This rebuilds the UI.
@@ -369,6 +382,11 @@ export class VideoPlayer {
             this.videoElement.currentTime = 0; // Jump back to start
             this.videoElement.muted = false; // Continue with audio
         }
+    }
+
+    // Updates the video's loop property from the settings.
+    private updateLoopSetting() {
+        this.videoElement.loop = Settings.shared.loopPlayback;
     }
 
     //#endregion Controls
