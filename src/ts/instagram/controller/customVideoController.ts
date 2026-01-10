@@ -1,7 +1,7 @@
-import {VideoController} from "./videoController";
-import {Utils} from "../../shared/utils";
-import {Browser} from "../../shared/browser";
-import {Settings} from "../../shared/settings";
+import { VideoController } from "./videoController";
+import { Utils } from "../../shared/utils";
+import { Browser } from "../../shared/browser";
+import { Settings } from "../../shared/settings";
 
 // The custom video controller.
 export class CustomVideoController extends VideoController {
@@ -16,6 +16,8 @@ export class CustomVideoController extends VideoController {
     private volumeBarProgressElement: HTMLElement | undefined;
     private fullscreenButtonElement: HTMLButtonElement | undefined;
     private pictureInPictureButtonElement: HTMLButtonElement | undefined;
+    private speedButtonElement: HTMLButtonElement | undefined;
+    private speedMenuElement: HTMLElement | undefined;
 
 
     public create() {
@@ -68,8 +70,8 @@ export class CustomVideoController extends VideoController {
 
         CustomVideoController.addDragEventToBar(elementSeekbar, elementSeekbarBackground, this.seekBarProgressElement,
             /* invokeOnDrag */ false, (value) => {
-                video.currentTime = value * video.duration;
-            });
+            video.currentTime = value * video.duration;
+        });
 
         // Mute
         this.muteButtonElement = document.createElement("button");
@@ -96,9 +98,54 @@ export class CustomVideoController extends VideoController {
 
         CustomVideoController.addDragEventToBar(elementVolume, elementVolumeBackground, this.volumeBarProgressElement,
             /* invokeOnDrag */ true, (value) => {
-                video.volume = value;
-                video.muted = video.volume <= 0;
-            });
+            video.volume = value;
+            video.muted = video.volume <= 0;
+        });
+
+        // Speed
+        const speedWrapper = document.createElement("div");
+        speedWrapper.classList.add("ivc-control-wrapper");
+        contentElement.appendChild(speedWrapper);
+
+        this.speedButtonElement = document.createElement("button");
+        this.speedButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.speedButtonElement.appendChild(document.createElement("img"));
+        speedWrapper.appendChild(this.speedButtonElement);
+
+        this.speedMenuElement = document.createElement("div");
+        this.speedMenuElement.classList.add("ivc-menu");
+        speedWrapper.appendChild(this.speedMenuElement);
+
+        const speeds = [0.25, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+        for (const speed of speeds) {
+            const menuItem = document.createElement("div");
+            menuItem.classList.add("ivc-menu-item");
+            menuItem.innerText = `${speed}x`;
+            menuItem.onclick = () => {
+                video.playbackRate = speed;
+                this.updateRateControl(); // Immediate update for responsiveness
+            };
+            this.speedMenuElement.appendChild(menuItem);
+        }
+
+        // Show/Hide menu logic
+        const showMenu = () => {
+            if (this.speedMenuElement) this.speedMenuElement.classList.add("visible");
+        };
+        const hideMenu = () => {
+            if (this.speedMenuElement) this.speedMenuElement.classList.remove("visible");
+        };
+
+        this.speedButtonElement.onmouseenter = showMenu;
+        this.speedMenuElement.onmouseenter = showMenu;
+
+        // Use the wrapper to handle mouseleave, so we don't hide when moving between button and menu
+        speedWrapper.onmouseleave = hideMenu;
+
+        this.speedButtonElement.onclick = () => {
+            // Toggle visibility on click for mobile/touch support
+            if (this.speedMenuElement) this.speedMenuElement.classList.toggle("visible");
+        };
 
         // Picture-in-Picture
         this.pictureInPictureButtonElement = document.createElement("button");
@@ -138,6 +185,7 @@ export class CustomVideoController extends VideoController {
         this.updatePlayControl();
         this.updatePositionControl();
         this.updateVolumeControl();
+        this.updateRateControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
         this.updateControlBarVisibility();
@@ -165,6 +213,9 @@ export class CustomVideoController extends VideoController {
     public override onPictureInPictureChange() {
         this.updatePictureInPictureControl();
     }
+    public override onRateChange() {
+        this.updateRateControl();
+    }
     public onUpdateSettings() {
         this.updatePositionControl();
         this.updateFullscreenControl();
@@ -173,6 +224,8 @@ export class CustomVideoController extends VideoController {
     }
 
     //#endregion Events
+
+    //#region Update
 
     //#region Update
 
@@ -199,6 +252,22 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(this.muteButtonElement, this.videoElement.muted ?
             CustomVideoController.imageSpeakerOff : CustomVideoController.imageSpeakerOn);
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`
+    }
+
+    private updateRateControl() {
+        if (!this.speedButtonElement) return;
+        CustomVideoController.setButtonIcon(this.speedButtonElement, CustomVideoController.imageSpeed);
+
+        if (this.speedMenuElement) {
+            const currentSpeed = this.videoElement.playbackRate;
+            // Clear current selection
+            Array.from(this.speedMenuElement.children).forEach(child => {
+                child.classList.remove("selected");
+                if ((child as HTMLElement).innerText === `${currentSpeed}x`) {
+                    child.classList.add("selected");
+                }
+            });
+        }
     }
 
     private updateFullscreenControl() {
@@ -239,6 +308,7 @@ export class CustomVideoController extends VideoController {
     private static imageSpeakerOff = Browser.getUrl('images/speaker-off.svg');
     private static imagePictureInPictureEnter = Browser.getUrl('images/picture-in-picture-enter.svg');
     private static imagePictureInPictureExit = Browser.getUrl('images/picture-in-picture-exit.svg');
+    private static imageSpeed = Browser.getUrl('images/speed.svg');
 
     //#endregion Resources
 
@@ -253,7 +323,7 @@ export class CustomVideoController extends VideoController {
 
     // Handles click and drag events to the bars elements (e.g. seekbar, volume bar).
     private static addDragEventToBar(element: HTMLElement, elementBackground: HTMLElement, elementProgress: HTMLElement,
-                                     invokeOnDrag: boolean, callback: (value: number) => void) {
+        invokeOnDrag: boolean, callback: (value: number) => void) {
 
         // Sub function to submit the current bar value
         const onValueChanged = (event: MouseEvent | TouchEvent, invoke: boolean) => {

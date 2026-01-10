@@ -1,4 +1,4 @@
-import {VideoController} from "./videoController";
+import { VideoController } from "./videoController";
 
 // The native browser video controller.
 export class NativeVideoController extends VideoController {
@@ -20,12 +20,13 @@ export class NativeVideoController extends VideoController {
 
     //#region Events
 
-    public override onPlay() {}
-    public override onPause() {}
-    public override onTimeUpdate() {}
-    public override onVolumeChange() {}
-    public override onFullscreenChange() {}
-    public override onPictureInPictureChange() {}
+    public override onPlay() { }
+    public override onPause() { }
+    public override onTimeUpdate() { }
+    public override onVolumeChange() { }
+    public override onFullscreenChange() { }
+    public override onPictureInPictureChange() { }
+    public override onRateChange() { }
 
     public onUpdateSettings() {
         this.updateControlBarVisibility();

@@ -1,12 +1,12 @@
-import {Utils} from "../shared/utils";
-import {VideoType} from "./videoType";
-import {PlaybackManager} from "./playbackManager";
-import {Settings} from "../shared/settings";
-import {VideoControlMode} from "../shared/videoControlMode";
-import {VideoController} from "./controller/videoController";
-import {NativeVideoController} from "./controller/nativeVideoController";
-import {CustomVideoController} from "./controller/customVideoController";
-import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
+import { Utils } from "../shared/utils";
+import { VideoType } from "./videoType";
+import { PlaybackManager } from "./playbackManager";
+import { Settings } from "../shared/settings";
+import { VideoControlMode } from "../shared/videoControlMode";
+import { VideoController } from "./controller/videoController";
+import { NativeVideoController } from "./controller/nativeVideoController";
+import { CustomVideoController } from "./controller/customVideoController";
+import { VideoAutoplayMode } from "../shared/videoAutoplayMode";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -59,6 +59,7 @@ export class VideoPlayer {
         this.videoElement.addEventListener("ended", this.onEnded);
         this.videoElement.addEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.addEventListener("volumechange", this.onVolumeChange);
+        this.videoElement.addEventListener("ratechange", this.onRateChange);
         document.addEventListener("fullscreenchange", this.onFullscreenChange);
         this.videoElement.addEventListener("enterpictureinpicture", this.onPictureInPictureChange);
         this.videoElement.addEventListener("leavepictureinpicture", this.onPictureInPictureChange);
@@ -84,6 +85,7 @@ export class VideoPlayer {
         this.videoElement.removeEventListener("ended", this.onEnded);
         this.videoElement.removeEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.removeEventListener("volumechange", this.onVolumeChange);
+        this.videoElement.removeEventListener("ratechange", this.onRateChange);
         document.removeEventListener("fullscreenchange", this.onFullscreenChange);
         this.videoElement.removeEventListener("enterpictureinpicture", this.onPictureInPictureChange);
         this.videoElement.removeEventListener("leavepictureinpicture", this.onPictureInPictureChange);
@@ -133,6 +135,11 @@ export class VideoPlayer {
         //if (!event.isTrusted) return;
 
         this.playbackManager.notifyVideoVolumeChange(this.videoElement);
+    }
+
+    // Handles video rate changes.
+    private onRateChange = () => {
+        this.videoController?.onRateChange();
     }
 
     // Handles fullscreen changes.

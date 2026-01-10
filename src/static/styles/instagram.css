@@ -16,7 +16,7 @@
 }
 
 .ivc-controls.ivc-story {
-    background: rgba(38,38,38,.6);
+    background: rgba(38, 38, 38, .6);
 }
 
 .ivc-controls-content {
@@ -104,4 +104,89 @@
 
 .ivc-volume-bar {
     flex: 0 0 48px;
+}
+
+.ivc-menu {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 100%;
+    /* Position above */
+    margin-bottom: 12px;
+    /* Visual gap */
+
+    background: rgba(38, 38, 38, 0.9);
+    border-radius: 8px;
+    /* overflow: hidden; Removed to allow bridge ::after element to be visible */
+
+    display: flex;
+    flex-direction: column;
+    /* Removed padding and gap for contiguous highlight */
+
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+    /* Initially hidden */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s;
+
+    pointer-events: auto;
+}
+
+.ivc-menu.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.ivc-menu-item {
+    padding: 6px 16px;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    transition: background-color 0.1s;
+    font-weight: 500;
+}
+
+/* Fix rounded corners for selection highlight manually since overflow is visible */
+.ivc-menu-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.ivc-menu-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.ivc-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ivc-menu-item.selected {
+    color: #0095f6;
+    /* Instagram blue */
+    font-weight: bold;
+}
+
+.ivc-control-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+    /* Essential for catching mouse events on the group */
+}
+
+/* Invisible bridge to prevent mouseleave when crossing the gap */
+.ivc-menu::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    /* Covers the margin gap */
 }

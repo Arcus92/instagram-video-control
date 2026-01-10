@@ -131,6 +131,8 @@ export abstract class VideoController {
     // The extension settings were changed.
     public abstract onUpdateSettings(): void;
 
+    public abstract onRateChange(): void;
+
     //#endregion Events
 
     //#region Hover
