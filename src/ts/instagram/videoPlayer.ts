@@ -1,12 +1,12 @@
-import { Utils } from "../shared/utils";
-import { VideoType } from "./videoType";
-import { PlaybackManager } from "./playbackManager";
-import { Settings } from "../shared/settings";
-import { VideoControlMode } from "../shared/videoControlMode";
-import { VideoController } from "./controller/videoController";
-import { NativeVideoController } from "./controller/nativeVideoController";
-import { CustomVideoController } from "./controller/customVideoController";
-import { VideoAutoplayMode } from "../shared/videoAutoplayMode";
+import {Utils} from "../shared/utils";
+import {VideoType} from "./videoType";
+import {PlaybackManager} from "./playbackManager";
+import {Settings} from "../shared/settings";
+import {VideoControlMode} from "../shared/videoControlMode";
+import {VideoController} from "./controller/videoController";
+import {NativeVideoController} from "./controller/nativeVideoController";
+import {CustomVideoController} from "./controller/customVideoController";
+import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {

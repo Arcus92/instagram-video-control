@@ -1,7 +1,7 @@
-import { VideoController } from "./videoController";
-import { Utils } from "../../shared/utils";
-import { Browser } from "../../shared/browser";
-import { Settings } from "../../shared/settings";
+import {VideoController} from "./videoController";
+import {Utils} from "../../shared/utils";
+import {Browser} from "../../shared/browser";
+import {Settings} from "../../shared/settings";
 
 // The custom video controller.
 export class CustomVideoController extends VideoController {
