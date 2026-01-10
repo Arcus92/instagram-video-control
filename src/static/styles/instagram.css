@@ -77,6 +77,19 @@
     padding: 10px 5px;
 
     cursor: pointer;
+
+    overflow: hidden;
+    transition-property: flex-basis, padding, margin;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.ivc-control-bar.hidden {
+    flex-basis: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 .ivc-control-bar-background {

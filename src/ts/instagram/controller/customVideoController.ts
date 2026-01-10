@@ -13,6 +13,7 @@ export class CustomVideoController extends VideoController {
     private seekBarProgressElement: HTMLElement | undefined;
     private positionTextElement: HTMLElement | undefined;
     private muteButtonElement: HTMLButtonElement | undefined;
+    private volumeBarElement: HTMLElement | undefined;
     private volumeBarProgressElement: HTMLElement | undefined;
     private fullscreenButtonElement: HTMLButtonElement | undefined;
     private pictureInPictureButtonElement: HTMLButtonElement | undefined;
@@ -48,6 +49,52 @@ export class CustomVideoController extends VideoController {
             }
         };
 
+        // Mute
+        this.muteButtonElement = document.createElement("button");
+        this.muteButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.muteButtonElement.appendChild(document.createElement("img"));
+        contentElement.appendChild(this.muteButtonElement);
+
+        this.muteButtonElement.onclick = () => {
+            video.muted = !video.muted;
+
+            // Fallback when volume is still set to zero
+            if (!video.muted && video.volume === 0) {
+                video.volume = 0.1;
+            }
+        };
+        this.muteButtonElement.onmouseenter = () => {
+            this.setVolumeBarVisibility(true);
+        };
+        this.muteButtonElement.onmouseleave = () => {
+            this.setVolumeBarVisibility(false);
+        };
+
+        // Volume
+        this.volumeBarElement = document.createElement("div");
+        this.volumeBarElement.classList.add("ivc-control-element", "ivc-control-bar", "ivc-volume-bar", "hidden");
+        contentElement.appendChild(this.volumeBarElement);
+
+        const elementVolumeBackground = document.createElement("div");
+        elementVolumeBackground.classList.add("ivc-control-bar-background");
+        this.volumeBarElement.appendChild(elementVolumeBackground);
+
+        this.volumeBarProgressElement = document.createElement("div");
+        this.volumeBarProgressElement.classList.add("ivc-control-bar-progress");
+        elementVolumeBackground.appendChild(this.volumeBarProgressElement);
+
+        CustomVideoController.addDragEventToBar(this.volumeBarElement, elementVolumeBackground, this.volumeBarProgressElement,
+          /* invokeOnDrag */ true, (value) => {
+              video.volume = value;
+              video.muted = video.volume <= 0;
+          });
+        this.volumeBarElement.onmouseenter = () => {
+            this.setVolumeBarVisibility(true);
+        };
+        this.volumeBarElement.onmouseleave = () => {
+            this.setVolumeBarVisibility(false);
+        };
+
         // Position text
         this.positionTextElement = document.createElement("div");
         this.positionTextElement.classList.add("ivc-control-element", "ivc-control-text");
@@ -69,35 +116,6 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.addDragEventToBar(elementSeekbar, elementSeekbarBackground, this.seekBarProgressElement,
             /* invokeOnDrag */ false, (value) => {
                 video.currentTime = value * video.duration;
-            });
-
-        // Mute
-        this.muteButtonElement = document.createElement("button");
-        this.muteButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
-        this.muteButtonElement.appendChild(document.createElement("img"));
-        contentElement.appendChild(this.muteButtonElement);
-
-        this.muteButtonElement.onclick = () => {
-            video.muted = !video.muted;
-        };
-
-        // Volume
-        const elementVolume = document.createElement("div");
-        elementVolume.classList.add("ivc-control-element", "ivc-control-bar", "ivc-volume-bar");
-        contentElement.appendChild(elementVolume);
-
-        const elementVolumeBackground = document.createElement("div");
-        elementVolumeBackground.classList.add("ivc-control-bar-background");
-        elementVolume.appendChild(elementVolumeBackground);
-
-        this.volumeBarProgressElement = document.createElement("div");
-        this.volumeBarProgressElement.classList.add("ivc-control-bar-progress");
-        elementVolumeBackground.appendChild(this.volumeBarProgressElement);
-
-        CustomVideoController.addDragEventToBar(elementVolume, elementVolumeBackground, this.volumeBarProgressElement,
-            /* invokeOnDrag */ true, (value) => {
-                video.volume = value;
-                video.muted = video.volume <= 0;
             });
 
         // Picture-in-Picture
@@ -176,6 +194,8 @@ export class CustomVideoController extends VideoController {
 
     //#region Update
 
+    private volumeBarDelayTimeout: number = -1;
+
     private updatePlayControl() {
         if (!this.playButtonElement) return;
         CustomVideoController.setButtonIcon(this.playButtonElement, this.videoElement.paused ?
@@ -224,6 +244,20 @@ export class CustomVideoController extends VideoController {
     protected setVisibility(visibility: boolean) {
         if (!this.videoControlElement) return;
         this.videoControlElement.classList.toggle('hidden', !visibility);
+    }
+
+    private setVolumeBarVisibility(visibility: boolean) {
+        if (!this.volumeBarElement) return;
+
+        if (visibility) {
+            clearTimeout(this.volumeBarDelayTimeout);
+            this.volumeBarElement.classList.toggle('hidden', false);
+        } else {
+            this.volumeBarDelayTimeout = setTimeout(() => {
+                if (!this.volumeBarElement) return;
+                this.volumeBarElement.classList.toggle('hidden', true);
+            }, 400);
+        }
     }
 
     //#endregion Update
