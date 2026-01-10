@@ -16,6 +16,7 @@ export interface SettingsData {
     showPictureInPictureButton: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
+    showSpeedControl: boolean;
 }
 
 // Handle extension settings.
@@ -27,7 +28,7 @@ export class Settings implements SettingsData {
 
     private readonly names: string[] = [
         'videoControlMode', 'lastPlaybackVolume', 'autoplayMode', 'showTimeCodeText', 'showFullscreenButton',
-        'showPictureInPictureButton', 'autoHideControlBar', 'loopPlayback'
+        'showPictureInPictureButton', 'autoHideControlBar', 'loopPlayback', 'showSpeedControl'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
@@ -37,6 +38,7 @@ export class Settings implements SettingsData {
     private _showPictureInPictureButton: boolean = false;
     private _autoHideControlBar: boolean = false;
     private _loopPlayback: boolean = true;
+    private _showSpeedControl: boolean = true;
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
@@ -126,6 +128,17 @@ export class Settings implements SettingsData {
         this.onChange('loopPlayback');
     }
 
+    // Should the speed control button be visible in the player controls?
+    public get showSpeedControl(): boolean {
+        return this._showSpeedControl;
+    }
+    public set showSpeedControl(value: boolean) {
+        if (this._showSpeedControl === value) return;
+        this._showSpeedControl = value;
+
+        this.onChange('showSpeedControl');
+    }
+
     //#endregion Data
 
     //#region Init
@@ -213,6 +226,10 @@ export class Settings implements SettingsData {
         if (typeof data.loopPlayback === 'boolean')
         {
             this.loopPlayback = data.loopPlayback;
+        }
+        if (typeof data.showSpeedControl === 'boolean')
+        {
+            this.showSpeedControl = data.showSpeedControl;
         }
     }
 

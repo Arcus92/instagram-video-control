@@ -220,6 +220,7 @@ export class CustomVideoController extends VideoController {
         this.updatePositionControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+        this.updateRateControl();
         this.updateControlBarVisibility();
     }
 
@@ -256,6 +257,18 @@ export class CustomVideoController extends VideoController {
 
     private updateRateControl() {
         if (!this.speedButtonElement) return;
+
+        const showSpeedControl = Settings.shared.showSpeedControl;
+        VideoController.setElementVisibility(this.speedButtonElement, showSpeedControl);
+
+        if (!showSpeedControl) {
+            // If the speed control is hidden, we ensure the speed is reset to 1.0
+            if (this.videoElement.playbackRate !== 1.0) {
+                this.videoElement.playbackRate = 1.0;
+            }
+            return;
+        }
+
         CustomVideoController.setButtonIcon(this.speedButtonElement, CustomVideoController.imageSpeed);
 
         if (this.speedMenuElement) {

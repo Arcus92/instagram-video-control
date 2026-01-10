@@ -1,7 +1,7 @@
-import {Browser} from "../shared/browser";
-import {Settings, SettingsData} from "../shared/settings";
-import {VideoControlMode} from "../shared/videoControlMode";
-import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
+import { Browser } from "../shared/browser";
+import { Settings, SettingsData } from "../shared/settings";
+import { VideoControlMode } from "../shared/videoControlMode";
+import { VideoAutoplayMode } from "../shared/videoAutoplayMode";
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -30,13 +30,18 @@ export class Popup {
 
         // Auto hide control bar
         this.initSettingInputElement('option_auto_hide_control_bar',
-          (e) => this.settings.autoHideControlBar = e.checked,
-          (e) => e.checked = this.settings.autoHideControlBar);
+            (e) => this.settings.autoHideControlBar = e.checked,
+            (e) => e.checked = this.settings.autoHideControlBar);
 
         // Time code option
         this.initSettingInputElement('option_show_time_code',
             (e) => this.settings.showTimeCodeText = e.checked,
             (e) => e.checked = this.settings.showTimeCodeText);
+
+        // Speed control option
+        this.initSettingInputElement('option_show_playback_speed',
+            (e) => this.settings.showSpeedControl = e.checked,
+            (e) => e.checked = this.settings.showSpeedControl);
 
         // Auto play option
         this.initSettingSelectElement('option_autoplay_mode',
@@ -65,30 +70,30 @@ export class Popup {
 
         // Loop playback option (can be used to disable default auto-loop on Instagram)
         this.initSettingInputElement('option_loop_playback',
-          (e) => this.settings.loopPlayback = e.checked,
-          (e) => e.checked = this.settings.loopPlayback);
+            (e) => this.settings.loopPlayback = e.checked,
+            (e) => e.checked = this.settings.loopPlayback);
 
         this.updateOptionAutoUnmuteHint();
     }
 
     // Handler for setting changes of input elements.
     private initSettingInputElement(name: string,
-                                    store: (e: HTMLInputElement) => void,
-                                    restore: (e: HTMLInputElement) => void) {
+        store: (e: HTMLInputElement) => void,
+        restore: (e: HTMLInputElement) => void) {
         this.initSettingElement<HTMLInputElement>(`input[name="${name}"]`, store, restore);
     }
 
     // Handler for setting changes of select elements.
     private initSettingSelectElement(name: string,
-                                    store: (e: HTMLSelectElement) => void,
-                                    restore: (e: HTMLSelectElement) => void) {
+        store: (e: HTMLSelectElement) => void,
+        restore: (e: HTMLSelectElement) => void) {
         this.initSettingElement<HTMLSelectElement>(`select[name="${name}"]`, store, restore);
     }
 
     // Generic handler for setting changes.
     private initSettingElement<T extends HTMLElement>(selector: string,
-                               store: (e: T) => void,
-                               restore: (e: T) => void) {
+        store: (e: T) => void,
+        restore: (e: T) => void) {
         const element = document.querySelector(selector) as T;
         if (!element) return;
 
