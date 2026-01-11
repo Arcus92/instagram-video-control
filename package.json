@@ -1,39 +1,42 @@
 {
-  "name": "instagram-video-control",
-  "version": "1.7.0",
-  "description": "Adds volume and play controls to Instagram videos.",
-  "devDependencies": {
-    "@types/archiver": "^6.0.3",
-    "@types/chrome": "^0.0.263",
-    "@types/firefox-webext-browser": "^120.0.4",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "archiver": "^7.0.1",
-    "eslint": "^8.57.1",
-    "eslint-webpack-plugin": "^4.2.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "~5.5.4",
-    "web-ext": "^8.3.0",
-    "webpack": "^5.97.1",
-    "webpack-cli": "^5.1.4"
-  },
-  "scripts": {
-    "build": "npm run compile && npm run pack",
-    "lint": "eslint ./src/ts",
-    "pack": "node ./pack.js",
-    "compile": "webpack",
-    "start:firefox": "web-ext run --target firefox-desktop --source-dir ./dist/firefox --start-url https://www.instagram.com",
-    "start:firefox-android": "web-ext run --target firefox-android --source-dir ./dist/firefox",
-    "start:chromium": "web-ext run --target chromium --source-dir ./dist/chrome --start-url https://www.instagram.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Arcus92/instagram-video-control.git"
-  },
-  "author": "David Schulte <mail@david-schulte.de>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Arcus92/instagram-video-control/issues"
-  },
-  "homepage": "https://github.com/Arcus92/instagram-video-control#readme"
+    "name": "instagram-video-control",
+    "version": "1.7.0",
+    "description": "Adds volume and play controls to Instagram videos.",
+    "devDependencies": {
+        "@types/archiver": "^6.0.3",
+        "@types/chrome": "^0.0.263",
+        "@types/firefox-webext-browser": "^120.0.4",
+        "@typescript-eslint/eslint-plugin": "^7.18.0",
+        "@typescript-eslint/parser": "^7.18.0",
+        "archiver": "^7.0.1",
+        "eslint": "^8.57.1",
+        "eslint-webpack-plugin": "^4.2.0",
+        "prettier": "^3.7.4",
+        "ts-loader": "^9.5.1",
+        "typescript": "~5.5.4",
+        "web-ext": "^8.3.0",
+        "webpack": "^5.97.1",
+        "webpack-cli": "^5.1.4"
+    },
+    "scripts": {
+        "build": "npm run compile && npm run pack",
+        "lint": "eslint ./src/ts",
+        "pack": "node ./pack.js",
+        "compile": "webpack",
+        "prettier": "prettier -c .",
+        "prettier:fix": "prettier -w .",
+        "start:firefox": "web-ext run --target firefox-desktop --source-dir ./dist/firefox --start-url https://www.instagram.com",
+        "start:firefox-android": "web-ext run --target firefox-android --source-dir ./dist/firefox",
+        "start:chromium": "web-ext run --target chromium --source-dir ./dist/chrome --start-url https://www.instagram.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Arcus92/instagram-video-control.git"
+    },
+    "author": "David Schulte <mail@david-schulte.de>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Arcus92/instagram-video-control/issues"
+    },
+    "homepage": "https://github.com/Arcus92/instagram-video-control#readme"
 }

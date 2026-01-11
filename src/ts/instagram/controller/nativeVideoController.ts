@@ -1,8 +1,7 @@
-import {VideoController} from "./videoController";
+import { VideoController } from './videoController';
 
 // The native browser video controller.
 export class NativeVideoController extends VideoController {
-
     //#region Control
 
     public create() {

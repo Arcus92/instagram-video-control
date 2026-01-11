@@ -1,83 +1,83 @@
 {
-  "extension_name": {
-    "message": "Video Control for Instagram"
-  },
-  "extension_description": {
-    "message": "Adds volume and play controls to Instagram videos."
-  },
-  "settings": {
-    "message": "Settings"
-  },
-  "control_settings": {
-    "message": "Controls"
-  },
-  "playback_settings": {
-    "message": "Playback"
-  },
-  "option_show_time_code": {
-    "message": "Show time code"
-  },
-  "option_show_fullscreen": {
-    "message": "Show fullscreen button"
-  },
-  "option_show_playback_speed": {
-    "message": "Show playback speed control"
-  },
-  "option_show_picture_in_picture": {
-    "message": "Show Picture-in-Picture button"
-  },
-  "option_video_control_mode": {
-    "message": "Controls"
-  },
-  "option_use_custom_controls": {
-    "message": "Custom video controls"
-  },
-  "option_use_browser_controls": {
-    "message": "Native browser controls"
-  },
-  "option_do_not_use_controls": {
-    "message": "No video controls (Instagram native)"
-  },
-  "option_autoplay_mode": {
-    "message": "Autoplay"
-  },
-  "option_autoplay_muted": {
-    "message": "Autoplay without audio (Instagram default)"
-  },
-  "option_autoplay_unmuted": {
-    "message": "Autoplay with audio"
-  },
-  "option_autoplay_stopped": {
-    "message": "Autoplay disabled"
-  },
-  "option_auto_hide_control_bar": {
-    "message": "Hide control bar"
-  },
-  "option_auto_unmute_playback_hint": {
-    "message": "Please allow autoplay with audio in your browser's website settings:"
-  },
-  "enable_autoplay_in_step_1": {
-    "message": "Goto Instagram.com."
-  },
-  "enable_autoplay_in_step_2": {
-    "message": "Click the website settings icon in the url bar."
-  },
-  "enable_autoplay_in_step_3_firefox": {
-    "message": "Select 'Allow Audio and Video' as Autoplay option."
-  },
-  "enable_autoplay_in_step_3_chrome": {
-    "message": "Click 'Site settings'."
-  },
-  "enable_autoplay_in_step_4_chrome": {
-    "message": "Scroll to 'Sound' and select 'Allow'."
-  },
-  "option_loop_playback": {
-    "message": "Loop videos"
-  },
-  "view_on_github": {
-    "message": "View on GitHub"
-  },
-  "report_an_issue": {
-    "message": "Report an Issue"
-  }
+    "extension_name": {
+        "message": "Video Control for Instagram"
+    },
+    "extension_description": {
+        "message": "Adds volume and play controls to Instagram videos."
+    },
+    "settings": {
+        "message": "Settings"
+    },
+    "control_settings": {
+        "message": "Controls"
+    },
+    "playback_settings": {
+        "message": "Playback"
+    },
+    "option_show_time_code": {
+        "message": "Show time code"
+    },
+    "option_show_fullscreen": {
+        "message": "Show fullscreen button"
+    },
+    "option_show_playback_speed": {
+        "message": "Show playback speed control"
+    },
+    "option_show_picture_in_picture": {
+        "message": "Show Picture-in-Picture button"
+    },
+    "option_video_control_mode": {
+        "message": "Controls"
+    },
+    "option_use_custom_controls": {
+        "message": "Custom video controls"
+    },
+    "option_use_browser_controls": {
+        "message": "Native browser controls"
+    },
+    "option_do_not_use_controls": {
+        "message": "No video controls (Instagram native)"
+    },
+    "option_autoplay_mode": {
+        "message": "Autoplay"
+    },
+    "option_autoplay_muted": {
+        "message": "Autoplay without audio (Instagram default)"
+    },
+    "option_autoplay_unmuted": {
+        "message": "Autoplay with audio"
+    },
+    "option_autoplay_stopped": {
+        "message": "Autoplay disabled"
+    },
+    "option_auto_hide_control_bar": {
+        "message": "Hide control bar"
+    },
+    "option_auto_unmute_playback_hint": {
+        "message": "Please allow autoplay with audio in your browser's website settings:"
+    },
+    "enable_autoplay_in_step_1": {
+        "message": "Goto Instagram.com."
+    },
+    "enable_autoplay_in_step_2": {
+        "message": "Click the website settings icon in the url bar."
+    },
+    "enable_autoplay_in_step_3_firefox": {
+        "message": "Select 'Allow Audio and Video' as Autoplay option."
+    },
+    "enable_autoplay_in_step_3_chrome": {
+        "message": "Click 'Site settings'."
+    },
+    "enable_autoplay_in_step_4_chrome": {
+        "message": "Scroll to 'Sound' and select 'Allow'."
+    },
+    "option_loop_playback": {
+        "message": "Loop videos"
+    },
+    "view_on_github": {
+        "message": "View on GitHub"
+    },
+    "report_an_issue": {
+        "message": "Report an Issue"
+    }
 }

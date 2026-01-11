@@ -1,97 +1,160 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, user-scalable=no"
+        />
 
-    <title>Video Controls for Instagram</title>
+        <title>Video Controls for Instagram</title>
 
-    <link rel="stylesheet" href="../styles/popup.css" />
-    <script src="../js/popup.js"></script>
-</head>
-<body>
-    <header>
-        <h1 class="title" data-locale="__name__"></h1>
-        <p class="subtitle" data-locale="__version__"></p>
-    </header>
-    <main>
-        <h3 data-locale="control_settings"></h3>
-        <ul class="options-list">
-            <li>
-                <label>
-                    <select name="option_video_control_mode">
-                        <option value="custom" data-locale="option_use_custom_controls"></option>
-                        <option value="native" data-locale="option_use_browser_controls"></option>
-                        <option value="disabled" data-locale="option_do_not_use_controls"></option>
-                    </select>
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_auto_hide_control_bar"/>
-                    <span data-locale="option_auto_hide_control_bar"></span>
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_show_time_code"/>
-                    <span data-locale="option_show_time_code"></span>
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_show_fullscreen"/>
-                    <span data-locale="option_show_fullscreen"></span>
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_show_picture_in_picture"/>
-                    <span data-locale="option_show_picture_in_picture"></span>
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_show_playback_speed"/>
-                    <span data-locale="option_show_playback_speed"></span>
-                </label>
-            </li>
-        </ul>
+        <link rel="stylesheet" href="../styles/popup.css" />
+        <script src="../js/popup.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1 class="title" data-locale="__name__"></h1>
+            <p class="subtitle" data-locale="__version__"></p>
+        </header>
+        <main>
+            <h3 data-locale="control_settings"></h3>
+            <ul class="options-list">
+                <li>
+                    <label>
+                        <select name="option_video_control_mode">
+                            <option
+                                value="custom"
+                                data-locale="option_use_custom_controls"
+                            ></option>
+                            <option
+                                value="native"
+                                data-locale="option_use_browser_controls"
+                            ></option>
+                            <option
+                                value="disabled"
+                                data-locale="option_do_not_use_controls"
+                            ></option>
+                        </select>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="option_auto_hide_control_bar"
+                        />
+                        <span data-locale="option_auto_hide_control_bar"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option_show_time_code" />
+                        <span data-locale="option_show_time_code"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option_show_fullscreen" />
+                        <span data-locale="option_show_fullscreen"></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="option_show_picture_in_picture"
+                        />
+                        <span
+                            data-locale="option_show_picture_in_picture"
+                        ></span>
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="option_show_playback_speed"
+                        />
+                        <span data-locale="option_show_playback_speed"></span>
+                    </label>
+                </li>
+            </ul>
 
-        <h3 data-locale="playback_settings"></h3>
-        <ul class="options-list">
-            <li>
-                <label>
-                    <select name="option_autoplay_mode">
-                        <option value="muted" data-locale="option_autoplay_muted"></option>
-                        <option value="unmuted" data-locale="option_autoplay_unmuted"></option>
-                        <option value="stopped" data-locale="option_autoplay_stopped"></option>
-                    </select>
-                </label>
-                <div class="hint">
-                    <span data-locale="option_auto_unmute_playback_hint"></span>
-                    <ul>
-                        <li><span data-locale="enable_autoplay_in_step_1"></span></li>
-                        <li><span data-locale="enable_autoplay_in_step_2"></span></li>
-                        <li data-browser="firefox"><span data-locale="enable_autoplay_in_step_3_firefox"></span></li>
-                        <li data-browser="chrome"><span data-locale="enable_autoplay_in_step_3_chrome"></span></li>
-                        <li data-browser="chrome"><span data-locale="enable_autoplay_in_step_4_chrome"></span></li>
-                    </ul>
-                </div>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" name="option_loop_playback"/>
-                    <span data-locale="option_loop_playback"></span>
-                </label>
-            </li>
-        </ul>
-    </main>
-    <footer>
-        <p>
-            <a href="https://github.com/Arcus92/instagram-video-control" target="_blank" data-locale="view_on_github"></a> -
-            <a href="https://github.com/Arcus92/instagram-video-control/issues/new" target="_blank" data-locale="report_an_issue"></a>
-        </p>
-    </footer>
-</body>
+            <h3 data-locale="playback_settings"></h3>
+            <ul class="options-list">
+                <li>
+                    <label>
+                        <select name="option_autoplay_mode">
+                            <option
+                                value="muted"
+                                data-locale="option_autoplay_muted"
+                            ></option>
+                            <option
+                                value="unmuted"
+                                data-locale="option_autoplay_unmuted"
+                            ></option>
+                            <option
+                                value="stopped"
+                                data-locale="option_autoplay_stopped"
+                            ></option>
+                        </select>
+                    </label>
+                    <div class="hint">
+                        <span
+                            data-locale="option_auto_unmute_playback_hint"
+                        ></span>
+                        <ul>
+                            <li>
+                                <span
+                                    data-locale="enable_autoplay_in_step_1"
+                                ></span>
+                            </li>
+                            <li>
+                                <span
+                                    data-locale="enable_autoplay_in_step_2"
+                                ></span>
+                            </li>
+                            <li data-browser="firefox">
+                                <span
+                                    data-locale="enable_autoplay_in_step_3_firefox"
+                                ></span>
+                            </li>
+                            <li data-browser="chrome">
+                                <span
+                                    data-locale="enable_autoplay_in_step_3_chrome"
+                                ></span>
+                            </li>
+                            <li data-browser="chrome">
+                                <span
+                                    data-locale="enable_autoplay_in_step_4_chrome"
+                                ></span>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option_loop_playback" />
+                        <span data-locale="option_loop_playback"></span>
+                    </label>
+                </li>
+            </ul>
+        </main>
+        <footer>
+            <p>
+                <a
+                    href="https://github.com/Arcus92/instagram-video-control"
+                    target="_blank"
+                    data-locale="view_on_github"
+                ></a>
+                -
+                <a
+                    href="https://github.com/Arcus92/instagram-video-control/issues/new"
+                    target="_blank"
+                    data-locale="report_an_issue"
+                ></a>
+            </p>
+        </footer>
+    </body>
 </html>

@@ -12,5 +12,5 @@ export enum VideoType {
     mobileStory,
 
     // The video is on the Explore grid.
-    explore
+    explore,
 }

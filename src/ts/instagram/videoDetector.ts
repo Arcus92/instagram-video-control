@@ -1,17 +1,16 @@
-import {Settings, SettingsData} from "../shared/settings";
-import {VideoPlayer} from "./videoPlayer";
-import {PlaybackManager} from "./playbackManager";
-import {Browser} from "../shared/browser";
-import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
+import { Settings, SettingsData } from '../shared/settings';
+import { VideoPlayer } from './videoPlayer';
+import { PlaybackManager } from './playbackManager';
+import { Browser } from '../shared/browser';
+import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
-
     // The extension settings.
     private readonly settings = Settings.shared;
 
     // List of all video players by source.
-    private videosBySource: { [source: string]: VideoPlayer } = {}
+    private videosBySource: { [source: string]: VideoPlayer } = {};
 
     // Initialize the video detector.
     public async init() {
@@ -122,7 +121,6 @@ export class VideoDetector implements PlaybackManager {
     // It is possible to overwrite this using `this.settings.autoUnmutePlayback` in the settings menu.
     private lastPlaybackMuted: boolean = true;
 
-
     // Sometimes Instagram resets the volume on play. We want to ignore it, since it isn't a user event.
     private ignoreNextVolumeChange = false;
 
@@ -166,14 +164,15 @@ export class VideoDetector implements PlaybackManager {
         this.checkForAutoplay((autoplayEnabled) => {
             // Failed...
             if (!autoplayEnabled) {
-                console.error('The browser is blocking autoplay with audio. Make sure to enable autoplay in the website settings!');
+                console.error(
+                    'The browser is blocking autoplay with audio. Make sure to enable autoplay in the website settings!'
+                );
                 return;
             }
 
             // Disable the mute for all videos.
             this.lastPlaybackMuted = false;
         });
-
     }
 
     // This checks if audio-autoplay is allowed for this website.
@@ -214,9 +213,8 @@ export class VideoDetector implements PlaybackManager {
         // change event and undo the volume / mute change.
         this.ignoreNextVolumeChange = true;
         setTimeout(() => {
-            this.ignoreNextVolumeChange = false
-        }, 50)
-
+            this.ignoreNextVolumeChange = false;
+        }, 50);
 
         // Make sure we apply the last used volume settings.
         this.updateVolumeForVideo(video);
@@ -225,8 +223,10 @@ export class VideoDetector implements PlaybackManager {
     // Must be called whenever a video volume was changed.
     public notifyVideoVolumeChange(video: HTMLVideoElement) {
         // Not changed, so no need to update the other videos.
-        if (this.settings.lastPlaybackVolume === video.volume &&
-            this.lastPlaybackMuted === video.muted)
+        if (
+            this.settings.lastPlaybackVolume === video.volume &&
+            this.lastPlaybackMuted === video.muted
+        )
             return;
 
         // To fix an issue with Reels, we sometimes have to ignore and undo volume events.
@@ -251,5 +251,4 @@ export class VideoDetector implements PlaybackManager {
     }
 
     //#endregion
-
 }

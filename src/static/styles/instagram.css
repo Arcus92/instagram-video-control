@@ -1,5 +1,9 @@
 .ivc-controls {
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
 
     position: absolute;
     height: 32px;
@@ -16,7 +20,7 @@
 }
 
 .ivc-controls.ivc-story {
-    background: rgba(38,38,38,.6);
+    background: rgba(38, 38, 38, 0.6);
 }
 
 .ivc-controls-content {
