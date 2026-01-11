@@ -28,7 +28,6 @@ export class VideoDetector implements PlaybackManager {
             this.lastPlaybackMuted = false;
         }
 
-        console.log('videoDetectionMethod', this.settings.videoDetectionMethod);
         switch (this.settings.videoDetectionMethod) {
             case VideoDetectionMethod.interval:
                 this.startIntervalDetection();

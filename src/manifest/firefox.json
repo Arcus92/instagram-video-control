@@ -41,7 +41,7 @@
             }
         ]
     },
-    "web_accessible_resources": ["images/*.svg", "audio/*.mp3"],
+    "web_accessible_resources": ["images/*.svg", "audio/*.mp3", "js/*.js"],
     "permissions": ["storage"],
     "browser_specific_settings": {
         "gecko": {
