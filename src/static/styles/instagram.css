@@ -39,6 +39,7 @@
 }
 
 .ivc-control-element {
+    position: relative;
     margin: 4px;
 
     /* Enable pointer events for the elements again. */
@@ -117,4 +118,46 @@
 
 .ivc-volume-bar {
     flex: 0 0 48px;
+}
+
+.ivc-control-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    max-height: 250px;
+    overflow-y: hidden;
+
+    padding: 2px;
+
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+
+    text-align: center;
+    font-weight: lighter;
+    font-size: 0.8em;
+
+    transition-property: max-height, padding;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.ivc-control-dropdown.hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.ivc-control-dropdown li {
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.ivc-control-dropdown li.active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ivc-control-dropdown li:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

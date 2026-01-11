@@ -55,8 +55,9 @@ export class VideoDetector implements PlaybackManager {
 
             player.attach();
 
-            // Update the initial volume.
+            // Update the initial volume and speed.
             this.updateVolumeForVideo(player.videoElement);
+            this.updatePlaybackSpeedForVideo(player.videoElement);
         }
 
         // Detect removed videos...
@@ -85,6 +86,7 @@ export class VideoDetector implements PlaybackManager {
             case 'showTimeCodeText':
             case 'showFullscreenButton':
             case 'showPictureInPictureButton':
+            case 'showPlaybackSpeedOption':
             case 'autoHideControlBar':
             case 'loopPlayback':
                 this.updateControlSettingForVideos();
@@ -136,6 +138,23 @@ export class VideoDetector implements PlaybackManager {
     private updateVolumeForVideo(video: HTMLVideoElement) {
         video.volume = this.settings.lastPlaybackVolume;
         video.muted = this.lastPlaybackMuted;
+    }
+
+    //#endregion
+
+    //#region Speed
+
+    // Applies the stored playback speed to all registered videos.
+    private updatePlaybackSpeedForVideos() {
+        for (const source in this.videosBySource) {
+            const videoPlayer = this.videosBySource[source];
+            this.updatePlaybackSpeedForVideo(videoPlayer.videoElement);
+        }
+    }
+
+    // Applies the stored playback speed to the given video.
+    private updatePlaybackSpeedForVideo(video: HTMLVideoElement) {
+        video.playbackRate = this.settings.lastPlaybackSpeed;
     }
 
     //#endregion
@@ -221,6 +240,14 @@ export class VideoDetector implements PlaybackManager {
 
         // Sync the volume across all other video players.
         this.updateVolumeForVideos();
+    }
+
+    // Must be called whenever a video playback speed was changed.
+    public notifyVideoPlaybackSpeedChange(video: HTMLVideoElement) {
+        this.settings.lastPlaybackSpeed = video.playbackRate;
+
+        // Sync the speed across all other video players.
+        this.updatePlaybackSpeedForVideos();
     }
 
     //#endregion

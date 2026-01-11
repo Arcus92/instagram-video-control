@@ -10,10 +10,12 @@ import StorageChangeBrowser = browser.storage.StorageChange;
 export interface SettingsData {
     videoControlMode: VideoControlMode;
     lastPlaybackVolume: number;
+    lastPlaybackSpeed: number;
     autoplayMode: VideoAutoplayMode;
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
+    showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
 }
@@ -26,15 +28,18 @@ export class Settings implements SettingsData {
     //#region Data
 
     private readonly names: string[] = [
-        'videoControlMode', 'lastPlaybackVolume', 'autoplayMode', 'showTimeCodeText', 'showFullscreenButton',
-        'showPictureInPictureButton', 'autoHideControlBar', 'loopPlayback'
+        'videoControlMode', 'lastPlaybackVolume', 'lastPlaybackSpeed', 'autoplayMode', 'showTimeCodeText',
+        'showFullscreenButton', 'showPictureInPictureButton', 'showPlaybackSpeedOption', 'autoHideControlBar',
+        'loopPlayback'
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
+    private _lastPlaybackSpeed: number = 1.0;
     private _autoplayMode: VideoAutoplayMode = VideoAutoplayMode.muted;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
+    private _showPlaybackSpeedOption: boolean = true;
     private _autoHideControlBar: boolean = false;
     private _loopPlayback: boolean = true;
 
@@ -58,6 +63,17 @@ export class Settings implements SettingsData {
         this._lastPlaybackVolume = value;
 
         this.onChange('lastPlaybackVolume');
+    }
+
+    // The last playback speed.
+    public get lastPlaybackSpeed(): number {
+        return this._lastPlaybackSpeed;
+    }
+    public set lastPlaybackSpeed(value: number) {
+        if (this._lastPlaybackSpeed === value) return;
+        this._lastPlaybackSpeed = value;
+
+        this.onChange('lastPlaybackSpeed');
     }
 
     // The autoplayer option (muted, unmuted, stopped)
@@ -102,6 +118,17 @@ export class Settings implements SettingsData {
         this._showPictureInPictureButton = value;
 
         this.onChange('showPictureInPictureButton');
+    }
+
+    // Should the playback-speed option be visible in the player controls?
+    public get showPlaybackSpeedOption(): boolean {
+        return this._showPlaybackSpeedOption;
+    }
+    public set showPlaybackSpeedOption(value: boolean) {
+        if (this._showPlaybackSpeedOption === value) return;
+        this._showPlaybackSpeedOption = value;
+
+        this.onChange('showPlaybackSpeedOption');
     }
 
     // If enabled, the controls will hide if the mouse is outside the video area.
@@ -190,6 +217,10 @@ export class Settings implements SettingsData {
         {
             this.lastPlaybackVolume = data.lastPlaybackVolume;
         }
+        if (typeof data.lastPlaybackSpeed === 'number')
+        {
+            this.lastPlaybackSpeed = data.lastPlaybackSpeed;
+        }
         if (typeof data.autoplayMode === 'string')
         {
             this.autoplayMode = data.autoplayMode as VideoAutoplayMode;
@@ -205,6 +236,10 @@ export class Settings implements SettingsData {
         if (typeof data.showPictureInPictureButton === 'boolean')
         {
             this.showPictureInPictureButton = data.showPictureInPictureButton;
+        }
+        if (typeof data.showPlaybackSpeedOption === 'boolean')
+        {
+            this.showPlaybackSpeedOption = data.showPlaybackSpeedOption;
         }
         if (typeof data.autoHideControlBar === 'boolean')
         {

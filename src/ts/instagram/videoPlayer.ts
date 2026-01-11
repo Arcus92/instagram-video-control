@@ -59,6 +59,7 @@ export class VideoPlayer {
         this.videoElement.addEventListener("ended", this.onEnded);
         this.videoElement.addEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.addEventListener("volumechange", this.onVolumeChange);
+        this.videoElement.addEventListener("ratechange", this.onPlaybackSpeedChange);
         document.addEventListener("fullscreenchange", this.onFullscreenChange);
         this.videoElement.addEventListener("enterpictureinpicture", this.onPictureInPictureChange);
         this.videoElement.addEventListener("leavepictureinpicture", this.onPictureInPictureChange);
@@ -84,6 +85,7 @@ export class VideoPlayer {
         this.videoElement.removeEventListener("ended", this.onEnded);
         this.videoElement.removeEventListener("timeupdate", this.onTimeUpdate);
         this.videoElement.removeEventListener("volumechange", this.onVolumeChange);
+        this.videoElement.removeEventListener("ratechange", this.onPlaybackSpeedChange);
         document.removeEventListener("fullscreenchange", this.onFullscreenChange);
         this.videoElement.removeEventListener("enterpictureinpicture", this.onPictureInPictureChange);
         this.videoElement.removeEventListener("leavepictureinpicture", this.onPictureInPictureChange);
@@ -133,6 +135,13 @@ export class VideoPlayer {
         //if (!event.isTrusted) return;
 
         this.playbackManager.notifyVideoVolumeChange(this.videoElement);
+    }
+
+    // Handles video playback speed changes.
+    private onPlaybackSpeedChange = () => {
+        this.videoController?.onPlaybackSpeedChange();
+
+        this.playbackManager.notifyVideoPlaybackSpeedChange(this.videoElement);
     }
 
     // Handles fullscreen changes.

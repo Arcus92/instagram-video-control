@@ -24,6 +24,7 @@ export class NativeVideoController extends VideoController {
     public override onPause() {}
     public override onTimeUpdate() {}
     public override onVolumeChange() {}
+    public override onPlaybackSpeedChange() {}
     public override onFullscreenChange() {}
     public override onPictureInPictureChange() {}
 

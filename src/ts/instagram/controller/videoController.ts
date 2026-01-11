@@ -125,6 +125,7 @@ export abstract class VideoController {
     public abstract onPause(): void;
     public abstract onTimeUpdate(): void;
     public abstract onVolumeChange(): void;
+    public abstract onPlaybackSpeedChange(): void;
     public abstract onFullscreenChange(): void;
     public abstract onPictureInPictureChange(): void;
 

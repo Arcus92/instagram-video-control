@@ -17,7 +17,11 @@ export class CustomVideoController extends VideoController {
     private volumeBarProgressElement: HTMLElement | undefined;
     private fullscreenButtonElement: HTMLButtonElement | undefined;
     private pictureInPictureButtonElement: HTMLButtonElement | undefined;
+    private playbackSpeedButtonElement: HTMLButtonElement | undefined;
+    private playbackSpeedDropDownElement: HTMLUListElement | undefined;
+    private playbackSpeedDropDownItemElement: { [speed: number]: HTMLLIElement} = {};
 
+    private readonly playbackSpeeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
 
     public create() {
         if (!this.videoPlayer.overlayElement) return;
@@ -135,6 +139,37 @@ export class CustomVideoController extends VideoController {
             }
         };
 
+        // Playback-speed
+        this.playbackSpeedButtonElement = document.createElement("button");
+        this.playbackSpeedButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
+        this.playbackSpeedButtonElement.appendChild(document.createElement("img"));
+        contentElement.appendChild(this.playbackSpeedButtonElement);
+
+        this.playbackSpeedDropDownElement = document.createElement("ul");
+        this.playbackSpeedDropDownElement.classList.add("ivc-control-dropdown", "hidden");
+        this.playbackSpeedButtonElement.appendChild(this.playbackSpeedDropDownElement);
+
+
+        this.playbackSpeedDropDownItemElement = {};
+        for (const playbackSpeed of this.playbackSpeeds) {
+            const playbackSpeedElement = document.createElement("li");
+            playbackSpeedElement.textContent = `${playbackSpeed}x`;
+            this.playbackSpeedDropDownElement.appendChild(playbackSpeedElement);
+
+            playbackSpeedElement.onclick = () => {
+                this.videoElement.playbackRate = playbackSpeed;
+            };
+
+            this.playbackSpeedDropDownItemElement[playbackSpeed] = playbackSpeedElement;
+        }
+
+        this.playbackSpeedButtonElement.onmouseenter = () => {
+            this.setPlaybackSpeedVisibility(true);
+        };
+        this.playbackSpeedButtonElement.onmouseleave = () => {
+            this.setPlaybackSpeedVisibility(false);
+        };
+
         // Full screen
         this.fullscreenButtonElement = document.createElement("button");
         this.fullscreenButtonElement.classList.add("ivc-control-element", "ivc-icon-button");
@@ -158,6 +193,7 @@ export class CustomVideoController extends VideoController {
         this.updateVolumeControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+        this.updatePlaybackSpeedControl();
         this.updateControlBarVisibility();
     }
 
@@ -177,6 +213,9 @@ export class CustomVideoController extends VideoController {
     public override onVolumeChange() {
         this.updateVolumeControl();
     }
+    public override onPlaybackSpeedChange() {
+        this.updatePlaybackSpeedControl();
+    }
     public override onFullscreenChange() {
         this.updateFullscreenControl();
     }
@@ -187,6 +226,7 @@ export class CustomVideoController extends VideoController {
         this.updatePositionControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
+        this.updatePlaybackSpeedControl();
         this.updateControlBarVisibility();
     }
 
@@ -195,6 +235,7 @@ export class CustomVideoController extends VideoController {
     //#region Update
 
     private volumeBarDelayTimeout: number = -1;
+    private playbackSpeedDelayTimeout: number = -1;
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
@@ -241,6 +282,20 @@ export class CustomVideoController extends VideoController {
             document.pictureInPictureEnabled && Settings.shared.showPictureInPictureButton);
     }
 
+    private updatePlaybackSpeedControl() {
+        if (!this.playbackSpeedButtonElement) return;
+        CustomVideoController.setButtonIcon(this.playbackSpeedButtonElement, CustomVideoController.imagePlaybackSpeed);
+
+        VideoController.setElementVisibility(this.playbackSpeedButtonElement, Settings.shared.showPlaybackSpeedOption);
+
+        // Update the dropdown items
+        for (const playbackSpeed of this.playbackSpeeds) {
+            const element = this.playbackSpeedDropDownItemElement[playbackSpeed];
+            if (!element) continue;
+            element.classList.toggle('active', playbackSpeed === this.videoElement.playbackRate);
+        }
+    }
+
     protected setVisibility(visibility: boolean) {
         if (!this.videoControlElement) return;
         this.videoControlElement.classList.toggle('hidden', !visibility);
@@ -260,6 +315,20 @@ export class CustomVideoController extends VideoController {
         }
     }
 
+    private setPlaybackSpeedVisibility(visibility: boolean) {
+        if (!this.playbackSpeedDropDownElement) return;
+
+        if (visibility) {
+            clearTimeout(this.playbackSpeedDelayTimeout);
+            this.playbackSpeedDropDownElement.classList.toggle('hidden', false);
+        } else {
+            this.playbackSpeedDelayTimeout = setTimeout(() => {
+                if (!this.playbackSpeedDropDownElement) return;
+                this.playbackSpeedDropDownElement.classList.toggle('hidden', true);
+            }, 400);
+        }
+    }
+
     //#endregion Update
 
     //#region Resources
@@ -273,6 +342,7 @@ export class CustomVideoController extends VideoController {
     private static imageSpeakerOff = Browser.getUrl('images/speaker-off.svg');
     private static imagePictureInPictureEnter = Browser.getUrl('images/picture-in-picture-enter.svg');
     private static imagePictureInPictureExit = Browser.getUrl('images/picture-in-picture-exit.svg');
+    private static imagePlaybackSpeed = Browser.getUrl('images/playback-speed.svg');
 
     //#endregion Resources
 

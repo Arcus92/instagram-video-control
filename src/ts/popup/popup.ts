@@ -63,6 +63,11 @@ export class Popup {
             this.setSettingControlVisibility('option_show_picture_in_picture', false);
         }
 
+        // Playback speed option
+        this.initSettingInputElement('option_show_playback_speed',
+          (e) => this.settings.showPlaybackSpeedOption = e.checked,
+          (e) => e.checked = this.settings.showPlaybackSpeedOption);
+
         // Loop playback option (can be used to disable default auto-loop on Instagram)
         this.initSettingInputElement('option_loop_playback',
           (e) => this.settings.loopPlayback = e.checked,
