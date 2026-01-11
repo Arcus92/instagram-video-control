@@ -134,9 +134,11 @@
     overflow-y: hidden;
 
     padding: 2px;
+    z-index: 9999;
 
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
 
     text-align: center;
     font-weight: lighter;
