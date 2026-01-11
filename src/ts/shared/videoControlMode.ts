@@ -6,5 +6,5 @@ export enum VideoControlMode {
     custom = 'custom',
 
     // The native browser controls. We take whatever the browser provides and have no control over it.
-    native = 'native'
+    native = 'native',
 }

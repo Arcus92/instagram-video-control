@@ -8,7 +8,9 @@ const sourcePath = path.join(__dirname, 'dist', 'js');
 const staticPath = path.join(__dirname, 'src', 'static');
 
 // Getting the version from the package.json
-const versionBuffer = childProcess.execSync("npm pkg get version --parseable", { encoding: 'utf8' });
+const versionBuffer = childProcess.execSync('npm pkg get version --parseable', {
+    encoding: 'utf8',
+});
 const version = JSON.parse(versionBuffer);
 console.log(`Packing version: ${version}`);
 
@@ -17,8 +19,17 @@ for (const platformName of platformNames) {
     console.log(`Packing plugin for ${platformName}...`);
     const platformDistPath = path.join(distPath, platformName);
     const platformSourceDistPath = path.join(distPath, platformName, 'js');
-    const platformDistManifestPath = path.join(distPath, platformName, 'manifest.json');
-    const platformManifestPath = path.join(__dirname, 'src', 'manifest', `${platformName}.json`);
+    const platformDistManifestPath = path.join(
+        distPath,
+        platformName,
+        'manifest.json'
+    );
+    const platformManifestPath = path.join(
+        __dirname,
+        'src',
+        'manifest',
+        `${platformName}.json`
+    );
     const platformZipPath = path.join(distPath, platformName + '.zip');
 
     // Clear output directory
@@ -38,7 +49,7 @@ for (const platformName of platformNames) {
     fs.writeFileSync(platformDistManifestPath, manifest);
 
     // Creating zip file from plugin.
-    const zip = archiver('zip', {  });
+    const zip = archiver('zip', {});
     const output = fs.createWriteStream(platformZipPath);
 
     zip.directory(platformDistPath, false);

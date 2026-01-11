@@ -1,10 +1,9 @@
-import {VideoPlayer} from "../videoPlayer";
-import {VideoType} from "../videoType";
-import {Settings} from "../../shared/settings";
+import { VideoPlayer } from '../videoPlayer';
+import { VideoType } from '../videoType';
+import { Settings } from '../../shared/settings';
 
 // Base class for video the different controllers.
 export abstract class VideoController {
-
     public constructor(videoPlayer: VideoPlayer) {
         this.videoPlayer = videoPlayer;
     }
@@ -16,7 +15,6 @@ export abstract class VideoController {
     protected get videoElement(): HTMLVideoElement {
         return this.videoPlayer.videoElement;
     }
-
 
     //#region Control
 
@@ -30,13 +28,13 @@ export abstract class VideoController {
     protected createVideoControlBackground() {
         if (!this.videoPlayer.overlayElement) return;
 
-        this.videoControlElement = document.createElement("div");
-        this.videoControlElement.classList.add("ivc-controls");
+        this.videoControlElement = document.createElement('div');
+        this.videoControlElement.classList.add('ivc-controls');
         if (this.videoPlayer.videoType === VideoType.reel) {
-            this.videoControlElement.classList.add("ivc-reel");
+            this.videoControlElement.classList.add('ivc-reel');
         }
         if (this.videoPlayer.videoType === VideoType.story) {
-            this.videoControlElement.classList.add("ivc-story");
+            this.videoControlElement.classList.add('ivc-story');
         }
         this.videoPlayer.overlayElement.appendChild(this.videoControlElement);
     }
@@ -82,12 +80,14 @@ export abstract class VideoController {
 
     // Removes the video controls
     public remove() {
-
         // Remove controls
         this.videoElement.controls = false;
 
         // Restore overlay margin
-        if (this.videoPlayer.overlayElement && this.videoPlayer.overlayElement.firstChild instanceof HTMLElement) {
+        if (
+            this.videoPlayer.overlayElement &&
+            this.videoPlayer.overlayElement.firstChild instanceof HTMLElement
+        ) {
             this.videoPlayer.overlayElement.firstChild.style.height = '';
         }
 
@@ -125,6 +125,7 @@ export abstract class VideoController {
     public abstract onPause(): void;
     public abstract onTimeUpdate(): void;
     public abstract onVolumeChange(): void;
+    public abstract onPlaybackSpeedChange(): void;
     public abstract onFullscreenChange(): void;
     public abstract onPictureInPictureChange(): void;
 

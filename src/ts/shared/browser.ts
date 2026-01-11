@@ -1,6 +1,6 @@
 // Generic browser helpers.
 export class Browser {
-    private constructor() { }
+    private constructor() {}
 
     // Returns if the current browser is Firefox.
     public static isFirefox(): boolean {
@@ -16,7 +16,7 @@ export class Browser {
     // Returns the current browser object for Chrome and Firefox.
     private static get current() {
         // This is 'browser' in Firefox and 'chrome' in ... Chrome.
-        if (typeof browser === "undefined") {
+        if (typeof browser === 'undefined') {
             return chrome;
         }
         return browser;

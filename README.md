@@ -15,7 +15,7 @@ Adds volume and play controls to Instagram videos.
     <img src=".github/example.png" alt="Screenshot of an Instagram video where the native Html video control is visible" style="max-width: 640px"/>
 </p>
 
-This extension adds playback controls to Instagram videos. This allows you to change the volume and seek through the 
+This extension adds playback controls to Instagram videos. This allows you to change the volume and seek through the
 video.
 
 ## Development
@@ -23,16 +23,19 @@ video.
 Before you can start, make sure Git and NodeJS is installed.
 
 Checkout the source code and navigate into the directory:
+
 ```
 https://github.com/Arcus92/instagram-video-control.git && cd instagram-video-control
 ```
 
 Install all required packages:
+
 ```
 npm install
 ```
 
 Compile and build the extension for all platform:
+
 ```
 npm run build
 ```
@@ -44,18 +47,22 @@ The built extensions are located in `./dist`.
 Always make sure you have built the extension with the previous steps.
 
 **Launch build in Firefox:**
+
 ```
 npm run start:firefox
 ```
 
 **Launch build in Firefox on Android:**
+
 ```
 WEB_EXT_ADB_DEVICE=<DEVICE-ID> npm run start:firefox-android
 ```
-*Make sure `adb` is installed, your device is connected via USB and you have enabled USB-Debugging.
-Run `adb devices` to list all connected devices. Replace `<DEVICE-ID>` with your Android device id.*
+
+_Make sure `adb` is installed, your device is connected via USB and you have enabled USB-Debugging.
+Run `adb devices` to list all connected devices. Replace `<DEVICE-ID>` with your Android device id._
 
 **Launch build in Chromium:**
+
 ```
 npm run start:chromium
 ```

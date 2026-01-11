@@ -1,8 +1,8 @@
-import {Browser} from "./browser";
-import {EventDispatcher} from "./eventDispatcher";
-import {VideoControlMode} from "./videoControlMode";
-import {Utils} from "./utils";
-import {VideoAutoplayMode} from "./videoAutoplayMode";
+import { Browser } from './browser';
+import { EventDispatcher } from './eventDispatcher';
+import { VideoControlMode } from './videoControlMode';
+import { Utils } from './utils';
+import { VideoAutoplayMode } from './videoAutoplayMode';
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
 
@@ -10,10 +10,12 @@ import StorageChangeBrowser = browser.storage.StorageChange;
 export interface SettingsData {
     videoControlMode: VideoControlMode;
     lastPlaybackVolume: number;
+    lastPlaybackSpeed: number;
     autoplayMode: VideoAutoplayMode;
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
+    showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
 }
@@ -26,15 +28,25 @@ export class Settings implements SettingsData {
     //#region Data
 
     private readonly names: string[] = [
-        'videoControlMode', 'lastPlaybackVolume', 'autoplayMode', 'showTimeCodeText', 'showFullscreenButton',
-        'showPictureInPictureButton', 'autoHideControlBar', 'loopPlayback'
+        'videoControlMode',
+        'lastPlaybackVolume',
+        'lastPlaybackSpeed',
+        'autoplayMode',
+        'showTimeCodeText',
+        'showFullscreenButton',
+        'showPictureInPictureButton',
+        'showPlaybackSpeedOption',
+        'autoHideControlBar',
+        'loopPlayback',
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
+    private _lastPlaybackSpeed: number = 1.0;
     private _autoplayMode: VideoAutoplayMode = VideoAutoplayMode.muted;
     private _showTimeCodeText: boolean = true;
     private _showFullscreenButton: boolean = true;
     private _showPictureInPictureButton: boolean = false;
+    private _showPlaybackSpeedOption: boolean = true;
     private _autoHideControlBar: boolean = false;
     private _loopPlayback: boolean = true;
 
@@ -58,6 +70,17 @@ export class Settings implements SettingsData {
         this._lastPlaybackVolume = value;
 
         this.onChange('lastPlaybackVolume');
+    }
+
+    // The last playback speed.
+    public get lastPlaybackSpeed(): number {
+        return this._lastPlaybackSpeed;
+    }
+    public set lastPlaybackSpeed(value: number) {
+        if (this._lastPlaybackSpeed === value) return;
+        this._lastPlaybackSpeed = value;
+
+        this.onChange('lastPlaybackSpeed');
     }
 
     // The autoplayer option (muted, unmuted, stopped)
@@ -104,6 +127,17 @@ export class Settings implements SettingsData {
         this.onChange('showPictureInPictureButton');
     }
 
+    // Should the playback-speed option be visible in the player controls?
+    public get showPlaybackSpeedOption(): boolean {
+        return this._showPlaybackSpeedOption;
+    }
+    public set showPlaybackSpeedOption(value: boolean) {
+        if (this._showPlaybackSpeedOption === value) return;
+        this._showPlaybackSpeedOption = value;
+
+        this.onChange('showPlaybackSpeedOption');
+    }
+
     // If enabled, the controls will hide if the mouse is outside the video area.
     public get autoHideControlBar(): boolean {
         return this._autoHideControlBar;
@@ -142,8 +176,9 @@ export class Settings implements SettingsData {
         await this.load();
 
         // Listen for changes...
-        Browser.storage.onChanged.addListener(
-            (changes, area) => this.onStorageChanged(changes, area))
+        Browser.storage.onChanged.addListener((changes, area) =>
+            this.onStorageChanged(changes, area)
+        );
     }
 
     //#endregion Init
@@ -151,7 +186,7 @@ export class Settings implements SettingsData {
     //#region Changes
 
     // The setting changed event is called, whenever a setting was changed in or outside of this class.
-    public readonly changed= new EventDispatcher<keyof SettingsData>();
+    public readonly changed = new EventDispatcher<keyof SettingsData>();
 
     // Invokes the change event.
     private onChange(name: keyof SettingsData) {
@@ -171,47 +206,47 @@ export class Settings implements SettingsData {
     }
 
     // Event that is called whenever a settings was changed from the storage.
-    private onStorageChanged(changes: { [p: string]: StorageChangeChrome | StorageChangeBrowser }, area: string) {
+    private onStorageChanged(
+        changes: { [p: string]: StorageChangeChrome | StorageChangeBrowser },
+        area: string
+    ) {
         if (area !== 'sync') return;
 
         // Converts the changes structure to a simple key-value pair.
-        const data = Utils.mapObject(changes,
-            (change) => change.newValue);
+        const data = Utils.mapObject(changes, (change) => change.newValue);
         this.storeValues(data);
     }
 
     // Stores the data in the settings.
     private storeValues(data: { [p: string]: unknown }) {
-        if (typeof data.videoControlMode === 'string')
-        {
+        if (typeof data.videoControlMode === 'string') {
             this.videoControlMode = data.videoControlMode as VideoControlMode;
         }
-        if (typeof data.lastPlaybackVolume === 'number')
-        {
+        if (typeof data.lastPlaybackVolume === 'number') {
             this.lastPlaybackVolume = data.lastPlaybackVolume;
         }
-        if (typeof data.autoplayMode === 'string')
-        {
+        if (typeof data.lastPlaybackSpeed === 'number') {
+            this.lastPlaybackSpeed = data.lastPlaybackSpeed;
+        }
+        if (typeof data.autoplayMode === 'string') {
             this.autoplayMode = data.autoplayMode as VideoAutoplayMode;
         }
-        if (typeof data.showTimeCodeText === 'boolean')
-        {
+        if (typeof data.showTimeCodeText === 'boolean') {
             this.showTimeCodeText = data.showTimeCodeText;
         }
-        if (typeof data.showFullscreenButton === 'boolean')
-        {
+        if (typeof data.showFullscreenButton === 'boolean') {
             this.showFullscreenButton = data.showFullscreenButton;
         }
-        if (typeof data.showPictureInPictureButton === 'boolean')
-        {
+        if (typeof data.showPictureInPictureButton === 'boolean') {
             this.showPictureInPictureButton = data.showPictureInPictureButton;
         }
-        if (typeof data.autoHideControlBar === 'boolean')
-        {
+        if (typeof data.showPlaybackSpeedOption === 'boolean') {
+            this.showPlaybackSpeedOption = data.showPlaybackSpeedOption;
+        }
+        if (typeof data.autoHideControlBar === 'boolean') {
             this.autoHideControlBar = data.autoHideControlBar;
         }
-        if (typeof data.loopPlayback === 'boolean')
-        {
+        if (typeof data.loopPlayback === 'boolean') {
             this.loopPlayback = data.loopPlayback;
         }
     }

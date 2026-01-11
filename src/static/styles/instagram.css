@@ -1,5 +1,9 @@
 .ivc-controls {
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
 
     position: absolute;
     height: 32px;
@@ -16,7 +20,7 @@
 }
 
 .ivc-controls.ivc-story {
-    background: rgba(38,38,38,.6);
+    background: rgba(38, 38, 38, 0.6);
 }
 
 .ivc-controls-content {
@@ -39,6 +43,7 @@
 }
 
 .ivc-control-element {
+    position: relative;
     margin: 4px;
 
     /* Enable pointer events for the elements again. */
@@ -77,6 +82,19 @@
     padding: 10px 5px;
 
     cursor: pointer;
+
+    overflow: hidden;
+    transition-property: flex-basis, padding, margin;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.ivc-control-bar.hidden {
+    flex-basis: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 .ivc-control-bar-background {
@@ -104,4 +122,48 @@
 
 .ivc-volume-bar {
     flex: 0 0 48px;
+}
+
+.ivc-control-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    max-height: 250px;
+    overflow-y: hidden;
+
+    padding: 2px;
+    z-index: 9999;
+
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+
+    text-align: center;
+    font-weight: lighter;
+    font-size: 0.8em;
+
+    transition-property: max-height, padding;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
+
+.ivc-control-dropdown.hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.ivc-control-dropdown li {
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.ivc-control-dropdown li.active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ivc-control-dropdown li:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

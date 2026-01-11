@@ -1,7 +1,11 @@
-import {Popup} from "./popup";
+import { Popup } from './popup';
 
 // Wait until the html is loaded.
-document.addEventListener('DOMContentLoaded', () => {
-    const popup = new Popup();
-    popup.init().then();
-}, false);
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+        const popup = new Popup();
+        popup.init().then();
+    },
+    false
+);

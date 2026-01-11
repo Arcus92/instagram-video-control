@@ -1,16 +1,15 @@
-import {Utils} from "../shared/utils";
-import {VideoType} from "./videoType";
-import {PlaybackManager} from "./playbackManager";
-import {Settings} from "../shared/settings";
-import {VideoControlMode} from "../shared/videoControlMode";
-import {VideoController} from "./controller/videoController";
-import {NativeVideoController} from "./controller/nativeVideoController";
-import {CustomVideoController} from "./controller/customVideoController";
-import {VideoAutoplayMode} from "../shared/videoAutoplayMode";
+import { Utils } from '../shared/utils';
+import { VideoType } from './videoType';
+import { PlaybackManager } from './playbackManager';
+import { Settings } from '../shared/settings';
+import { VideoControlMode } from '../shared/videoControlMode';
+import { VideoController } from './controller/videoController';
+import { NativeVideoController } from './controller/nativeVideoController';
+import { CustomVideoController } from './controller/customVideoController';
+import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
-
     // The playback manager to report events to.
     public readonly playbackManager: PlaybackManager;
 
@@ -20,7 +19,10 @@ export class VideoPlayer {
     // Has the user already interacted with the video player?
     private userInteractedWithVideo: boolean = false;
 
-    public constructor(playbackManager: PlaybackManager, videoElement: HTMLVideoElement) {
+    public constructor(
+        playbackManager: PlaybackManager,
+        videoElement: HTMLVideoElement
+    ) {
         this.playbackManager = playbackManager;
         this.videoElement = videoElement;
     }
@@ -53,43 +55,86 @@ export class VideoPlayer {
 
     // Register all video events.
     private registerEvents() {
-
-        this.videoElement.addEventListener("play", this.onPlay);
-        this.videoElement.addEventListener("pause", this.onPause);
-        this.videoElement.addEventListener("ended", this.onEnded);
-        this.videoElement.addEventListener("timeupdate", this.onTimeUpdate);
-        this.videoElement.addEventListener("volumechange", this.onVolumeChange);
-        document.addEventListener("fullscreenchange", this.onFullscreenChange);
-        this.videoElement.addEventListener("enterpictureinpicture", this.onPictureInPictureChange);
-        this.videoElement.addEventListener("leavepictureinpicture", this.onPictureInPictureChange);
-        this.videoRootElement?.addEventListener("mouseenter", this.onMouseEnter);
-        this.videoRootElement?.addEventListener("mouseleave", this.onMouseLeave);
-        this.nativeControlsElement?.addEventListener("click", this.onNativeControlClick);
+        this.videoElement.addEventListener('play', this.onPlay);
+        this.videoElement.addEventListener('pause', this.onPause);
+        this.videoElement.addEventListener('ended', this.onEnded);
+        this.videoElement.addEventListener('timeupdate', this.onTimeUpdate);
+        this.videoElement.addEventListener('volumechange', this.onVolumeChange);
+        this.videoElement.addEventListener(
+            'ratechange',
+            this.onPlaybackSpeedChange
+        );
+        document.addEventListener('fullscreenchange', this.onFullscreenChange);
+        this.videoElement.addEventListener(
+            'enterpictureinpicture',
+            this.onPictureInPictureChange
+        );
+        this.videoElement.addEventListener(
+            'leavepictureinpicture',
+            this.onPictureInPictureChange
+        );
+        this.videoRootElement?.addEventListener(
+            'mouseenter',
+            this.onMouseEnter
+        );
+        this.videoRootElement?.addEventListener(
+            'mouseleave',
+            this.onMouseLeave
+        );
+        this.nativeControlsElement?.addEventListener(
+            'click',
+            this.onNativeControlClick
+        );
 
         if (this.isEmbedded) {
             // We need to overwrite the video-end event. Instagram will show you a 'watch again on Instagram' message and
             // hide the video. We want to give the user the option to replay the video even after it finished.
-            Utils.disableAllEventListeners(this.videoElement, "ended");
+            Utils.disableAllEventListeners(this.videoElement, 'ended');
             // The embedded page will also force you to open Instagram once you started the video and then lost focus.
             // For example: Playing the video and then switching the tab or scrolling down.
             // This might cause other issues, and we may need to remove this later.
-            Utils.disableAllEventListeners(document, "visibilitychange");
+            Utils.disableAllEventListeners(document, 'visibilitychange');
         }
     }
 
     // Unregisters all video events.
     private unregisterEvents() {
-        this.videoElement.removeEventListener("play", this.onPlay);
-        this.videoElement.removeEventListener("pause", this.onPause);
-        this.videoElement.removeEventListener("ended", this.onEnded);
-        this.videoElement.removeEventListener("timeupdate", this.onTimeUpdate);
-        this.videoElement.removeEventListener("volumechange", this.onVolumeChange);
-        document.removeEventListener("fullscreenchange", this.onFullscreenChange);
-        this.videoElement.removeEventListener("enterpictureinpicture", this.onPictureInPictureChange);
-        this.videoElement.removeEventListener("leavepictureinpicture", this.onPictureInPictureChange);
-        this.videoRootElement?.removeEventListener("mouseenter", this.onMouseEnter);
-        this.videoRootElement?.removeEventListener("mouseleave", this.onMouseLeave);
-        this.nativeControlsElement?.removeEventListener("click", this.onNativeControlClick);
+        this.videoElement.removeEventListener('play', this.onPlay);
+        this.videoElement.removeEventListener('pause', this.onPause);
+        this.videoElement.removeEventListener('ended', this.onEnded);
+        this.videoElement.removeEventListener('timeupdate', this.onTimeUpdate);
+        this.videoElement.removeEventListener(
+            'volumechange',
+            this.onVolumeChange
+        );
+        this.videoElement.removeEventListener(
+            'ratechange',
+            this.onPlaybackSpeedChange
+        );
+        document.removeEventListener(
+            'fullscreenchange',
+            this.onFullscreenChange
+        );
+        this.videoElement.removeEventListener(
+            'enterpictureinpicture',
+            this.onPictureInPictureChange
+        );
+        this.videoElement.removeEventListener(
+            'leavepictureinpicture',
+            this.onPictureInPictureChange
+        );
+        this.videoRootElement?.removeEventListener(
+            'mouseenter',
+            this.onMouseEnter
+        );
+        this.videoRootElement?.removeEventListener(
+            'mouseleave',
+            this.onMouseLeave
+        );
+        this.nativeControlsElement?.removeEventListener(
+            'click',
+            this.onNativeControlClick
+        );
     }
 
     // Handles video play event.
@@ -99,7 +144,7 @@ export class VideoPlayer {
         this.playbackManager.notifyVideoPlay(this.videoElement);
 
         this.checkAutoplay();
-    }
+    };
 
     // Handles video pause event.
     private onPause = () => {
@@ -110,7 +155,7 @@ export class VideoPlayer {
         setTimeout(() => {
             this.removeNotRegisteredOverlayElement();
         });
-    }
+    };
 
     // Handles video end-of-playback event.
     private onEnded = () => {
@@ -118,12 +163,12 @@ export class VideoPlayer {
         if (!this.videoElement.loop) {
             this.videoElement.pause();
         }
-    }
+    };
 
     // Handles video time update event.
     private onTimeUpdate = () => {
         this.videoController?.onTimeUpdate();
-    }
+    };
 
     // Handles video volume changes.
     private onVolumeChange = () => {
@@ -133,27 +178,34 @@ export class VideoPlayer {
         //if (!event.isTrusted) return;
 
         this.playbackManager.notifyVideoVolumeChange(this.videoElement);
-    }
+    };
+
+    // Handles video playback speed changes.
+    private onPlaybackSpeedChange = () => {
+        this.videoController?.onPlaybackSpeedChange();
+
+        this.playbackManager.notifyVideoPlaybackSpeedChange(this.videoElement);
+    };
 
     // Handles fullscreen changes.
     private onFullscreenChange = () => {
         this.videoController?.onFullscreenChange();
-    }
+    };
 
     // Handles Picture-in-Picture changes.
     private onPictureInPictureChange = () => {
         this.videoController?.onPictureInPictureChange();
-    }
+    };
 
     // Mouse enters the player element.
     private onMouseEnter = () => {
         this.videoController?.setHover(true);
-    }
+    };
 
     // Mouse leaves the player element.
     private onMouseLeave = () => {
         this.videoController?.setHover(false);
-    }
+    };
 
     // Mouse clicked the native player element
     private onNativeControlClick = () => {
@@ -171,9 +223,8 @@ export class VideoPlayer {
             setTimeout(() => {
                 this.videoElement.play().then();
             });
-
         }
-    }
+    };
 
     //#endregion
 
@@ -206,7 +257,6 @@ export class VideoPlayer {
     // The overlay elements used for Reels on mobile.
     public mobileOverlayElement: HTMLElement | undefined;
 
-
     // Detects the video type and finds all native components.
     private detectVideo() {
         // We assume Reels are the default.
@@ -215,7 +265,6 @@ export class VideoPlayer {
         // It is not easy to detect the video type. We can only guess by checking the node parent chain for clues.
         let currentElement = this.videoElement as HTMLElement;
         while (currentElement) {
-
             // If we find an <article> tag, we know this is a post in the main feed.
             if (currentElement.tagName === 'ARTICLE') {
                 this.videoType = VideoType.post;
@@ -232,11 +281,16 @@ export class VideoPlayer {
         }
 
         // Check for embedded videos.
-        this.isEmbedded = this.videoElement.parentElement?.parentElement?.parentElement?.classList?.contains("EmbedVideo") ?? false;
+        this.isEmbedded =
+            this.videoElement.parentElement?.parentElement?.parentElement?.classList?.contains(
+                'EmbedVideo'
+            ) ?? false;
 
         // Detect the native overlay.
-        this.overlayElement = this.videoElement.nextElementSibling as HTMLElement;
-        this.nativeControlsElement = this.overlayElement?.firstChild as HTMLElement;
+        this.overlayElement = this.videoElement
+            .nextElementSibling as HTMLElement;
+        this.nativeControlsElement = this.overlayElement
+            ?.firstChild as HTMLElement;
 
         this.replyElement = undefined;
         this.clickEventElement = undefined;
@@ -246,16 +300,20 @@ export class VideoPlayer {
         // If you click left you go to the previous Story element. If you click right you go to the next one.
         // These are only present in the mobile view (aka small screen width) mode. Otherwise, this element still
         // exists, but it is empty.
-        const clickEventElement =
-            Utils.elementParent(this.videoElement, 5)?.nextElementSibling;
+        const clickEventElement = Utils.elementParent(
+            this.videoElement,
+            5
+        )?.nextElementSibling;
         if (clickEventElement instanceof HTMLElement) {
             this.clickEventElement = clickEventElement;
         }
 
         // Navigate to the social buttons. They are seven layers deep in the structure.
         // Instagram added a new layer, so we need an additional `firstChild`.
-        const socialElement =
-            Utils.elementParent(this.videoElement, 7)?.nextElementSibling;
+        const socialElement = Utils.elementParent(
+            this.videoElement,
+            7
+        )?.nextElementSibling;
 
         if (socialElement) {
             // I was checking if a <textarea> exists in the reply section to detect stories. However, you can disable
@@ -268,8 +326,10 @@ export class VideoPlayer {
             if (socialIconsElement instanceof HTMLDivElement) {
                 // There is another issue. Stories have a different layout and controls scheme when viewed on a slim
                 // device / viewport. Only the mobile layout has two clickable areas (next and previous buttons).
-                if (this.clickEventElement &&
-                    this.clickEventElement.childElementCount > 0) {
+                if (
+                    this.clickEventElement &&
+                    this.clickEventElement.childElementCount > 0
+                ) {
                     this.videoType = VideoType.mobileStory;
                 } else {
                     // No clickable elements are used. We are not in mobile layout.
@@ -283,7 +343,6 @@ export class VideoPlayer {
         if (this.nativeControlsElement) {
             // Normal posts have a simpler structure. All the different elements are on the first level.
             if (this.nativeControlsElement.childElementCount > 1) {
-
                 // The position of the mute button can change. It is not always the second element.
                 // But it is the first element that contains a <button> tag.
                 // The second <button> tag is the marked accounts icon.
@@ -301,15 +360,14 @@ export class VideoPlayer {
         }
 
         // Detect the mobile controls for Reels.
-        const mobileOverlayElement =
-            Utils.elementParent(this.videoElement, 4)?.nextElementSibling?.firstChild as HTMLElement;
+        const mobileOverlayElement = Utils.elementParent(this.videoElement, 4)
+            ?.nextElementSibling?.firstChild as HTMLElement;
         if (mobileOverlayElement) {
             this.mobileOverlayElement = mobileOverlayElement;
         }
 
         // Finds the video root element used for fullscreen.
-        const videoRootElement =
-            Utils.elementParent(this.videoElement, 1);
+        const videoRootElement = Utils.elementParent(this.videoElement, 1);
         if (videoRootElement instanceof HTMLElement) {
             this.videoRootElement = videoRootElement;
         }
@@ -342,12 +400,14 @@ export class VideoPlayer {
         this.videoController = undefined;
     }
 
-
     private removeNotRegisteredOverlayElement() {
         if (this.nativeControlsElement) {
             // The site adds an overlay still frame when playback ends and forces you to log in to re-watch.
             // We'll remove that.
-            if (this.nativeControlsElement.firstChild instanceof HTMLImageElement) {
+            if (
+                this.nativeControlsElement.firstChild instanceof
+                HTMLImageElement
+            ) {
                 const thumbnailElement = this.nativeControlsElement.firstChild;
                 thumbnailElement.remove();
             }
@@ -377,7 +437,10 @@ export class VideoPlayer {
 
     // Checks the autoplay setting and pauses the video if needed.
     private checkAutoplay() {
-        if (Settings.shared.autoplayMode === VideoAutoplayMode.stopped && !this.userInteractedWithVideo) {
+        if (
+            Settings.shared.autoplayMode === VideoAutoplayMode.stopped &&
+            !this.userInteractedWithVideo
+        ) {
             this.videoElement.pause();
             this.videoElement.currentTime = 0; // Jump back to start
             this.videoElement.muted = false; // Continue with audio

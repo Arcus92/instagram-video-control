@@ -1,109 +1,109 @@
 name: Publish
 on:
-  # Trigger on every tag
-  push:
-    tags:
-      - 'v*'
+    # Trigger on every tag
+    push:
+        tags:
+            - 'v*'
 jobs:
-  # Creates the release
-  release:
-    name: Release
-    runs-on: ubuntu-latest
+    # Creates the release
+    release:
+        name: Release
+        runs-on: ubuntu-latest
 
-    steps:
-      # Gets the release info
-      - name: Get release info
-        id: get_release_info
-        run: |
-          echo "repository=${REPOSITORY_NAME##*/}" >> $GITHUB_OUTPUT
-          echo "tag=${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
-        env:
-          TAG_REF_NAME: ${{ github.ref }}
-          REPOSITORY_NAME: ${{ github.repository }}
+        steps:
+            # Gets the release info
+            - name: Get release info
+              id: get_release_info
+              run: |
+                  echo "repository=${REPOSITORY_NAME##*/}" >> $GITHUB_OUTPUT
+                  echo "tag=${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
+              env:
+                  TAG_REF_NAME: ${{ github.ref }}
+                  REPOSITORY_NAME: ${{ github.repository }}
 
-      # Create the release
-      - name: Create release archive
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ steps.get_release_info.outputs.repository }} ${{ steps.get_release_info.outputs.tag }}
-          draft: false
-          prerelease: false
+            # Create the release
+            - name: Create release archive
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  release_name: ${{ steps.get_release_info.outputs.repository }} ${{ steps.get_release_info.outputs.tag }}
+                  draft: false
+                  prerelease: false
 
-      # Stores the release url to a file
-      - name: Store release url
-        run: echo "${{ steps.create_release.outputs.upload_url }}" > ./release_url.txt
+            # Stores the release url to a file
+            - name: Store release url
+              run: echo "${{ steps.create_release.outputs.upload_url }}" > ./release_url.txt
 
-      # Uploads the release url as artifact
-      - name: Upload release url
-        uses: actions/upload-artifact@v4
-        with:
-          name: release_url
-          path: ./release_url.txt
+            # Uploads the release url as artifact
+            - name: Upload release url
+              uses: actions/upload-artifact@v4
+              with:
+                  name: release_url
+                  path: ./release_url.txt
 
-  # Publish all version
-  publish:
-    name: Publish
-    runs-on: ubuntu-latest
-    needs: [ release ]
+    # Publish all version
+    publish:
+        name: Publish
+        runs-on: ubuntu-latest
+        needs: [release]
 
-    steps:
-      # Checkout the source code
-      - name: Checkout
-        uses: actions/checkout@v1
+        steps:
+            # Checkout the source code
+            - name: Checkout
+              uses: actions/checkout@v1
 
-      # Downloads the release url from artifact
-      - name: Download release url
-        uses: actions/download-artifact@v4
-        with:
-          name: release_url
+            # Downloads the release url from artifact
+            - name: Download release url
+              uses: actions/download-artifact@v4
+              with:
+                  name: release_url
 
-      # Gets the release info
-      - name: Get release info
-        id: get_release_info
-        run: |
-          echo "file_name=${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
-          value=`cat release_url.txt`
-          echo "upload_url=$value" >> $GITHUB_OUTPUT
-        env:
-          TAG_REF_NAME: ${{ github.ref }}
-          REPOSITORY_NAME: ${{ github.repository }}
+            # Gets the release info
+            - name: Get release info
+              id: get_release_info
+              run: |
+                  echo "file_name=${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/}" >> $GITHUB_OUTPUT
+                  value=`cat release_url.txt`
+                  echo "upload_url=$value" >> $GITHUB_OUTPUT
+              env:
+                  TAG_REF_NAME: ${{ github.ref }}
+                  REPOSITORY_NAME: ${{ github.repository }}
 
-      # Clean the output folder
-      - name: Clean
-        run: rm -rf ./dist
+            # Clean the output folder
+            - name: Clean
+              run: rm -rf ./dist
 
-      # Compile with Node
-      - name: Compile with Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-      - run: npm ci
-      - run: npm run build
+            # Compile with Node
+            - name: Compile with Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20.x'
+            - run: npm ci
+            - run: npm run build
 
-      # Upload the Firefox extension
-      - name: Upload Firefox extension
-        id: upload-release-asset-firefox
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./dist/firefox.zip
-          asset_name: ${{ steps.get_release_info.outputs.file_name }}-firefox.zip
-          asset_content_type: application/zip
+            # Upload the Firefox extension
+            - name: Upload Firefox extension
+              id: upload-release-asset-firefox
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+                  asset_path: ./dist/firefox.zip
+                  asset_name: ${{ steps.get_release_info.outputs.file_name }}-firefox.zip
+                  asset_content_type: application/zip
 
-      # Upload the Chrome extension
-      - name: Upload Chrome extension
-        id: upload-release-asset-chrome
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./dist/chrome.zip
-          asset_name: ${{ steps.get_release_info.outputs.file_name }}-chrome.zip
-          asset_content_type: application/zip
+            # Upload the Chrome extension
+            - name: Upload Chrome extension
+              id: upload-release-asset-chrome
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+                  asset_path: ./dist/chrome.zip
+                  asset_name: ${{ steps.get_release_info.outputs.file_name }}-chrome.zip
+                  asset_content_type: application/zip
