@@ -17,6 +17,7 @@
             "matches": ["*://*.instagram.com/*"],
             "js": ["js/instagram.js"],
             "css": ["styles/instagram.css"],
+            "run_at": "document_start",
             "all_frames": true
         }
     ],

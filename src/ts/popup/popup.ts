@@ -2,6 +2,7 @@ import { Browser } from '../shared/browser';
 import { Settings, SettingsData } from '../shared/settings';
 import { VideoControlMode } from '../shared/videoControlMode';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
+import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -92,7 +93,17 @@ export class Popup {
             (e) => (e.checked = this.settings.loopPlayback)
         );
 
+        // Video detection method
+        this.initSettingSelectElement(
+            'option_video_detection_method',
+            (e) =>
+                (this.settings.videoDetectionMethod =
+                    e.value as VideoDetectionMethod),
+            (e) => (e.value = this.settings.videoDetectionMethod)
+        );
+
         this.updateOptionAutoUnmuteHint();
+        this.updateOptionVideoDetectionMethodHint();
     }
 
     // Handler for setting changes of input elements.
@@ -159,9 +170,16 @@ export class Popup {
 
     // Hide a setting hint.
     private setSettingHintVisibility(name: string, visibility: boolean) {
-        const element = document.querySelector(
+        let element = document.querySelector(
             `li:has([name="${name}"]) .hint`
         ) as HTMLElement;
+
+        if (!element) {
+            element = document.querySelector(
+                `[data-hint="${name}"]`
+            ) as HTMLElement;
+        }
+
         if (!element) return;
         element.style.display = visibility ? 'inherit' : 'none';
     }
@@ -210,6 +228,9 @@ export class Popup {
             case 'autoplayMode':
                 this.updateOptionAutoUnmuteHint();
                 break;
+            case 'videoDetectionMethod':
+                this.updateOptionVideoDetectionMethodHint();
+                break;
         }
     }
 
@@ -217,6 +238,17 @@ export class Popup {
         this.setSettingHintVisibility(
             'option_autoplay_mode',
             this.settings.autoplayMode === VideoAutoplayMode.unmuted
+        );
+    }
+
+    private updateOptionVideoDetectionMethodHint() {
+        this.setSettingHintVisibility(
+            'option_use_interval_video_detection',
+            this.settings.videoDetectionMethod === VideoDetectionMethod.interval
+        );
+        this.setSettingHintVisibility(
+            'option_use_observer_video_detection',
+            this.settings.videoDetectionMethod === VideoDetectionMethod.observer
         );
     }
 

@@ -100,7 +100,7 @@
                             ></option>
                         </select>
                     </label>
-                    <div class="hint">
+                    <div class="hint warning">
                         <span
                             data-locale="option_auto_unmute_playback_hint"
                         ></span>
@@ -138,6 +138,41 @@
                         <input type="checkbox" name="option_loop_playback" />
                         <span data-locale="option_loop_playback"></span>
                     </label>
+                </li>
+            </ul>
+
+            <h3 data-locale="experimental_settings"></h3>
+            <ul class="options-list">
+                <li>
+                    <label>
+                        <span
+                            data-locale="option_video_detection_method"
+                        ></span>
+                        <em data-locale="option_warning_reload_required"></em
+                        >:<br />
+                        <select name="option_video_detection_method">
+                            <option
+                                value="interval"
+                                data-locale="option_use_interval_video_detection"
+                            ></option>
+                            <option
+                                value="observer"
+                                data-locale="option_use_observer_video_detection"
+                            ></option>
+                        </select>
+                    </label>
+                    <div class="hint">
+                        <div data-hint="option_use_interval_video_detection">
+                            <span
+                                data-locale="option_use_interval_video_detection_description"
+                            ></span>
+                        </div>
+                        <div data-hint="option_use_observer_video_detection">
+                            <span
+                                data-locale="option_use_observer_video_detection_description"
+                            ></span>
+                        </div>
+                    </div>
                 </li>
             </ul>
         </main>
