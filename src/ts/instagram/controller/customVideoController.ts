@@ -201,14 +201,24 @@ export class CustomVideoController extends VideoController {
             playbackSpeedElement.textContent = `${playbackSpeed}x`;
             this.playbackSpeedDropDownElement.appendChild(playbackSpeedElement);
 
-            playbackSpeedElement.onclick = () => {
+            playbackSpeedElement.onpointerdown = (ev) => {
                 this.videoElement.playbackRate = playbackSpeed;
+
+                // Hide the dropdown once a value is clicked for mobile
+                if (ev.pointerType === 'touch' || ev.pointerType === 'pen') {
+                    this.setPlaybackSpeedVisibility(false);
+                }
+
+                ev.stopPropagation();
             };
 
             this.playbackSpeedDropDownItemElement[playbackSpeed] =
                 playbackSpeedElement;
         }
 
+        this.playbackSpeedButtonElement.onpointerdown = () => {
+            this.setPlaybackSpeedVisibility(true);
+        };
         this.playbackSpeedButtonElement.onmouseenter = () => {
             this.setPlaybackSpeedVisibility(true);
         };
