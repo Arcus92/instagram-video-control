@@ -3,6 +3,7 @@ import { VideoPlayer } from './videoPlayer';
 import { PlaybackManager } from './playbackManager';
 import { Browser } from '../shared/browser';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
+import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
@@ -27,17 +28,46 @@ export class VideoDetector implements PlaybackManager {
             this.lastPlaybackMuted = false;
         }
 
-        // Starts the detector.
-        this.start();
+        switch (this.settings.videoDetectionMethod) {
+            case VideoDetectionMethod.interval:
+                this.startIntervalDetection();
+                break;
+            case VideoDetectionMethod.observer:
+                this.startMutationObserverDetection();
+                break;
+        }
     }
 
-    // Starts the video detector and adds the control bar.
-    private start() {
+    // Starts the video detector with a fixed time interval.
+    private startIntervalDetection() {
         // Instagram is a single-page-application and loads posts asynchronously. We'll check every second for new videos.
         // MutationObserver is too slow, because there are to many nodes and changes on that site.
         setInterval(() => {
             this.checkForVideosAndAttachControls();
         }, 1000);
+    }
+
+    // Starts the video detection with a MutationObserver.
+    private startMutationObserverDetection() {
+        // Added a JavaScript element to inject code into the original page that
+        // doesn't operate in the shadow DOM and can detect changes all elements
+        // on the page.
+        const scriptElement = document.createElement('script');
+        scriptElement.src = Browser.getUrl('js/inject.js');
+        scriptElement.type = 'module';
+        scriptElement.onload = () => scriptElement.remove();
+        (document.head || document.documentElement).append(scriptElement);
+
+        // Adding the message handler.
+        window.addEventListener('message', (ev) => this.onMessageHandler(ev));
+    }
+
+    // Handling messages from the page.
+    private onMessageHandler(ev: MessageEvent) {
+        // Run video detection
+        if (ev.data.type === 'ivcDetectVideos') {
+            this.checkForVideosAndAttachControls();
+        }
     }
 
     // Checks the page for new or removed video players and attaches / detaches them.
@@ -46,17 +76,7 @@ export class VideoDetector implements PlaybackManager {
 
         // Detect new videos...
         for (let i = 0; i < videos.length; i++) {
-            const video = videos[i];
-            if (this.videosBySource[video.src]) continue;
-
-            const player = new VideoPlayer(this, video);
-            this.videosBySource[video.src] = player;
-
-            player.attach();
-
-            // Update the initial volume and speed.
-            this.updateVolumeForVideo(player.videoElement);
-            this.updatePlaybackSpeedForVideo(player.videoElement);
+            this.detectAddedVideoElement(videos[i]);
         }
 
         // Detect removed videos...
@@ -75,6 +95,27 @@ export class VideoDetector implements PlaybackManager {
 
             delete this.videosBySource[source];
         }
+    }
+
+    public detectAddedVideoElement(video: HTMLVideoElement) {
+        if (this.videosBySource[video.src]) return;
+
+        const player = new VideoPlayer(this, video);
+        this.videosBySource[video.src] = player;
+
+        player.attach();
+
+        // Update the initial volume and speed.
+        this.updateVolumeForVideo(player.videoElement);
+        this.updatePlaybackSpeedForVideo(player.videoElement);
+    }
+
+    public detectRemovedVideoElement(video: HTMLVideoElement) {
+        const player = this.videosBySource[video.src];
+        if (!player) return;
+        player.detach();
+
+        delete this.videosBySource[video.src];
     }
 
     //#region Settings

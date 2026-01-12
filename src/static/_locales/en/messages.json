@@ -74,6 +74,27 @@
     "option_loop_playback": {
         "message": "Loop videos"
     },
+    "experimental_settings": {
+        "message": "Experimental settings"
+    },
+    "option_video_detection_method": {
+        "message": "Video detection method"
+    },
+    "option_use_interval_video_detection": {
+        "message": "Delayed (default)"
+    },
+    "option_use_interval_video_detection_description": {
+        "message": "Videos are detected at one second intervals."
+    },
+    "option_use_observer_video_detection": {
+        "message": "Instant (faster, experimental)"
+    },
+    "option_use_observer_video_detection_description": {
+        "message": "Videos are detected instantly when scrolling. This removes the delay before the controls appear, but cost more CPU usage."
+    },
+    "option_warning_reload_required": {
+        "message": "(reload required)"
+    },
     "view_on_github": {
         "message": "View on GitHub"
     },

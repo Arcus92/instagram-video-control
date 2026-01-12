@@ -5,6 +5,7 @@ import { Utils } from './utils';
 import { VideoAutoplayMode } from './videoAutoplayMode';
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
+import { VideoDetectionMethod } from './videoDetectionMethod';
 
 // Settings data struct.
 export interface SettingsData {
@@ -18,6 +19,7 @@ export interface SettingsData {
     showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
+    videoDetectionMethod: VideoDetectionMethod;
 }
 
 // Handle extension settings.
@@ -38,6 +40,7 @@ export class Settings implements SettingsData {
         'showPlaybackSpeedOption',
         'autoHideControlBar',
         'loopPlayback',
+        'videoDetectionMethod',
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
@@ -49,6 +52,8 @@ export class Settings implements SettingsData {
     private _showPlaybackSpeedOption: boolean = true;
     private _autoHideControlBar: boolean = false;
     private _loopPlayback: boolean = true;
+    private _videoDetectionMethod: VideoDetectionMethod =
+        VideoDetectionMethod.interval;
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
@@ -160,6 +165,17 @@ export class Settings implements SettingsData {
         this.onChange('loopPlayback');
     }
 
+    // Sets the video detection method.
+    public get videoDetectionMethod(): VideoDetectionMethod {
+        return this._videoDetectionMethod;
+    }
+    public set videoDetectionMethod(value: VideoDetectionMethod) {
+        if (this._videoDetectionMethod === value) return;
+        this._videoDetectionMethod = value;
+
+        this.onChange('videoDetectionMethod');
+    }
+
     //#endregion Data
 
     //#region Init
@@ -248,6 +264,10 @@ export class Settings implements SettingsData {
         }
         if (typeof data.loopPlayback === 'boolean') {
             this.loopPlayback = data.loopPlayback;
+        }
+        if (typeof data.videoDetectionMethod === 'string') {
+            this.videoDetectionMethod =
+                data.videoDetectionMethod as VideoDetectionMethod;
         }
     }
 
