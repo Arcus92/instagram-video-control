@@ -9,10 +9,10 @@ export abstract class VideoController {
     }
 
     // The video player.
-    protected readonly videoPlayer: VideoPlayer;
+    public readonly videoPlayer: VideoPlayer;
 
     // Shortcut to the video element.
-    protected get videoElement(): HTMLVideoElement | undefined {
+    public get videoElement(): HTMLVideoElement | undefined {
         return this.videoPlayer.videoElementRef?.deref();
     }
 
