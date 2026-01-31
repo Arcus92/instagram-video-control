@@ -81,6 +81,7 @@ export class VideoPlayer {
             'mouseleave',
             this.onMouseLeave
         );
+        this.videoRootElement?.addEventListener('mousemove', this.onMouseMove);
         this.nativeControlsElement?.addEventListener(
             'click',
             this.onNativeControlClick
@@ -130,6 +131,10 @@ export class VideoPlayer {
         this.videoRootElement?.removeEventListener(
             'mouseleave',
             this.onMouseLeave
+        );
+        this.videoRootElement?.removeEventListener(
+            'mousemove',
+            this.onMouseMove
         );
         this.nativeControlsElement?.removeEventListener(
             'click',
@@ -205,6 +210,17 @@ export class VideoPlayer {
     // Mouse leaves the player element.
     private onMouseLeave = () => {
         this.videoController?.setHover(false);
+    };
+
+    // Mouse moves over the player element.
+    private onMouseMove = (ev: MouseEvent) => {
+        // There is no way to detect clicks to the native video controller, but we need to know when the user interacted
+        // with the playback control to allow user-playback when auto-playback is disabled.
+        // While mouse click events are blocked, mouse move events still fire. This isn't the best solution, but it
+        // resolves the issue where the user wasn't able to start playback from native controls if autoplay is disabled.
+        if (ev.target === this.videoElement) {
+            this.setUserInteractedWithVideo();
+        }
     };
 
     // Mouse clicked the native player element
@@ -379,6 +395,14 @@ export class VideoPlayer {
 
     // The current created controller.
     private videoController: VideoController | undefined;
+
+    /**
+     * Sets the flag that the user has interacted with the video.
+     * This allows playback if autoplay is disabled.
+     */
+    public setUserInteractedWithVideo() {
+        this.userInteractedWithVideo = true;
+    }
 
     // Creates the video controls.
     private createVideoControl() {

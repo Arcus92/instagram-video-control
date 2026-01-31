@@ -52,6 +52,11 @@ export class CustomVideoController extends VideoController {
         contentElement.appendChild(this.playButtonElement);
 
         this.playButtonElement.onclick = () => {
+            // Tell the player that the user stated playback in case auto-playback is disabled.
+            if (this.videoPlayer) {
+                this.videoPlayer.setUserInteractedWithVideo();
+            }
+
             if (video.paused) {
                 video.play().then();
             } else {

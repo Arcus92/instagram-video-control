@@ -175,7 +175,14 @@ export class VideoDetector implements PlaybackManager {
 
     // Applies the stored volume to the given video.
     private updateVolumeForVideo(video: HTMLVideoElement) {
-        video.volume = this.settings.lastPlaybackVolume;
+        let volume = this.settings.lastPlaybackVolume;
+
+        // Do not restore volume if it is zero to prevent a second click to the volume bar.
+        if (volume === 0) {
+            volume = 0.1;
+        }
+
+        video.volume = volume;
         video.muted = this.lastPlaybackMuted;
     }
 
@@ -263,10 +270,13 @@ export class VideoDetector implements PlaybackManager {
 
     // Must be called whenever a video volume was changed.
     public notifyVideoVolumeChange(video: HTMLVideoElement) {
+        const volume = video.volume;
+        const muted = video.muted || video.volume === 0;
+
         // Not changed, so no need to update the other videos.
         if (
-            this.settings.lastPlaybackVolume === video.volume &&
-            this.lastPlaybackMuted === video.muted
+            this.settings.lastPlaybackVolume === volume &&
+            this.lastPlaybackMuted === muted
         )
             return;
 
@@ -276,8 +286,8 @@ export class VideoDetector implements PlaybackManager {
             return;
         }
 
-        this.settings.lastPlaybackVolume = video.volume;
-        this.lastPlaybackMuted = video.muted;
+        this.settings.lastPlaybackVolume = volume;
+        this.lastPlaybackMuted = muted;
 
         // Sync the volume across all other video players.
         this.updateVolumeForVideos();
