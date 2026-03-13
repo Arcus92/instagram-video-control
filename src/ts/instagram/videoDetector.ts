@@ -13,6 +13,9 @@ export class VideoDetector implements PlaybackManager {
     // List of all video players by source.
     private videosBySource: { [source: string]: VideoPlayer } = {};
 
+    // List of ignored video elements (like Reels background videos).
+    private ignoredVideos = new WeakSet<HTMLVideoElement>();
+
     // Initialize the video detector.
     public async init() {
         // Loads the settings and subscribe for setting changes.
@@ -98,12 +101,16 @@ export class VideoDetector implements PlaybackManager {
     }
 
     public detectAddedVideoElement(video: HTMLVideoElement) {
-        if (this.videosBySource[video.src]) return;
+        if (this.videosBySource[video.src] || this.ignoredVideos.has(video)) return;
 
         const player = new VideoPlayer(this, video);
-        this.videosBySource[video.src] = player;
 
-        player.attach();
+        if (!player.attach()) {
+            this.ignoredVideos.add(video);
+            return;
+        }
+
+        this.videosBySource[video.src] = player;
 
         // Update the initial volume and speed.
         this.updateVolumeForVideo(player.videoElement);
