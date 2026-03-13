@@ -102,6 +102,20 @@ export class Popup {
             (e) => (e.value = this.settings.videoDetectionMethod)
         );
 
+        // Copy settings into clipboard
+        this.initSettingButtonElement('option_copy_settings', async () => {
+            // Fetch all settings from the browser and write them to the clipboard. as JSON.
+            const data = await Browser.storage.sync.get();
+            const json = JSON.stringify(data);
+            await navigator.clipboard.writeText(json);
+
+            // Show a message that the settings were copied
+            this.setSettingHintVisibility(
+                'option_copy_settings_successful',
+                true
+            );
+        });
+
         this.updateOptionAutoUnmuteHint();
         this.updateOptionVideoDetectionMethodHint();
     }
@@ -130,6 +144,18 @@ export class Popup {
             store,
             restore
         );
+    }
+
+    // Handler settings buttons.
+    private initSettingButtonElement(name: string, click: () => void) {
+        const selector = `button[name="${name}"]`;
+        const element = document.querySelector(selector) as HTMLButtonElement;
+        if (!element) return;
+
+        // Handling the control clicks
+        element.addEventListener('click', () => {
+            click();
+        });
     }
 
     // Generic handler for setting changes.
