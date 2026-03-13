@@ -28,11 +28,19 @@ export class VideoPlayer {
     }
 
     // Attaches to the video player and adds custom element and events.
-    public attach() {
+    public attach(): boolean {
         this.detectVideo();
 
         // Do not add controls to the Explore page. This page contains a grid of many small preview videos.
-        if (this.videoType === VideoType.explore) return;
+        if (this.videoType === VideoType.explore) return false;
+
+        // Ignore background blurred videos in Reels that cause double sound and duplicated controls.
+        if (this.overlayElement) {
+            const style = (this.overlayElement.getAttribute('style') || '').replace(/\s/g, '');
+            if (style.includes('pointer-events:none') || style.includes('inset-inline-start:-32px')) {
+                return false;
+            }
+        }
 
         this.createVideoControl();
 
@@ -42,6 +50,8 @@ export class VideoPlayer {
 
         this.checkAutoplay();
         this.updateLoopSetting();
+
+        return true;
     }
 
     // Detaches the custom player from the video tag. Removes all custom element and events.

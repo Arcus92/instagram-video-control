@@ -28,6 +28,14 @@ export abstract class VideoController {
     protected createVideoControlBackground() {
         if (!this.videoPlayer.overlayElement) return;
 
+        // Clean up any existing ivc-controls in the overlay.
+        // This prevents duplication bugs if Instagram clones the DOM elements (e.g., during reel transitions),
+        // which copies our injected inactive controls into the new element before we attach to it.
+        const existingControls = this.videoPlayer.overlayElement.querySelectorAll('.ivc-controls');
+        for (let i = 0; i < existingControls.length; i++) {
+            existingControls[i].remove();
+        }
+
         this.videoControlElement = document.createElement('div');
         this.videoControlElement.classList.add('ivc-controls');
         if (this.videoPlayer.videoType === VideoType.reel) {
