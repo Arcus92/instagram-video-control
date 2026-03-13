@@ -47,10 +47,15 @@ ul.options-list label {
     cursor: pointer;
 }
 
-ul.options-list li select {
+ul.options-list li select,
+ul.options-list li button {
     background-color: #fff;
     color: #111;
     border: #888 solid 1px;
+}
+
+ul.options-list li button {
+    cursor: pointer;
 }
 
 ul.options-list li .title {
@@ -68,6 +73,10 @@ ul.options-list li .hint.warning {
     color: #9e7300;
 }
 
+ul.options-list li .hint.success {
+    color: #2b7d26;
+}
+
 ul.options-list li .hint ul {
     padding: 0 0 0 1.5em;
 }
@@ -79,12 +88,17 @@ ul.options-list li .hint ul {
         color: #fff;
     }
 
-    ul.options-list li select {
+    ul.options-list li select,
+    ul.options-list li button {
         background-color: #111;
         color: #fff;
     }
 
     ul.options-list li .hint.warning {
         color: #ffba00;
+    }
+
+    ul.options-list li .hint.success {
+        color: #2fff00;
     }
 }
