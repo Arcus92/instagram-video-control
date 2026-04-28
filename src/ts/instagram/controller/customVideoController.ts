@@ -298,8 +298,9 @@ export class CustomVideoController extends VideoController {
 
     //#region Update
 
-    private volumeBarDelayTimeout: number = -1;
-    private playbackSpeedDelayTimeout: number = -1;
+    private volumeBarDelayTimeout?: ReturnType<typeof setTimeout> = undefined;
+    private playbackSpeedDelayTimeout?: ReturnType<typeof setTimeout> =
+        undefined;
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
