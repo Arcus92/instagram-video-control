@@ -4,6 +4,7 @@ import { PlaybackManager } from './playbackManager';
 import { Browser } from '../shared/browser';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
+import { Resources } from './resources';
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
@@ -234,7 +235,7 @@ export class VideoDetector implements PlaybackManager {
         audio.style.display = 'none';
         audio.autoplay = true;
         audio.defaultMuted = false;
-        audio.src = Browser.getUrl('audio/silence.mp3');
+        audio.src = Resources.shared.soundSilence;
         document.body.appendChild(audio);
 
         const timerId = setTimeout(() => {
