@@ -7,6 +7,7 @@
         "@types/archiver": "^6.0.3",
         "@types/chrome": "^0.0.263",
         "@types/firefox-webext-browser": "^120.0.4",
+        "@types/node": "^25.6.0",
         "@typescript-eslint/eslint-plugin": "^8.54.0",
         "@typescript-eslint/parser": "^8.54.0",
         "archiver": "^7.0.1",

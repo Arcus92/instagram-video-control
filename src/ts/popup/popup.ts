@@ -3,6 +3,7 @@ import { Settings, SettingsData } from '../shared/settings';
 import { VideoControlMode } from '../shared/videoControlMode';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
+import { VideoDetectionVersion } from '../shared/videoDetectionVersion';
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -100,6 +101,15 @@ export class Popup {
                 (this.settings.videoDetectionMethod =
                     e.value as VideoDetectionMethod),
             (e) => (e.value = this.settings.videoDetectionMethod)
+        );
+
+        // Video detection version
+        this.initSettingSelectElement(
+            'option_video_detection_version',
+            (e) =>
+                (this.settings.videoDetectionVersion =
+                    e.value as VideoDetectionVersion),
+            (e) => (e.value = this.settings.videoDetectionVersion)
         );
 
         // Copy settings into clipboard

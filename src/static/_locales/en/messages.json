@@ -92,6 +92,15 @@
     "option_use_observer_video_detection_description": {
         "message": "Videos are detected instantly when scrolling. This removes the delay before the controls appear, but cost more CPU usage."
     },
+    "option_video_detection_version": {
+        "message": "Instagram website version"
+    },
+    "option_use_latest_video_detection_version": {
+        "message": "Latest (after April 2026 update)"
+    },
+    "option_use_legacy_video_detection_version": {
+        "message": "Legacy (before April 2026 update)"
+    },
     "option_warning_reload_required": {
         "message": "(reload required)"
     },
