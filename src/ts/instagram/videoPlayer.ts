@@ -330,19 +330,6 @@ export class VideoPlayer {
         this.replyElement = undefined;
         this.clickEventElement = undefined;
 
-        // Navigate to the overlay buttons. They are five layers deep in the structure.
-        // The overlay buttons are used for Stories in mobile mode. These are two hidden links that overlay the video.
-        // If you click left you go to the previous Story element. If you click right you go to the next one.
-        // These are only present in the mobile view (aka small screen width) mode. Otherwise, this element still
-        // exists, but it is empty.
-        const clickEventElement = Utils.elementParent(
-            videoRootElement,
-            5
-        )?.nextElementSibling;
-        if (clickEventElement instanceof HTMLElement) {
-            this.clickEventElement = clickEventElement;
-        }
-
         // Navigate to the social buttons. They are four layers deep in the structure.
         // Instagram added a new layer, so we need an additional `firstChild`.
         const socialElement = Utils.elementParent(
@@ -359,17 +346,8 @@ export class VideoPlayer {
             // If the second child is still a <div>, we can assume this is a Story.
             const socialIconsElement = socialElement.firstChild?.firstChild;
             if (socialIconsElement instanceof HTMLDivElement) {
-                // There is another issue. Stories have a different layout and controls scheme when viewed on a slim
-                // device / viewport. Only the mobile layout has two clickable areas (next and previous buttons).
-                if (
-                    this.clickEventElement &&
-                    this.clickEventElement.childElementCount > 0
-                ) {
-                    this.videoType = VideoType.mobileStory;
-                } else {
-                    // No clickable elements are used. We are not in mobile layout.
-                    this.videoType = VideoType.story;
-                }
+                // No clickable elements are used. We are not in mobile layout.
+                this.videoType = VideoType.story;
                 this.replyElement = socialElement?.firstChild as HTMLElement;
             }
         }
