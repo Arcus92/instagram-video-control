@@ -104,15 +104,6 @@
     "option_warning_reload_required": {
         "message": "(reload required)"
     },
-    "debug_settings": {
-        "message": "Debugging"
-    },
-    "option_copy_settings": {
-        "message": "Copy settings into clipboard"
-    },
-    "option_copy_settings_successful": {
-        "message": "Successfully copied to the clipboard!"
-    },
     "view_on_github": {
         "message": "View on GitHub"
     },

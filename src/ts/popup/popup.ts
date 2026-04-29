@@ -112,20 +112,6 @@ export class Popup {
             (e) => (e.value = this.settings.videoDetectionVersion)
         );
 
-        // Copy settings into clipboard
-        this.initSettingButtonElement('option_copy_settings', async () => {
-            // Fetch all settings from the browser and write them to the clipboard. as JSON.
-            const data = await Browser.storage.sync.get();
-            const json = JSON.stringify(data);
-            await navigator.clipboard.writeText(json);
-
-            // Show a message that the settings were copied
-            this.setSettingHintVisibility(
-                'option_copy_settings_successful',
-                true
-            );
-        });
-
         this.updateOptionAutoUnmuteHint();
         this.updateOptionVideoDetectionMethodHint();
     }
