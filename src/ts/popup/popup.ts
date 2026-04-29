@@ -3,6 +3,7 @@ import { Settings, SettingsData } from '../shared/settings';
 import { VideoControlMode } from '../shared/videoControlMode';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
+import { VideoDetectionVersion } from '../shared/videoDetectionVersion';
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -102,19 +103,14 @@ export class Popup {
             (e) => (e.value = this.settings.videoDetectionMethod)
         );
 
-        // Copy settings into clipboard
-        this.initSettingButtonElement('option_copy_settings', async () => {
-            // Fetch all settings from the browser and write them to the clipboard. as JSON.
-            const data = await Browser.storage.sync.get();
-            const json = JSON.stringify(data);
-            await navigator.clipboard.writeText(json);
-
-            // Show a message that the settings were copied
-            this.setSettingHintVisibility(
-                'option_copy_settings_successful',
-                true
-            );
-        });
+        // Video detection version
+        this.initSettingSelectElement(
+            'option_video_detection_version',
+            (e) =>
+                (this.settings.videoDetectionVersion =
+                    e.value as VideoDetectionVersion),
+            (e) => (e.value = this.settings.videoDetectionVersion)
+        );
 
         this.updateOptionAutoUnmuteHint();
         this.updateOptionVideoDetectionMethodHint();

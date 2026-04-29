@@ -3,9 +3,10 @@ import { EventDispatcher } from './eventDispatcher';
 import { VideoControlMode } from './videoControlMode';
 import { Utils } from './utils';
 import { VideoAutoplayMode } from './videoAutoplayMode';
+import { VideoDetectionMethod } from './videoDetectionMethod';
+import { VideoDetectionVersion } from './videoDetectionVersion';
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
-import { VideoDetectionMethod } from './videoDetectionMethod';
 
 // Settings data struct.
 export interface SettingsData {
@@ -20,6 +21,7 @@ export interface SettingsData {
     autoHideControlBar: boolean;
     loopPlayback: boolean;
     videoDetectionMethod: VideoDetectionMethod;
+    videoDetectionVersion: VideoDetectionVersion;
 }
 
 // Handle extension settings.
@@ -41,6 +43,7 @@ export class Settings implements SettingsData {
         'autoHideControlBar',
         'loopPlayback',
         'videoDetectionMethod',
+        'videoDetectionVersion',
     ];
     private _videoControlMode: VideoControlMode = VideoControlMode.custom;
     private _lastPlaybackVolume: number = 0.0;
@@ -54,6 +57,8 @@ export class Settings implements SettingsData {
     private _loopPlayback: boolean = true;
     private _videoDetectionMethod: VideoDetectionMethod =
         VideoDetectionMethod.interval;
+    private _videoDetectionVersion: VideoDetectionVersion =
+        VideoDetectionVersion.latest;
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
@@ -176,6 +181,17 @@ export class Settings implements SettingsData {
         this.onChange('videoDetectionMethod');
     }
 
+    // Sets the video detection version.
+    public get videoDetectionVersion(): VideoDetectionVersion {
+        return this._videoDetectionVersion;
+    }
+    public set videoDetectionVersion(value: VideoDetectionVersion) {
+        if (this._videoDetectionVersion === value) return;
+        this._videoDetectionVersion = value;
+
+        this.onChange('videoDetectionVersion');
+    }
+
     //#endregion Data
 
     //#region Init
@@ -268,6 +284,10 @@ export class Settings implements SettingsData {
         if (typeof data.videoDetectionMethod === 'string') {
             this.videoDetectionMethod =
                 data.videoDetectionMethod as VideoDetectionMethod;
+        }
+        if (typeof data.videoDetectionVersion === 'string') {
+            this.videoDetectionVersion =
+                data.videoDetectionVersion as VideoDetectionVersion;
         }
     }
 

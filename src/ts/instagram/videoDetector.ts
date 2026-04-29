@@ -4,6 +4,8 @@ import { PlaybackManager } from './playbackManager';
 import { Browser } from '../shared/browser';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
 import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
+import { Resources } from './resources';
+import { VideoDetectionVersion } from '../shared/videoDetectionVersion';
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
@@ -100,7 +102,10 @@ export class VideoDetector implements PlaybackManager {
     public detectAddedVideoElement(video: HTMLVideoElement) {
         if (this.videosBySource[video.src]) return;
 
-        const player = new VideoPlayer(this, video);
+        const player = this.createVideoPlayer(
+            video,
+            Settings.shared.videoDetectionVersion
+        );
         this.videosBySource[video.src] = player;
 
         player.attach();
@@ -116,6 +121,16 @@ export class VideoDetector implements PlaybackManager {
         player.detach();
 
         delete this.videosBySource[video.src];
+    }
+
+    // Creates the video player from the given HTML video element.
+    public createVideoPlayer(
+        video: HTMLVideoElement,
+        version: VideoDetectionVersion
+    ): VideoPlayer {
+        const player = new VideoPlayer(this, video);
+        player.detectVideo(version);
+        return player;
     }
 
     //#region Settings
@@ -234,7 +249,7 @@ export class VideoDetector implements PlaybackManager {
         audio.style.display = 'none';
         audio.autoplay = true;
         audio.defaultMuted = false;
-        audio.src = Browser.getUrl('audio/silence.mp3');
+        audio.src = Resources.shared.soundSilence;
         document.body.appendChild(audio);
 
         const timerId = setTimeout(() => {

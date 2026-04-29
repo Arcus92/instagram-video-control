@@ -7,6 +7,7 @@ import { VideoController } from './controller/videoController';
 import { NativeVideoController } from './controller/nativeVideoController';
 import { CustomVideoController } from './controller/customVideoController';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
+import { VideoDetectionVersion } from '../shared/videoDetectionVersion';
 
 // The custom video player for Instagram video tags.
 export class VideoPlayer {
@@ -29,8 +30,6 @@ export class VideoPlayer {
 
     // Attaches to the video player and adds custom element and events.
     public attach() {
-        this.detectVideo();
-
         // Do not add controls to the Explore page. This page contains a grid of many small preview videos.
         if (this.videoType === VideoType.explore) return;
 
@@ -274,7 +273,124 @@ export class VideoPlayer {
     public mobileOverlayElement: HTMLElement | undefined;
 
     // Detects the video type and finds all native components.
-    private detectVideo() {
+    public detectVideo(version: VideoDetectionVersion) {
+        switch (version) {
+            case VideoDetectionVersion.legacy:
+                this.detectVideoLegacy();
+                break;
+            default:
+                this.detectVideoLatest();
+                break;
+        }
+    }
+
+    // Detection after the March/April 2026 website update.
+    private detectVideoLatest() {
+        // We assume Reels are the default.
+        this.videoType = VideoType.reel;
+
+        // The video element is now layered in multiple divs. We traversel upwards until there is a sibling.
+        let videoRootElement = this.videoElement as HTMLElement;
+        while (!videoRootElement.nextElementSibling) {
+            const nextElement = videoRootElement.parentElement as HTMLElement;
+            if (!nextElement) break;
+            videoRootElement = nextElement;
+        }
+
+        // It is not easy to detect the video type. We can only guess by checking the node parent chain for clues.
+        let currentElement = this.videoElement as HTMLElement;
+        while (currentElement) {
+            // If we find an <article> tag, we know this is a post in the main feed.
+            if (currentElement.tagName === 'ARTICLE') {
+                this.videoType = VideoType.post;
+                break;
+            }
+
+            // If we find an <a> tag, we know it must be on the Explore page.
+            if (currentElement.tagName === 'A') {
+                this.videoType = VideoType.story;
+                break;
+            }
+
+            currentElement = currentElement.parentNode as HTMLElement;
+        }
+
+        // Check for embedded videos.
+        this.isEmbedded =
+            videoRootElement.parentElement?.parentElement?.parentElement?.classList?.contains(
+                'EmbedVideo'
+            ) ?? false;
+
+        // Detect the native overlay.
+        this.overlayElement =
+            videoRootElement.nextElementSibling as HTMLElement;
+        this.nativeControlsElement = this.overlayElement
+            ?.firstChild as HTMLElement;
+
+        this.replyElement = undefined;
+        this.clickEventElement = undefined;
+
+        // Navigate to the social buttons. They are four layers deep in the structure.
+        // Instagram added a new layer, so we need an additional `firstChild`.
+        const socialElement = Utils.elementParent(
+            videoRootElement,
+            3
+        )?.nextElementSibling;
+
+        if (socialElement) {
+            // I was checking if a <textarea> exists in the reply section to detect stories. However, you can disable
+            // users from reply to your stories via a privacy setting. This creates Stories without textarea.
+            // The new detection is not as smart:
+            // - In Stories the Like and Share buttons are two div-layers deep followed by a <span>.
+            // - In Reals they are just one div-layer deep.
+            // If the second child is still a <div>, we can assume this is a Story.
+            const socialIconsElement = socialElement.firstChild?.firstChild;
+            if (socialIconsElement instanceof HTMLDivElement) {
+                // No clickable elements are used. We are not in mobile layout.
+                this.videoType = VideoType.story;
+                this.replyElement = socialElement?.firstChild as HTMLElement;
+            }
+        }
+
+        // Finds the native mute button in posts.
+        if (this.nativeControlsElement) {
+            // Normal posts have a simpler structure. All the different elements are on the first level.
+            if (this.nativeControlsElement.childElementCount > 1) {
+                // The position of the mute button can change. It is not always the second element.
+                // But it is the first element that contains a <button> tag.
+                // The second <button> tag is the marked accounts icon.
+                for (const element of this.nativeControlsElement.children) {
+                    if (!(element instanceof HTMLElement)) continue;
+
+                    // Check if this contains a button.
+                    if (element.firstChild instanceof HTMLButtonElement) {
+                        this.videoType = VideoType.post;
+                        this.muteElement = element;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Detect the mobile controls for Reels.
+        const mobileOverlayElement = Utils.elementParent(this.videoElement, 4)
+            ?.nextElementSibling?.firstChild as HTMLElement;
+        if (mobileOverlayElement) {
+            this.mobileOverlayElement = mobileOverlayElement;
+        }
+
+        // Finds the video root element used for fullscreen.
+        const videoRootParentElement = Utils.elementParent(
+            this.videoElement,
+            1
+        );
+        if (videoRootParentElement instanceof HTMLElement) {
+            this.videoRootElement = videoRootParentElement;
+        }
+    }
+
+    // Detection before the March/April 2026 website update.
+    private detectVideoLegacy() {
         // We assume Reels are the default.
         this.videoType = VideoType.reel;
 

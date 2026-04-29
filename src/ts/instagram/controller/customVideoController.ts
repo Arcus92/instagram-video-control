@@ -1,7 +1,7 @@
 import { VideoController } from './videoController';
 import { Utils } from '../../shared/utils';
-import { Browser } from '../../shared/browser';
 import { Settings } from '../../shared/settings';
+import { Resources } from '../resources';
 
 // The custom video controller.
 export class CustomVideoController extends VideoController {
@@ -298,16 +298,17 @@ export class CustomVideoController extends VideoController {
 
     //#region Update
 
-    private volumeBarDelayTimeout: number = -1;
-    private playbackSpeedDelayTimeout: number = -1;
+    private volumeBarDelayTimeout?: ReturnType<typeof setTimeout> = undefined;
+    private playbackSpeedDelayTimeout?: ReturnType<typeof setTimeout> =
+        undefined;
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
         CustomVideoController.setButtonIcon(
             this.playButtonElement,
             this.videoElement.paused
-                ? CustomVideoController.imagePlay
-                : CustomVideoController.imagePause
+                ? Resources.shared.imagePlay
+                : Resources.shared.imagePause
         );
     }
 
@@ -331,8 +332,8 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(
             this.muteButtonElement,
             this.videoElement.muted
-                ? CustomVideoController.imageSpeakerOff
-                : CustomVideoController.imageSpeakerOn
+                ? Resources.shared.imageSpeakerOff
+                : Resources.shared.imageSpeakerOn
         );
         this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`;
     }
@@ -342,8 +343,8 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(
             this.fullscreenButtonElement,
             document.fullscreenElement
-                ? CustomVideoController.imageFullscreenExit
-                : CustomVideoController.imageFullscreenEnter
+                ? Resources.shared.imageFullscreenExit
+                : Resources.shared.imageFullscreenEnter
         );
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
@@ -358,8 +359,8 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(
             this.pictureInPictureButtonElement,
             document.pictureInPictureElement
-                ? CustomVideoController.imagePictureInPictureExit
-                : CustomVideoController.imagePictureInPictureEnter
+                ? Resources.shared.imagePictureInPictureExit
+                : Resources.shared.imagePictureInPictureEnter
         );
 
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
@@ -374,7 +375,7 @@ export class CustomVideoController extends VideoController {
         if (!this.playbackSpeedButtonElement) return;
         CustomVideoController.setButtonIcon(
             this.playbackSpeedButtonElement,
-            CustomVideoController.imagePlaybackSpeed
+            Resources.shared.imagePlaybackSpeed
         );
 
         VideoController.setElementVisibility(
@@ -431,31 +432,6 @@ export class CustomVideoController extends VideoController {
     }
 
     //#endregion Update
-
-    //#region Resources
-
-    // Cache of the created image tags for the icons.
-    private static imagePlay = Browser.getUrl('images/play.svg');
-    private static imagePause = Browser.getUrl('images/pause.svg');
-    private static imageFullscreenEnter = Browser.getUrl(
-        'images/fullscreen-enter.svg'
-    );
-    private static imageFullscreenExit = Browser.getUrl(
-        'images/fullscreen-exit.svg'
-    );
-    private static imageSpeakerOn = Browser.getUrl('images/speaker-on.svg');
-    private static imageSpeakerOff = Browser.getUrl('images/speaker-off.svg');
-    private static imagePictureInPictureEnter = Browser.getUrl(
-        'images/picture-in-picture-enter.svg'
-    );
-    private static imagePictureInPictureExit = Browser.getUrl(
-        'images/picture-in-picture-exit.svg'
-    );
-    private static imagePlaybackSpeed = Browser.getUrl(
-        'images/playback-speed.svg'
-    );
-
-    //#endregion Resources
 
     //#region Utils
 
