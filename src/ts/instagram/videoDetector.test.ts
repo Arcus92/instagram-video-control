@@ -20,6 +20,17 @@ describe('videoDetector', () => {
         expect(player.videoType).toBe(VideoType.reel);
     });
 
+    test('detect video elements in Reels on mobile', async () => {
+        const dom = await JSDOM.fromFile('tests/data/reel-mobile.html');
+        const videoDetector = new VideoDetector();
+        const video = dom.window.document.getElementsByTagName('video')[0];
+        const player = videoDetector.createVideoPlayer(
+            video,
+            VideoDetectionVersion.latest
+        );
+        expect(player.videoType).toBe(VideoType.reel);
+    });
+
     test('detect video elements in Post', async () => {
         const dom = await JSDOM.fromFile('tests/data/story.html');
         const videoDetector = new VideoDetector();
