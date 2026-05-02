@@ -43,6 +43,9 @@ export abstract class VideoController {
     protected adjustVideoControlHeight(controlHeight: number) {
         if (!this.videoPlayer.overlayElement) return;
 
+        // Ensure the overlay stacks above any sibling hitbox divs Instagram may inject at the same level.
+        this.videoPlayer.overlayElement.style.zIndex = '1';
+
         // Removes the height of the controls from the inner overlay to not block mouse clicks.
         if (this.videoPlayer.overlayElement.firstChild instanceof HTMLElement) {
             this.videoPlayer.overlayElement.firstChild.style.height = `calc(100% - ${controlHeight}px)`;
@@ -89,6 +92,11 @@ export abstract class VideoController {
             this.videoPlayer.overlayElement.firstChild instanceof HTMLElement
         ) {
             this.videoPlayer.overlayElement.firstChild.style.height = '';
+        }
+
+        // Restore z-index
+        if (this.videoPlayer.overlayElement) {
+            this.videoPlayer.overlayElement.style.zIndex = '';
         }
 
         // Restore reply controls
