@@ -289,12 +289,37 @@ export class VideoPlayer {
         // We assume Reels are the default.
         this.videoType = VideoType.reel;
 
-        // The video element is now layered in multiple divs. We traversel upwards until there is a sibling.
+        // Walk up from the <video> looking for a parent that has a direct child with [data-instancekey].
+        // This is robust against Instagram injecting extra sibling elements (e.g. a click-to-mute hitbox div)
+        // between the video wrapper and the player overlay, which broke the old nextElementSibling walk.
         let videoRootElement = this.videoElement as HTMLElement;
-        while (!videoRootElement.nextElementSibling) {
-            const nextElement = videoRootElement.parentElement as HTMLElement;
-            if (!nextElement) break;
-            videoRootElement = nextElement;
+        let overlayFound: HTMLElement | null = null;
+
+        let searchParent = this.videoElement.parentElement as HTMLElement | null;
+        while (searchParent) {
+            const instanceKeyEl = searchParent.querySelector(':scope > [data-instancekey]');
+            if (instanceKeyEl instanceof HTMLElement) {
+                overlayFound = instanceKeyEl;
+                for (const child of searchParent.children) {
+                    if (child instanceof HTMLElement && child !== instanceKeyEl && child.contains(this.videoElement)) {
+                        videoRootElement = child;
+                        break;
+                    }
+                }
+                break;
+            }
+            searchParent = searchParent.parentElement as HTMLElement | null;
+        }
+
+        // Fallback to the original sibling-walk for older DOM layouts.
+        if (!overlayFound) {
+            videoRootElement = this.videoElement as HTMLElement;
+            while (!videoRootElement.nextElementSibling) {
+                const nextElement = videoRootElement.parentElement as HTMLElement;
+                if (!nextElement) break;
+                videoRootElement = nextElement;
+            }
+            overlayFound = videoRootElement.nextElementSibling as HTMLElement;
         }
 
         // It is not easy to detect the video type. We can only guess by checking the node parent chain for clues.
@@ -322,8 +347,7 @@ export class VideoPlayer {
             ) ?? false;
 
         // Detect the native overlay.
-        this.overlayElement =
-            videoRootElement.nextElementSibling as HTMLElement;
+        this.overlayElement = overlayFound ?? undefined;
         this.nativeControlsElement = this.overlayElement
             ?.firstChild as HTMLElement;
 
