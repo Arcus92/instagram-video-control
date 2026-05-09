@@ -6,6 +6,7 @@
         "outDir": "./dist/js/",
         "sourceMap": true,
         "types": ["chrome", "firefox-webext-browser"],
+        "typeRoots": ["./node_modules/@types", "./src/ts/types"],
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,

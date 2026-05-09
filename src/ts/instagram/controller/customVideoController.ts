@@ -27,8 +27,8 @@ export class CustomVideoController extends VideoController {
     ];
 
     public create() {
-        if (!this.videoPlayer.overlayElement) return;
-        const video = this.videoElement;
+        const videoElement = this.videoElement;
+        if (!videoElement) return;
 
         const controlHeight = 32;
 
@@ -40,7 +40,6 @@ export class CustomVideoController extends VideoController {
 
         const contentElement = document.createElement('div');
         contentElement.classList.add('ivc-controls-content');
-        this.videoControlElement.appendChild(contentElement);
 
         // Play button
         this.playButtonElement = document.createElement('button');
@@ -57,10 +56,10 @@ export class CustomVideoController extends VideoController {
                 this.videoPlayer.setUserInteractedWithVideo();
             }
 
-            if (video.paused) {
-                video.play().then();
+            if (videoElement.paused) {
+                videoElement.play().then();
             } else {
-                video.pause();
+                videoElement.pause();
             }
         };
 
@@ -74,11 +73,11 @@ export class CustomVideoController extends VideoController {
         contentElement.appendChild(this.muteButtonElement);
 
         this.muteButtonElement.onclick = () => {
-            video.muted = !video.muted;
+            videoElement.muted = !videoElement.muted;
 
             // Fallback when volume is still set to zero
-            if (!video.muted && video.volume === 0) {
-                video.volume = 0.1;
+            if (!videoElement.muted && videoElement.volume === 0) {
+                videoElement.volume = 0.1;
             }
         };
         this.muteButtonElement.onmouseenter = () => {
@@ -112,8 +111,8 @@ export class CustomVideoController extends VideoController {
             this.volumeBarProgressElement,
             /* invokeOnDrag */ true,
             (value) => {
-                video.volume = value;
-                video.muted = video.volume <= 0;
+                videoElement.volume = value;
+                videoElement.muted = videoElement.volume <= 0;
             }
         );
         this.volumeBarElement.onmouseenter = () => {
@@ -154,7 +153,7 @@ export class CustomVideoController extends VideoController {
             this.seekBarProgressElement,
             /* invokeOnDrag */ false,
             (value) => {
-                video.currentTime = value * video.duration;
+                videoElement.currentTime = value * videoElement.duration;
             }
         );
 
@@ -207,7 +206,7 @@ export class CustomVideoController extends VideoController {
             this.playbackSpeedDropDownElement.appendChild(playbackSpeedElement);
 
             playbackSpeedElement.onpointerdown = (ev) => {
-                this.videoElement.playbackRate = playbackSpeed;
+                videoElement.playbackRate = playbackSpeed;
 
                 // Hide the dropdown once a value is clicked for mobile
                 if (ev.pointerType === 'touch' || ev.pointerType === 'pen') {
@@ -241,13 +240,15 @@ export class CustomVideoController extends VideoController {
         contentElement.appendChild(this.fullscreenButtonElement);
 
         this.fullscreenButtonElement.onclick = () => {
-            if (!this.videoPlayer.videoRootElement) return;
+            const videoRootElement =
+                this.videoPlayer.videoRootElementRef?.deref();
+            if (!videoRootElement) return;
 
             // Toggle fullscreen
             if (document.fullscreenElement) {
                 document.exitFullscreen().then();
             } else {
-                this.videoPlayer.videoRootElement.requestFullscreen().then();
+                videoRootElement.requestFullscreen().then();
             }
         };
 
@@ -259,6 +260,9 @@ export class CustomVideoController extends VideoController {
         this.updatePictureInPictureControl();
         this.updatePlaybackSpeedControl();
         this.updateControlBarVisibility();
+
+        // Add this to the DOM after everything is added to reduce DOM modifications.
+        this.videoControlElement.appendChild(contentElement);
     }
 
     //#endregion Control
@@ -304,22 +308,25 @@ export class CustomVideoController extends VideoController {
 
     private updatePlayControl() {
         if (!this.playButtonElement) return;
+        const videoElement = this.videoElement;
+        if (!videoElement) return;
         CustomVideoController.setButtonIcon(
             this.playButtonElement,
-            this.videoElement.paused
-                ? Resources.shared.imagePlay
-                : Resources.shared.imagePause
+            videoElement.paused
+                ? Resources.shared.urls.images.play
+                : Resources.shared.urls.images.pause
         );
     }
 
     private updatePositionControl() {
         if (!this.seekBarProgressElement || !this.positionTextElement) return;
+        const videoElement = this.videoElement;
+        if (!videoElement) return;
 
-        const progress =
-            this.videoElement.currentTime / this.videoElement.duration;
+        const progress = videoElement.currentTime / videoElement.duration;
         this.seekBarProgressElement.style.width = `${Math.round(progress * 100)}%`;
 
-        this.positionTextElement.innerText = `${Utils.formatTime(this.videoElement.currentTime)} / ${Utils.formatTime(this.videoElement.duration)}`;
+        this.positionTextElement.innerText = `${Utils.formatTime(videoElement.currentTime)} / ${Utils.formatTime(this.videoElement.duration)}`;
 
         VideoController.setElementVisibility(
             this.positionTextElement,
@@ -329,13 +336,16 @@ export class CustomVideoController extends VideoController {
 
     private updateVolumeControl() {
         if (!this.muteButtonElement || !this.volumeBarProgressElement) return;
+        const videoElement = this.videoElement;
+        if (!videoElement) return;
+
         CustomVideoController.setButtonIcon(
             this.muteButtonElement,
-            this.videoElement.muted
-                ? Resources.shared.imageSpeakerOff
-                : Resources.shared.imageSpeakerOn
+            videoElement.muted
+                ? Resources.shared.urls.images.speakerOff
+                : Resources.shared.urls.images.speakerOn
         );
-        this.volumeBarProgressElement.style.width = `${Math.round(this.videoElement.volume * 100)}%`;
+        this.volumeBarProgressElement.style.width = `${Math.round(videoElement.volume * 100)}%`;
     }
 
     private updateFullscreenControl() {
@@ -343,8 +353,8 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(
             this.fullscreenButtonElement,
             document.fullscreenElement
-                ? Resources.shared.imageFullscreenExit
-                : Resources.shared.imageFullscreenEnter
+                ? Resources.shared.urls.images.fullscreenExit
+                : Resources.shared.urls.images.fullscreenEnter
         );
 
         // Only show the fullscreen button if it is available in the current context. It can be disabled by iframes.
@@ -359,8 +369,8 @@ export class CustomVideoController extends VideoController {
         CustomVideoController.setButtonIcon(
             this.pictureInPictureButtonElement,
             document.pictureInPictureElement
-                ? Resources.shared.imagePictureInPictureExit
-                : Resources.shared.imagePictureInPictureEnter
+                ? Resources.shared.urls.images.pictureInPictureExit
+                : Resources.shared.urls.images.pictureInPictureEnter
         );
 
         // Only show the PiP button if it is available in the current context. It is not available in Firefox!
@@ -373,9 +383,12 @@ export class CustomVideoController extends VideoController {
 
     private updatePlaybackSpeedControl() {
         if (!this.playbackSpeedButtonElement) return;
+        const videoElement = this.videoElement;
+        if (!videoElement) return;
+
         CustomVideoController.setButtonIcon(
             this.playbackSpeedButtonElement,
-            Resources.shared.imagePlaybackSpeed
+            Resources.shared.urls.images.playbackSpeed
         );
 
         VideoController.setElementVisibility(
@@ -390,7 +403,7 @@ export class CustomVideoController extends VideoController {
             if (!element) continue;
             element.classList.toggle(
                 'active',
-                playbackSpeed === this.videoElement.playbackRate
+                playbackSpeed === videoElement.playbackRate
             );
         }
     }
@@ -442,7 +455,7 @@ export class CustomVideoController extends VideoController {
         img.src = url;
     }
 
-    // Handles click and drag events to the bars elements (e.g. seekbar, volume bar).
+    // Handles click and drag events to the bar elements (e.g. seekbar, volume bar).
     private static addDragEventToBar(
         element: HTMLElement,
         elementBackground: HTMLElement,

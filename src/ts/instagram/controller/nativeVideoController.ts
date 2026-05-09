@@ -5,8 +5,6 @@ export class NativeVideoController extends VideoController {
     //#region Control
 
     public create() {
-        if (!this.videoPlayer.overlayElement) return;
-
         // The controls in Chrome are higher than in Firefox.
         const controlHeight = window.chrome ? 70 : 40;
 
