@@ -24,19 +24,45 @@ export abstract class VideoController {
     // The main control background element.
     protected videoControlElement: HTMLElement | undefined;
 
+    private videoControlElementIsPortal = false;
+
     // Create the control background.
-    protected createVideoControlBackground() {
+    protected createVideoControlBackground(portal = false) {
         if (!this.videoPlayer.overlayElement) return;
 
+        this.videoControlElementIsPortal = portal;
         this.videoControlElement = document.createElement('div');
         this.videoControlElement.classList.add('ivc-controls');
+        if (portal) {
+            this.videoControlElement.classList.add('ivc-controls-portal');
+        }
         if (this.videoPlayer.videoType === VideoType.reel) {
             this.videoControlElement.classList.add('ivc-reel');
         }
         if (this.videoPlayer.videoType === VideoType.story) {
             this.videoControlElement.classList.add('ivc-story');
         }
-        this.videoPlayer.overlayElement.appendChild(this.videoControlElement);
+        if (portal) {
+            document.body.appendChild(this.videoControlElement);
+            this.updateVideoControlPosition();
+        } else {
+            this.videoPlayer.overlayElement.appendChild(
+                this.videoControlElement
+            );
+        }
+    }
+
+    protected updateVideoControlPosition() {
+        if (!this.videoControlElement || !this.videoControlElementIsPortal) {
+            return;
+        }
+
+        const rect = this.videoElement.getBoundingClientRect();
+        this.videoControlElement.style.left = `${Math.round(rect.left)}px`;
+        this.videoControlElement.style.width = `${Math.round(rect.width)}px`;
+        this.videoControlElement.style.top = `${Math.round(
+            rect.bottom - this.videoControlElement.offsetHeight
+        )}px`;
     }
 
     // Adjust the control bar height for the background and all native elements.

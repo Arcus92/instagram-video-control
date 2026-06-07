@@ -12,8 +12,8 @@ export class VideoDetector implements PlaybackManager {
     // The extension settings.
     private readonly settings = Settings.shared;
 
-    // List of all video players by source.
-    private videosBySource: { [source: string]: VideoPlayer } = {};
+    // List of all video players by element.
+    private videosByElement: Map<HTMLVideoElement, VideoPlayer> = new Map();
 
     // Initialize the video detector.
     public async init() {
@@ -82,31 +82,22 @@ export class VideoDetector implements PlaybackManager {
         }
 
         // Detect removed videos...
-        for (const source in this.videosBySource) {
-            let found = false;
-            for (let n = 0; n < videos.length; n++) {
-                if (videos[n].src === source) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) continue;
+        for (const [videoElement, videoPlayer] of this.videosByElement) {
+            if (Array.prototype.includes.call(videos, videoElement)) continue;
 
-            const video = this.videosBySource[source];
-            video.detach();
-
-            delete this.videosBySource[source];
+            videoPlayer.detach();
+            this.videosByElement.delete(videoElement);
         }
     }
 
     public detectAddedVideoElement(video: HTMLVideoElement) {
-        if (this.videosBySource[video.src]) return;
+        if (this.videosByElement.has(video)) return;
 
         const player = this.createVideoPlayer(
             video,
             Settings.shared.videoDetectionVersion
         );
-        this.videosBySource[video.src] = player;
+        this.videosByElement.set(video, player);
 
         player.attach();
 
@@ -116,11 +107,11 @@ export class VideoDetector implements PlaybackManager {
     }
 
     public detectRemovedVideoElement(video: HTMLVideoElement) {
-        const player = this.videosBySource[video.src];
+        const player = this.videosByElement.get(video);
         if (!player) return;
         player.detach();
 
-        delete this.videosBySource[video.src];
+        this.videosByElement.delete(video);
     }
 
     // Creates the video player from the given HTML video element.
@@ -154,16 +145,14 @@ export class VideoDetector implements PlaybackManager {
 
     // Notify all players that a control setting was changed.
     private updateControlSettingForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videosByElement.values()) {
             videoPlayer.updateControlSetting();
         }
     }
 
     // Notify all players that a control mode was changed.
     private updateControlModeForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videosByElement.values()) {
             videoPlayer.updateControlMode();
         }
     }
@@ -182,8 +171,7 @@ export class VideoDetector implements PlaybackManager {
 
     // Applies the stored volume to all registered videos.
     private updateVolumeForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videosByElement.values()) {
             this.updateVolumeForVideo(videoPlayer.videoElement);
         }
     }
@@ -207,8 +195,7 @@ export class VideoDetector implements PlaybackManager {
 
     // Applies the stored playback speed to all registered videos.
     private updatePlaybackSpeedForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videosByElement.values()) {
             this.updatePlaybackSpeedForVideo(videoPlayer.videoElement);
         }
     }

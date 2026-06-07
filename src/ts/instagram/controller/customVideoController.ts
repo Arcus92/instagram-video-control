@@ -26,20 +26,25 @@ export class CustomVideoController extends VideoController {
         0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0,
     ];
 
+    private static documentControlEventGuardAdded = false;
+
     public create() {
         if (!this.videoPlayer.overlayElement) return;
         const video = this.videoElement;
 
         const controlHeight = 32;
 
-        this.createVideoControlBackground();
+        this.createVideoControlBackground(true);
         this.adjustVideoControlHeight(controlHeight);
 
         // Creating the actual player...
         if (!this.videoControlElement) return;
 
+        CustomVideoController.addDocumentControlEventGuard();
+
         const contentElement = document.createElement('div');
         contentElement.classList.add('ivc-controls-content');
+        CustomVideoController.addControlEventShield(contentElement);
         this.videoControlElement.appendChild(contentElement);
 
         // Play button
@@ -154,7 +159,11 @@ export class CustomVideoController extends VideoController {
             this.seekBarProgressElement,
             /* invokeOnDrag */ false,
             (value) => {
-                video.currentTime = value * video.duration;
+                CustomVideoController.seekVideo(
+                    this.videoPlayer,
+                    video,
+                    value
+                );
             }
         );
 
@@ -259,6 +268,9 @@ export class CustomVideoController extends VideoController {
         this.updatePictureInPictureControl();
         this.updatePlaybackSpeedControl();
         this.updateControlBarVisibility();
+
+        window.addEventListener('scroll', this.onWindowLayoutChange, true);
+        window.addEventListener('resize', this.onWindowLayoutChange);
     }
 
     //#endregion Control
@@ -266,12 +278,15 @@ export class CustomVideoController extends VideoController {
     //#region Events
 
     public override onPlay() {
+        this.updateVideoControlPosition();
         this.updatePlayControl();
     }
     public override onPause() {
+        this.updateVideoControlPosition();
         this.updatePlayControl();
     }
     public override onTimeUpdate() {
+        this.updateVideoControlPosition();
         this.updatePositionControl();
     }
     public override onVolumeChange() {
@@ -287,12 +302,23 @@ export class CustomVideoController extends VideoController {
         this.updatePictureInPictureControl();
     }
     public onUpdateSettings() {
+        this.updateVideoControlPosition();
         this.updatePositionControl();
         this.updateFullscreenControl();
         this.updatePictureInPictureControl();
         this.updatePlaybackSpeedControl();
         this.updateControlBarVisibility();
     }
+
+    public override remove() {
+        window.removeEventListener('scroll', this.onWindowLayoutChange, true);
+        window.removeEventListener('resize', this.onWindowLayoutChange);
+        super.remove();
+    }
+
+    private onWindowLayoutChange = () => {
+        this.updateVideoControlPosition();
+    };
 
     //#endregion Events
 
@@ -442,6 +468,86 @@ export class CustomVideoController extends VideoController {
         img.src = url;
     }
 
+    private static consumeEvent(event: Event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+    }
+
+    private static addDocumentControlEventGuard() {
+        if (CustomVideoController.documentControlEventGuardAdded) return;
+        CustomVideoController.documentControlEventGuardAdded = true;
+
+        const eventNames = [
+            'click',
+            'dblclick',
+            'mousedown',
+            'mouseup',
+            'pointerdown',
+            'pointerup',
+            'pointercancel',
+            'touchstart',
+            'touchend',
+            'touchcancel',
+        ];
+
+        for (const eventName of eventNames) {
+            document.addEventListener(
+                eventName,
+                (event) => {
+                    const target = event.target;
+                    if (!(target instanceof Element)) return;
+                    if (!target.closest('.ivc-controls')) return;
+
+                    event.preventDefault();
+                },
+                true
+            );
+        }
+    }
+
+    private static addControlEventShield(element: HTMLElement) {
+        const eventNames = [
+            'click',
+            'dblclick',
+            'mousedown',
+            'mouseup',
+            'pointerdown',
+            'pointerup',
+            'pointercancel',
+            'touchstart',
+            'touchend',
+            'touchcancel',
+        ];
+
+        for (const eventName of eventNames) {
+            element.addEventListener(
+                eventName,
+                (event) => CustomVideoController.consumeEvent(event),
+                false
+            );
+        }
+    }
+
+    private static seekVideo(
+        videoPlayer: { setUserInteractedWithVideo: () => void },
+        video: HTMLVideoElement,
+        value: number
+    ) {
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+
+        videoPlayer.setUserInteractedWithVideo();
+        video.currentTime = value * video.duration;
+
+        if (video.paused) {
+            video.dispatchEvent(new Event('timeupdate'));
+            video
+                .play()
+                .then(() => video.pause())
+                .catch(() => video.pause());
+        }
+    }
+
     // Handles click and drag events to the bars elements (e.g. seekbar, volume bar).
     private static addDragEventToBar(
         element: HTMLElement,
@@ -452,15 +558,15 @@ export class CustomVideoController extends VideoController {
     ) {
         // Sub function to submit the current bar value
         const onValueChanged = (
-            event: MouseEvent | TouchEvent,
+            event: MouseEvent | TouchEvent | PointerEvent,
             invoke: boolean
         ) => {
             const rect = elementBackground.getBoundingClientRect();
 
             const clientX =
-                event instanceof MouseEvent
-                    ? event.clientX
-                    : event.changedTouches[0].clientX;
+                'changedTouches' in event
+                    ? event.changedTouches[0].clientX
+                    : event.clientX;
             const relativeX = clientX - rect.left;
             const value = Math.max(Math.min(relativeX / rect.width, 1), 0);
 
@@ -472,33 +578,43 @@ export class CustomVideoController extends VideoController {
         // Handle click event
 
         element.addEventListener('click', (event) => {
+            CustomVideoController.consumeEvent(event);
             onValueChanged(event, true);
         });
 
         // Handle drag event
 
         let isDragging = false;
-        const onDragStart = () => {
+        const onDragStart = (
+            event: MouseEvent | TouchEvent | PointerEvent
+        ) => {
+            CustomVideoController.consumeEvent(event);
             isDragging = true;
         };
-        const onDragEnd = (event: MouseEvent | TouchEvent) => {
+        const onDragEnd = (event: MouseEvent | TouchEvent | PointerEvent) => {
             if (!isDragging) return;
+            CustomVideoController.consumeEvent(event);
             onValueChanged(event, true);
             isDragging = false;
         };
-        const onDrag = (event: MouseEvent | TouchEvent) => {
+        const onDrag = (event: MouseEvent | TouchEvent | PointerEvent) => {
             if (!isDragging) return;
+            CustomVideoController.consumeEvent(event);
             onValueChanged(event, invokeOnDrag);
         };
 
         element.addEventListener('mousedown', onDragStart);
         element.addEventListener('touchstart', onDragStart);
+        element.addEventListener('pointerdown', onDragStart);
 
         element.addEventListener('mousemove', onDrag);
         element.addEventListener('touchmove', onDrag);
+        element.addEventListener('pointermove', onDrag);
 
         element.addEventListener('mouseup', onDragEnd);
         element.addEventListener('touchend', onDragEnd);
+        element.addEventListener('pointerup', onDragEnd);
+        element.addEventListener('pointercancel', onDragEnd);
         element.addEventListener('mouseleave', onDragEnd);
     }
 

@@ -23,9 +23,18 @@
     background: rgba(38, 38, 38, 0.6);
 }
 
+.ivc-controls.ivc-controls-portal {
+    position: fixed;
+    right: auto;
+    bottom: auto;
+    z-index: 2147483647;
+}
+
 .ivc-controls-content {
     display: flex;
     flex-direction: row;
+
+    pointer-events: auto;
 
     /* Limit the with and center the controls for full screen */
     max-width: 640px;
