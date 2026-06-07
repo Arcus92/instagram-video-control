@@ -52,4 +52,39 @@ describe('videoDetector', () => {
         );
         expect(player.videoType).toBe(VideoType.post);
     });
+
+    test('detect feed video wrapped in media link as Post', async () => {
+        const dom = await JSDOM.fromFile(
+            'tests/data/home-feed-post-link-wrapper.html'
+        );
+        const videoDetector = new VideoDetector();
+        const video = dom.window.document.getElementsByTagName('video')[0];
+        const player = videoDetector.createVideoPlayer(
+            video,
+            VideoDetectionVersion.latest
+        );
+        expect(player.videoType).toBe(VideoType.post);
+    });
+
+    test('detect separate video elements with the same source', () => {
+        const dom = new JSDOM(`
+            <video src="blob:https://www.instagram.com/shared"></video>
+            <video src="blob:https://www.instagram.com/shared"></video>
+        `);
+        Object.assign(global, { document: dom.window.document });
+
+        const videoDetector = new VideoDetector();
+        const attachedVideos: HTMLVideoElement[] = [];
+        videoDetector.createVideoPlayer = (video: HTMLVideoElement) =>
+            ({
+                videoElement: video,
+                attach: () => attachedVideos.push(video),
+            }) as never;
+
+        const videos = dom.window.document.getElementsByTagName('video');
+        videoDetector.detectAddedVideoElement(videos[0]);
+        videoDetector.detectAddedVideoElement(videos[1]);
+
+        expect(attachedVideos).toEqual([videos[0], videos[1]]);
+    });
 });

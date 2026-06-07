@@ -20,6 +20,9 @@ export class VideoPlayer {
     // Has the user already interacted with the video player?
     private userInteractedWithVideo: boolean = false;
 
+    // Has initial unwanted autoplay already been stopped?
+    private autoplayStoppedOnce: boolean = false;
+
     public constructor(
         playbackManager: PlaybackManager,
         videoElement: HTMLVideoElement
@@ -298,6 +301,8 @@ export class VideoPlayer {
         }
 
         // It is not easy to detect the video type. We can only guess by checking the node parent chain for clues.
+        // Current feed posts can wrap the media in an <a>, so scan the complete chain before deciding.
+        let hasAnchorParent = false;
         let currentElement = this.videoElement as HTMLElement;
         while (currentElement) {
             // If we find an <article> tag, we know this is a post in the main feed.
@@ -306,13 +311,16 @@ export class VideoPlayer {
                 break;
             }
 
-            // If we find an <a> tag, we know it must be on the Explore page.
+            // If we find an <a> tag without an article parent, it is a Story-like linked media surface.
             if (currentElement.tagName === 'A') {
-                this.videoType = VideoType.story;
-                break;
+                hasAnchorParent = true;
             }
 
-            currentElement = currentElement.parentNode as HTMLElement;
+            currentElement = currentElement.parentElement as HTMLElement;
+        }
+
+        if (this.videoType !== VideoType.post && hasAnchorParent) {
+            this.videoType = VideoType.story;
         }
 
         // Check for embedded videos.
@@ -582,7 +590,10 @@ export class VideoPlayer {
             !this.userInteractedWithVideo
         ) {
             this.videoElement.pause();
-            this.videoElement.currentTime = 0; // Jump back to start
+            if (!this.autoplayStoppedOnce) {
+                this.videoElement.currentTime = 0; // Jump back to start
+                this.autoplayStoppedOnce = true;
+            }
             this.videoElement.muted = false; // Continue with audio
         }
     }
