@@ -4,7 +4,7 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 module.exports = {
     entry: {
         instagram: './src/ts/instagram/index.ts',
-        inject: './src/ts/instagram/inject.ts',
+        extension: './src/ts/extension/index.ts',
         popup: './src/ts/popup/index.ts',
     },
     mode: 'development',

@@ -1,26 +1,59 @@
 import { Settings, SettingsData } from '../shared/settings';
 import { VideoPlayer } from './videoPlayer';
 import { PlaybackManager } from './playbackManager';
-import { Browser } from '../shared/browser';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
-import { VideoDetectionMethod } from '../shared/videoDetectionMethod';
-import { Resources } from './resources';
-import { VideoDetectionVersion } from '../shared/videoDetectionVersion';
+import { Resources, ResourceUrls } from './resources';
+import { ReactHelper } from '../react/reactHelper';
+import { ReactFiber } from '../react/reactFiber';
+import { ReactDevTools } from '../react/reactDevTools';
+import { ReactTag } from '../react/reactTag';
+import { ReactFlags } from '../react/reactFlags';
+import { ReactRoot } from '../react/reactRoot';
+import { ReactDevToolsHook } from '../react/reactDevToolsHook';
 
 // Detects changes of <video> tags and attaches the custom video players to the Instagram page.
 export class VideoDetector implements PlaybackManager {
     // The extension settings.
     private readonly settings = Settings.shared;
 
-    // List of all video players by source.
-    private videosBySource: { [source: string]: VideoPlayer } = {};
+    // List of all video players by source element.
+    private videoPlayersByElement = new WeakMap<HTMLElement, VideoPlayer>();
+    private videoPlayers: VideoPlayer[] = [];
 
     // Initialize the video detector.
     public async init() {
-        // Loads the settings and subscribe for setting changes.
-        await this.settings.init();
-        this.settings.changed.subscribe((name) => this.onSettingChanged(name));
+        this.startMessageHandling();
+    }
 
+    //#region Messaging
+
+    // Adding the message handler.
+    private startMessageHandling() {
+        window.addEventListener('message', (ev) => this.onMessageHandler(ev));
+    }
+
+    // Handling messages from the extension.
+    private onMessageHandler(ev: MessageEvent) {
+        if (typeof ev.data !== 'object' || !ev.data.type) return;
+        switch (ev.data.type) {
+            // Handle extension initialization
+            case 'vci-initialized': {
+                const resourceUrls: ResourceUrls = ev.data.resourceUrls;
+                Resources.shared.init(resourceUrls);
+
+                this.onInitialized();
+                break;
+            }
+
+            // Handle setting updates
+            case 'vci-settings':
+                this.settings.applyChanges(ev.data.data);
+                break;
+        }
+    }
+
+    // The extension was initialized.
+    private onInitialized() {
         // If the user really want's to unmute the videos on page-load, we let him do that.
         if (this.settings.autoplayMode === VideoAutoplayMode.unmuted) {
             this.checkAndEnableAutoplayWithAudio();
@@ -30,108 +63,113 @@ export class VideoDetector implements PlaybackManager {
             this.lastPlaybackMuted = false;
         }
 
-        switch (this.settings.videoDetectionMethod) {
-            case VideoDetectionMethod.interval:
-                this.startIntervalDetection();
-                break;
-            case VideoDetectionMethod.observer:
-                this.startMutationObserverDetection();
-                break;
-        }
+        this.registerReactHooks();
+
+        // Listen to setting changes.
+        this.settings.changed.subscribe((name) => this.onSettingChanged(name));
     }
 
-    // Starts the video detector with a fixed time interval.
-    private startIntervalDetection() {
-        // Instagram is a single-page-application and loads posts asynchronously. We'll check every second for new videos.
-        // MutationObserver is too slow, because there are to many nodes and changes on that site.
-        setInterval(() => {
-            this.checkForVideosAndAttachControls();
-        }, 1000);
+    //#region Messaging
+
+    //#region Detector
+
+    private registerReactHooks() {
+        const hook: ReactDevToolsHook = {
+            inject: () => {
+                // Must be defined for React execute the other hooks.
+            },
+            onCommitFiberRoot: (rendererId: number, root: ReactRoot) => {
+                // Only collect new or updated nodes.
+                const subtreeFlagFilter =
+                    ReactFlags.Placement | ReactFlags.Update | ReactFlags.Ref;
+
+                // First level: Find all
+                ReactHelper.traversal(root.current, {
+                    filter: (fiber) => {
+                        // Only collect the first render of the fiber.
+                        if (fiber.alternate) return false;
+                        // Filter function by name.
+                        if (fiber.tag !== ReactTag.FunctionComponent)
+                            return false;
+                        const name = ReactHelper.getName(fiber);
+                        return name?.endsWith('[from PolarisVideo.react]');
+                    },
+                    subtreeFilter: (fiber) =>
+                        (fiber.subtreeFlags & subtreeFlagFilter) !== 0,
+                    callback: (fiber) => {
+                        // Wait a few ticks for React to spawn the required elements.
+                        setTimeout(() => {
+                            this.tryAttachPolarisVideo(fiber);
+                        }, 100);
+                    },
+                });
+            },
+            onCommitFiberUnmount: (rendererId: number, fiber: ReactFiber) => {
+                // Filter function by name.
+                if (fiber.tag !== ReactTag.FunctionComponent) return false;
+                const name = ReactHelper.getName(fiber);
+                if (!name?.endsWith('[from PolarisVideo.react]')) return;
+                this.tryDetachPolarisVideo(fiber);
+            },
+        };
+        ReactDevTools.register(hook);
     }
 
-    // Starts the video detection with a MutationObserver.
-    private startMutationObserverDetection() {
-        // Added a JavaScript element to inject code into the original page that
-        // doesn't operate in the shadow DOM and can detect changes all elements
-        // on the page.
-        const scriptElement = document.createElement('script');
-        scriptElement.src = Browser.getUrl('js/inject.js');
-        scriptElement.type = 'module';
-        scriptElement.onload = () => scriptElement.remove();
-        (document.head || document.documentElement).append(scriptElement);
-
-        // Adding the message handler.
-        window.addEventListener('message', (ev) => this.onMessageHandler(ev));
-    }
-
-    // Handling messages from the page.
-    private onMessageHandler(ev: MessageEvent) {
-        // Run video detection
-        if (ev.data.type === 'ivcDetectVideos') {
-            this.checkForVideosAndAttachControls();
-        }
-    }
-
-    // Checks the page for new or removed video players and attaches / detaches them.
-    private checkForVideosAndAttachControls() {
-        const videos = document.getElementsByTagName('video');
-
-        // Detect new videos...
-        for (let i = 0; i < videos.length; i++) {
-            this.detectAddedVideoElement(videos[i]);
-        }
-
-        // Detect removed videos...
-        for (const source in this.videosBySource) {
-            let found = false;
-            for (let n = 0; n < videos.length; n++) {
-                if (videos[n].src === source) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) continue;
-
-            const video = this.videosBySource[source];
-            video.detach();
-
-            delete this.videosBySource[source];
-        }
-    }
-
-    public detectAddedVideoElement(video: HTMLVideoElement) {
-        if (this.videosBySource[video.src]) return;
-
-        const player = this.createVideoPlayer(
-            video,
-            Settings.shared.videoDetectionVersion
-        );
-        this.videosBySource[video.src] = player;
-
-        player.attach();
-
-        // Update the initial volume and speed.
-        this.updateVolumeForVideo(player.videoElement);
-        this.updatePlaybackSpeedForVideo(player.videoElement);
-    }
-
-    public detectRemovedVideoElement(video: HTMLVideoElement) {
-        const player = this.videosBySource[video.src];
-        if (!player) return;
-        player.detach();
-
-        delete this.videosBySource[video.src];
-    }
-
-    // Creates the video player from the given HTML video element.
-    public createVideoPlayer(
-        video: HTMLVideoElement,
-        version: VideoDetectionVersion
-    ): VideoPlayer {
-        const player = new VideoPlayer(this, video);
-        player.detectVideo(version);
+    // Creates the video player from the given polaris player.
+    public tryDetectVideoPlayer(
+        polarisFiber: ReactFiber
+    ): VideoPlayer | undefined {
+        const player = new VideoPlayer(this);
+        if (!player.tryDetect(polarisFiber)) return;
         return player;
     }
+
+    private tryAttachPolarisVideo(polarisFiber: ReactFiber) {
+        const polarisElement = ReactHelper.getNodeFromFiber(polarisFiber);
+        if (!polarisElement) {
+            return;
+        }
+
+        // Detect the video player elements.
+        const videoPlayer = this.tryDetectVideoPlayer(polarisFiber);
+        if (!videoPlayer) {
+            return;
+        }
+
+        // Element is already registered.
+        if (this.videoPlayersByElement.get(polarisElement)) return;
+
+        // Add to lists.
+        this.videoPlayers.push(videoPlayer);
+        this.videoPlayersByElement.set(polarisElement, videoPlayer);
+
+        videoPlayer.attach();
+
+        // Update the initial volume and speed.
+        this.updateVolumeForVideo(videoPlayer);
+        this.updatePlaybackSpeedForVideo(videoPlayer);
+    }
+
+    private tryDetachPolarisVideo(polarisFiber: ReactFiber) {
+        const polarisElement = ReactHelper.getNodeFromFiber(polarisFiber);
+        if (!polarisElement) {
+            return;
+        }
+
+        const videoPlayer = this.videoPlayersByElement.get(polarisElement);
+        if (!videoPlayer) {
+            return;
+        }
+
+        videoPlayer.detach();
+
+        // Remove from lists.
+        const index = this.videoPlayers.indexOf(videoPlayer);
+        if (index >= 0) this.videoPlayers.splice(index, 1);
+        this.videoPlayersByElement.delete(polarisElement);
+    }
+
+    //#endregion Detector
 
     //#region Settings
 
@@ -142,6 +180,7 @@ export class VideoDetector implements PlaybackManager {
             case 'showFullscreenButton':
             case 'showPictureInPictureButton':
             case 'showPlaybackSpeedOption':
+            case 'showDownloadButton':
             case 'autoHideControlBar':
             case 'loopPlayback':
                 this.updateControlSettingForVideos();
@@ -154,16 +193,14 @@ export class VideoDetector implements PlaybackManager {
 
     // Notify all players that a control setting was changed.
     private updateControlSettingForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videoPlayers) {
             videoPlayer.updateControlSetting();
         }
     }
 
     // Notify all players that a control mode was changed.
     private updateControlModeForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
+        for (const videoPlayer of this.videoPlayers) {
             videoPlayer.updateControlMode();
         }
     }
@@ -172,7 +209,7 @@ export class VideoDetector implements PlaybackManager {
 
     //#region Volume
 
-    // Stores the last muted state. We can not load it from the settings. We cannot unmute and autoplay in modern
+    // Stores the last muted state. We cannot load it from the settings. We cannot unmute and autoplay in modern
     // browsers. Instagram will always autoplay. If we unmute by default, without user interaction, the video will stop.
     // It is possible to overwrite this using `this.settings.autoUnmutePlayback` in the settings menu.
     private lastPlaybackMuted: boolean = true;
@@ -182,14 +219,16 @@ export class VideoDetector implements PlaybackManager {
 
     // Applies the stored volume to all registered videos.
     private updateVolumeForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
-            this.updateVolumeForVideo(videoPlayer.videoElement);
+        for (const videoPlayer of this.videoPlayers) {
+            this.updateVolumeForVideo(videoPlayer);
         }
     }
 
     // Applies the stored volume to the given video.
-    private updateVolumeForVideo(video: HTMLVideoElement) {
+    private updateVolumeForVideo(videoPlayer: VideoPlayer) {
+        const videoElement = videoPlayer.videoElementRef?.deref();
+        if (!videoElement) return;
+
         let volume = this.settings.lastPlaybackVolume;
 
         // Do not restore volume if it is zero to prevent a second click to the volume bar.
@@ -197,8 +236,8 @@ export class VideoDetector implements PlaybackManager {
             volume = 0.1;
         }
 
-        video.volume = volume;
-        video.muted = this.lastPlaybackMuted;
+        videoElement.volume = volume;
+        videoElement.muted = this.lastPlaybackMuted;
     }
 
     //#endregion
@@ -207,15 +246,17 @@ export class VideoDetector implements PlaybackManager {
 
     // Applies the stored playback speed to all registered videos.
     private updatePlaybackSpeedForVideos() {
-        for (const source in this.videosBySource) {
-            const videoPlayer = this.videosBySource[source];
-            this.updatePlaybackSpeedForVideo(videoPlayer.videoElement);
+        for (const videoPlayer of this.videoPlayers) {
+            this.updatePlaybackSpeedForVideo(videoPlayer);
         }
     }
 
     // Applies the stored playback speed to the given video.
-    private updatePlaybackSpeedForVideo(video: HTMLVideoElement) {
-        video.playbackRate = this.settings.lastPlaybackSpeed;
+    private updatePlaybackSpeedForVideo(videoPlayer: VideoPlayer) {
+        const videoElement = videoPlayer.videoElementRef?.deref();
+        if (!videoElement) return;
+
+        videoElement.playbackRate = this.settings.lastPlaybackSpeed;
     }
 
     //#endregion
@@ -240,7 +281,7 @@ export class VideoDetector implements PlaybackManager {
 
     // This checks if audio-autoplay is allowed for this website.
     private checkForAutoplay(callback: (autoplayEnabled: boolean) => void) {
-        // I know the is this new experimental api `Navigator.getAutoplayPolicy()` and this is just a hack.
+        // I know there is this new experimental api `Navigator.getAutoplayPolicy()` and this is just a hack.
         // However, this has the benefit of requesting autoplay in Firefox. This adds the website permission settings
         // icon to the url bar, where the user can actually enable audio autoplay.
         // How it works: We simply add a silent audio track to the page, enable unmuted autoplay and check if it starts
@@ -249,7 +290,7 @@ export class VideoDetector implements PlaybackManager {
         audio.style.display = 'none';
         audio.autoplay = true;
         audio.defaultMuted = false;
-        audio.src = Resources.shared.soundSilence;
+        audio.src = Resources.shared.urls.sounds.silence;
         document.body.appendChild(audio);
 
         const timerId = setTimeout(() => {
@@ -271,7 +312,7 @@ export class VideoDetector implements PlaybackManager {
     //#region PlaybackManager implementation
 
     // Must be called whenever a video playback was started.
-    public notifyVideoPlay(video: HTMLVideoElement) {
+    public notifyVideoPlay(videoPlayer: VideoPlayer) {
         // Instagram will mute videos in Reels as soon as playback starts. To counter this we will ignore the next volume
         // change event and undo the volume / mute change.
         this.ignoreNextVolumeChange = true;
@@ -280,13 +321,16 @@ export class VideoDetector implements PlaybackManager {
         }, 50);
 
         // Make sure we apply the last used volume settings.
-        this.updateVolumeForVideo(video);
+        this.updateVolumeForVideo(videoPlayer);
     }
 
     // Must be called whenever a video volume was changed.
-    public notifyVideoVolumeChange(video: HTMLVideoElement) {
-        const volume = video.volume;
-        const muted = video.muted || video.volume === 0;
+    public notifyVideoVolumeChange(videoPlayer: VideoPlayer) {
+        const videoElement = videoPlayer.videoElementRef?.deref();
+        if (!videoElement) return;
+
+        const volume = videoElement.volume;
+        const muted = videoElement.muted || videoElement.volume === 0;
 
         // Not changed, so no need to update the other videos.
         if (
@@ -297,7 +341,7 @@ export class VideoDetector implements PlaybackManager {
 
         // To fix an issue with Reels, we sometimes have to ignore and undo volume events.
         if (this.ignoreNextVolumeChange) {
-            this.updateVolumeForVideo(video);
+            this.updateVolumeForVideo(videoPlayer);
             return;
         }
 
@@ -309,8 +353,11 @@ export class VideoDetector implements PlaybackManager {
     }
 
     // Must be called whenever a video playback speed was changed.
-    public notifyVideoPlaybackSpeedChange(video: HTMLVideoElement) {
-        this.settings.lastPlaybackSpeed = video.playbackRate;
+    public notifyVideoPlaybackSpeedChange(videoPlayer: VideoPlayer) {
+        const videoElement = videoPlayer.videoElementRef?.deref();
+        if (!videoElement) return;
+
+        this.settings.lastPlaybackSpeed = videoElement.playbackRate;
 
         // Sync the speed across all other video players.
         this.updatePlaybackSpeedForVideos();

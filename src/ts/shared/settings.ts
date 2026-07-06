@@ -3,8 +3,6 @@ import { EventDispatcher } from './eventDispatcher';
 import { VideoControlMode } from './videoControlMode';
 import { Utils } from './utils';
 import { VideoAutoplayMode } from './videoAutoplayMode';
-import { VideoDetectionMethod } from './videoDetectionMethod';
-import { VideoDetectionVersion } from './videoDetectionVersion';
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
 
@@ -17,11 +15,10 @@ export interface SettingsData {
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
+    showDownloadButton: boolean;
     showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
-    videoDetectionMethod: VideoDetectionMethod;
-    videoDetectionVersion: VideoDetectionVersion;
 }
 
 // Handle extension settings.
@@ -31,165 +28,140 @@ export class Settings implements SettingsData {
 
     //#region Data
 
-    private readonly names: string[] = [
-        'videoControlMode',
-        'lastPlaybackVolume',
-        'lastPlaybackSpeed',
-        'autoplayMode',
-        'showTimeCodeText',
-        'showFullscreenButton',
-        'showPictureInPictureButton',
-        'showPlaybackSpeedOption',
-        'autoHideControlBar',
-        'loopPlayback',
-        'videoDetectionMethod',
-        'videoDetectionVersion',
-    ];
-    private _videoControlMode: VideoControlMode = VideoControlMode.custom;
-    private _lastPlaybackVolume: number = 0.0;
-    private _lastPlaybackSpeed: number = 1.0;
-    private _autoplayMode: VideoAutoplayMode = VideoAutoplayMode.muted;
-    private _showTimeCodeText: boolean = true;
-    private _showFullscreenButton: boolean = true;
-    private _showPictureInPictureButton: boolean = false;
-    private _showPlaybackSpeedOption: boolean = true;
-    private _autoHideControlBar: boolean = false;
-    private _loopPlayback: boolean = true;
-    private _videoDetectionMethod: VideoDetectionMethod =
-        VideoDetectionMethod.interval;
-    private _videoDetectionVersion: VideoDetectionVersion =
-        VideoDetectionVersion.latest;
+    // The data object containing the raw values.
+    public data: SettingsData = {
+        videoControlMode: VideoControlMode.custom,
+        lastPlaybackVolume: 0.0,
+        lastPlaybackSpeed: 1.0,
+        autoplayMode: VideoAutoplayMode.muted,
+        showTimeCodeText: true,
+        showFullscreenButton: true,
+        showPictureInPictureButton: false,
+        showDownloadButton: false,
+        showPlaybackSpeedOption: true,
+        autoHideControlBar: false,
+        loopPlayback: true,
+    };
 
     // The video control mode
     public get videoControlMode(): VideoControlMode {
-        return this._videoControlMode;
+        return this.data.videoControlMode;
     }
     public set videoControlMode(value: VideoControlMode) {
-        if (this._videoControlMode === value) return;
-        this._videoControlMode = value;
+        if (this.data.videoControlMode === value) return;
+        this.data.videoControlMode = value;
 
         this.onChange('videoControlMode');
     }
 
     // The last playback volume.
     public get lastPlaybackVolume(): number {
-        return this._lastPlaybackVolume;
+        return this.data.lastPlaybackVolume;
     }
     public set lastPlaybackVolume(value: number) {
-        if (this._lastPlaybackVolume === value) return;
-        this._lastPlaybackVolume = value;
+        if (this.data.lastPlaybackVolume === value) return;
+        this.data.lastPlaybackVolume = value;
 
         this.onChange('lastPlaybackVolume');
     }
 
     // The last playback speed.
     public get lastPlaybackSpeed(): number {
-        return this._lastPlaybackSpeed;
+        return this.data.lastPlaybackSpeed;
     }
     public set lastPlaybackSpeed(value: number) {
-        if (this._lastPlaybackSpeed === value) return;
-        this._lastPlaybackSpeed = value;
+        if (this.data.lastPlaybackSpeed === value) return;
+        this.data.lastPlaybackSpeed = value;
 
         this.onChange('lastPlaybackSpeed');
     }
 
     // The autoplayer option (muted, unmuted, stopped)
     public get autoplayMode(): VideoAutoplayMode {
-        return this._autoplayMode;
+        return this.data.autoplayMode;
     }
     public set autoplayMode(value: VideoAutoplayMode) {
-        if (this._autoplayMode === value) return;
-        this._autoplayMode = value;
+        if (this.data.autoplayMode === value) return;
+        this.data.autoplayMode = value;
 
         this.onChange('autoplayMode');
     }
 
     // Should the time code text be visible in the player controls?
     public get showTimeCodeText(): boolean {
-        return this._showTimeCodeText;
+        return this.data.showTimeCodeText;
     }
     public set showTimeCodeText(value: boolean) {
-        if (this._showTimeCodeText === value) return;
-        this._showTimeCodeText = value;
+        if (this.data.showTimeCodeText === value) return;
+        this.data.showTimeCodeText = value;
 
         this.onChange('showTimeCodeText');
     }
 
     // Should the fullscreen button be visible in the player controls?
     public get showFullscreenButton(): boolean {
-        return this._showFullscreenButton;
+        return this.data.showFullscreenButton;
     }
     public set showFullscreenButton(value: boolean) {
-        if (this._showFullscreenButton === value) return;
-        this._showFullscreenButton = value;
+        if (this.data.showFullscreenButton === value) return;
+        this.data.showFullscreenButton = value;
 
         this.onChange('showFullscreenButton');
     }
 
     // Should the picture-in-picture button be visible in the player controls?
     public get showPictureInPictureButton(): boolean {
-        return this._showPictureInPictureButton;
+        return this.data.showPictureInPictureButton;
     }
     public set showPictureInPictureButton(value: boolean) {
-        if (this._showPictureInPictureButton === value) return;
-        this._showPictureInPictureButton = value;
+        if (this.data.showPictureInPictureButton === value) return;
+        this.data.showPictureInPictureButton = value;
 
         this.onChange('showPictureInPictureButton');
     }
 
+    // Should the download button be visible in the player controls?
+    public get showDownloadButton(): boolean {
+        return this.data.showDownloadButton;
+    }
+    public set showDownloadButton(value: boolean) {
+        if (this.data.showDownloadButton === value) return;
+        this.data.showDownloadButton = value;
+
+        this.onChange('showDownloadButton');
+    }
+
     // Should the playback-speed option be visible in the player controls?
     public get showPlaybackSpeedOption(): boolean {
-        return this._showPlaybackSpeedOption;
+        return this.data.showPlaybackSpeedOption;
     }
     public set showPlaybackSpeedOption(value: boolean) {
-        if (this._showPlaybackSpeedOption === value) return;
-        this._showPlaybackSpeedOption = value;
+        if (this.data.showPlaybackSpeedOption === value) return;
+        this.data.showPlaybackSpeedOption = value;
 
         this.onChange('showPlaybackSpeedOption');
     }
 
     // If enabled, the controls will hide if the mouse is outside the video area.
     public get autoHideControlBar(): boolean {
-        return this._autoHideControlBar;
+        return this.data.autoHideControlBar;
     }
     public set autoHideControlBar(value: boolean) {
-        if (this._autoHideControlBar === value) return;
-        this._autoHideControlBar = value;
+        if (this.data.autoHideControlBar === value) return;
+        this.data.autoHideControlBar = value;
 
         this.onChange('autoHideControlBar');
     }
 
     // If enabled, the videos will auto-loop at the end of playback (Instagram default).
     public get loopPlayback(): boolean {
-        return this._loopPlayback;
+        return this.data.loopPlayback;
     }
     public set loopPlayback(value: boolean) {
-        if (this._loopPlayback === value) return;
-        this._loopPlayback = value;
+        if (this.data.loopPlayback === value) return;
+        this.data.loopPlayback = value;
 
         this.onChange('loopPlayback');
-    }
-
-    // Sets the video detection method.
-    public get videoDetectionMethod(): VideoDetectionMethod {
-        return this._videoDetectionMethod;
-    }
-    public set videoDetectionMethod(value: VideoDetectionMethod) {
-        if (this._videoDetectionMethod === value) return;
-        this._videoDetectionMethod = value;
-
-        this.onChange('videoDetectionMethod');
-    }
-
-    // Sets the video detection version.
-    public get videoDetectionVersion(): VideoDetectionVersion {
-        return this._videoDetectionVersion;
-    }
-    public set videoDetectionVersion(value: VideoDetectionVersion) {
-        if (this._videoDetectionVersion === value) return;
-        this._videoDetectionVersion = value;
-
-        this.onChange('videoDetectionVersion');
     }
 
     //#endregion Data
@@ -217,13 +189,15 @@ export class Settings implements SettingsData {
 
     //#region Changes
 
-    // The setting changed event is called, whenever a setting was changed in or outside of this class.
+    // The setting-changed event is called whenever a setting was changed in or outside of this class.
     public readonly changed = new EventDispatcher<keyof SettingsData>();
 
     // Invokes the change event.
     private onChange(name: keyof SettingsData) {
         // Invokes the change event.
         this.changed.invoke(name);
+
+        if (!this.initialized) return;
 
         // Write changes to storage.
         const change: { [p: string]: unknown } = {};
@@ -233,18 +207,19 @@ export class Settings implements SettingsData {
 
     // Loads the volume settings from storage.
     private async load() {
-        const data = await Browser.storage.sync.get(this.names);
+        const names = Object.keys(this.data);
+        const data = await Browser.storage.sync.get(names);
         this.storeValues(data);
     }
 
-    // Event that is called whenever a settings was changed from the storage.
+    // Event that is called whenever settings were changed from the storage.
     private onStorageChanged(
         changes: { [p: string]: StorageChangeChrome | StorageChangeBrowser },
         area: string
     ) {
         if (area !== 'sync') return;
 
-        // Converts the changes structure to a simple key-value pair.
+        // Converts the change structure to a simple key-value pair.
         const data = Utils.mapObject(changes, (change) => change.newValue);
         this.storeValues(data);
     }
@@ -272,6 +247,9 @@ export class Settings implements SettingsData {
         if (typeof data.showPictureInPictureButton === 'boolean') {
             this.showPictureInPictureButton = data.showPictureInPictureButton;
         }
+        if (typeof data.showDownloadButton === 'boolean') {
+            this.showDownloadButton = data.showDownloadButton;
+        }
         if (typeof data.showPlaybackSpeedOption === 'boolean') {
             this.showPlaybackSpeedOption = data.showPlaybackSpeedOption;
         }
@@ -281,14 +259,10 @@ export class Settings implements SettingsData {
         if (typeof data.loopPlayback === 'boolean') {
             this.loopPlayback = data.loopPlayback;
         }
-        if (typeof data.videoDetectionMethod === 'string') {
-            this.videoDetectionMethod =
-                data.videoDetectionMethod as VideoDetectionMethod;
-        }
-        if (typeof data.videoDetectionVersion === 'string') {
-            this.videoDetectionVersion =
-                data.videoDetectionVersion as VideoDetectionVersion;
-        }
+    }
+
+    public applyChanges(data: Partial<SettingsData>) {
+        this.storeValues(data);
     }
 
     //#endregion Changes

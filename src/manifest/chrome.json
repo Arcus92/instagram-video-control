@@ -16,6 +16,13 @@
         {
             "matches": ["*://*.instagram.com/*"],
             "js": ["js/instagram.js"],
+            "run_at": "document_start",
+            "all_frames": true,
+            "world": "MAIN"
+        },
+        {
+            "matches": ["*://*.instagram.com/*"],
+            "js": ["js/extension.js"],
             "css": ["styles/instagram.css"],
             "run_at": "document_start",
             "all_frames": true
