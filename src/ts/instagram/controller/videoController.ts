@@ -34,9 +34,6 @@ export abstract class VideoController {
         if (this.videoPlayer.videoType === VideoType.reel) {
             this.videoControlElement.classList.add('ivc-reel');
         }
-        if (this.videoPlayer.videoType === VideoType.story) {
-            this.videoControlElement.classList.add('ivc-story');
-        }
         videoRootElement.appendChild(this.videoControlElement);
     }
 

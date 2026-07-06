@@ -23,9 +23,6 @@ export class VideoPlayer {
 
     // Attaches to the video player and adds custom element and events.
     public attach() {
-        // Do not add controls to the Explore page. This page contains a grid of many small preview videos.
-        if (this.videoType === VideoType.explore) return;
-
         this.createVideoControl();
 
         this.registerEvents();
@@ -280,6 +277,18 @@ export class VideoPlayer {
         this.nativeOverlayElementRef = overlayElement
             ? new WeakRef(overlayElement)
             : undefined;
+
+        // Currently the best way to detect Reels
+        const postVideoPlayer = ReactHelper.getParentByName(
+            polarisFiber,
+            'PolarisPostMediaVideoPlayer',
+            'PolarisPostVideoPlayer'
+        );
+        if (postVideoPlayer) {
+            this.videoType = VideoType.post;
+        } else {
+            this.videoType = VideoType.reel;
+        }
 
         return true;
     }

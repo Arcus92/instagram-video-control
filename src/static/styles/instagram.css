@@ -19,9 +19,6 @@
     background: rgba(0, 0, 0, 0.35);
 }
 
-.ivc-controls.ivc-story {
-    background: rgba(38, 38, 38, 0.6);
-}
 
 .ivc-controls-content {
     display: flex;
