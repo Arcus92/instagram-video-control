@@ -272,10 +272,6 @@ export class VideoPlayer {
             ? new WeakRef(volumeControlElement)
             : undefined;
 
-        // PolarisVideoIndicatorIcon
-        // PolarisVideoIndicatorIcon
-
-        //
         const overlayFiber = ReactHelper.getChildByName(
             polarisFiber,
             'VideoPlayerInteractionOverlay'

@@ -9,6 +9,7 @@ import { PlaybackSpeedButton } from './elements/playbackSpeedButton';
 import { VolumeBar } from './elements/volumeBar';
 import { SeekBar } from './elements/seekBar';
 import { Settings } from '../../shared/settings';
+import { DownloadButton } from './elements/downloadButton';
 
 // The custom video controller.
 export class CustomVideoController extends VideoController {
@@ -86,6 +87,9 @@ export class CustomVideoController extends VideoController {
             settings.showPictureInPictureButton
         ) {
             controls.push(new PictureInPictureButton(this));
+        }
+        if (settings.showDownloadButton) {
+            controls.push(new DownloadButton(this));
         }
         if (document.fullscreenEnabled && settings.showFullscreenButton) {
             controls.push(new FullscreenButton(this));

@@ -26,6 +26,9 @@
     "option_show_picture_in_picture": {
         "message": "Show Picture-in-Picture button"
     },
+    "option_show_download": {
+        "message": "Show download button"
+    },
     "option_video_control_mode": {
         "message": "Controls"
     },

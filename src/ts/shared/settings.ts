@@ -15,6 +15,7 @@ export interface SettingsData {
     showTimeCodeText: boolean;
     showFullscreenButton: boolean;
     showPictureInPictureButton: boolean;
+    showDownloadButton: boolean;
     showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
@@ -36,6 +37,7 @@ export class Settings implements SettingsData {
         showTimeCodeText: true,
         showFullscreenButton: true,
         showPictureInPictureButton: false,
+        showDownloadButton: false,
         showPlaybackSpeedOption: true,
         autoHideControlBar: false,
         loopPlayback: true,
@@ -116,6 +118,17 @@ export class Settings implements SettingsData {
         this.data.showPictureInPictureButton = value;
 
         this.onChange('showPictureInPictureButton');
+    }
+
+    // Should the download button be visible in the player controls?
+    public get showDownloadButton(): boolean {
+        return this.data.showDownloadButton;
+    }
+    public set showDownloadButton(value: boolean) {
+        if (this.data.showDownloadButton === value) return;
+        this.data.showDownloadButton = value;
+
+        this.onChange('showDownloadButton');
     }
 
     // Should the playback-speed option be visible in the player controls?
@@ -233,6 +246,9 @@ export class Settings implements SettingsData {
         }
         if (typeof data.showPictureInPictureButton === 'boolean') {
             this.showPictureInPictureButton = data.showPictureInPictureButton;
+        }
+        if (typeof data.showDownloadButton === 'boolean') {
+            this.showDownloadButton = data.showDownloadButton;
         }
         if (typeof data.showPlaybackSpeedOption === 'boolean') {
             this.showPlaybackSpeedOption = data.showPlaybackSpeedOption;

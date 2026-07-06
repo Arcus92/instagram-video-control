@@ -78,6 +78,13 @@ export class Popup {
             );
         }
 
+        // Download option
+        this.initSettingInputElement(
+            'option_show_download',
+            (e) => (this.settings.showDownloadButton = e.checked),
+            (e) => (e.checked = this.settings.showDownloadButton)
+        );
+
         // Playback speed option
         this.initSettingInputElement(
             'option_show_playback_speed',

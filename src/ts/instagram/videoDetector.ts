@@ -180,6 +180,7 @@ export class VideoDetector implements PlaybackManager {
             case 'showFullscreenButton':
             case 'showPictureInPictureButton':
             case 'showPlaybackSpeedOption':
+            case 'showDownloadButton':
             case 'autoHideControlBar':
             case 'loopPlayback':
                 this.updateControlSettingForVideos();

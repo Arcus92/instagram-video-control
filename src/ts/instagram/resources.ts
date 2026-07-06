@@ -11,6 +11,7 @@ export type ResourceUrls = {
         pictureInPictureEnter: string;
         pictureInPictureExit: string;
         playbackSpeed: string;
+        download: string;
     };
     sounds: {
         silence: string;
@@ -34,6 +35,7 @@ export class Resources {
             pictureInPictureEnter: '',
             pictureInPictureExit: '',
             playbackSpeed: '',
+            download: '',
         },
         sounds: {
             silence: '',
@@ -65,6 +67,7 @@ export class Resources {
                     'images/picture-in-picture-exit.svg'
                 ),
                 playbackSpeed: Browser.getUrl('images/playback-speed.svg'),
+                download: Browser.getUrl('images/download.svg'),
             },
             sounds: {
                 silence: Browser.getUrl('audio/silence.mp3'),
