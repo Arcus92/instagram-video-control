@@ -23,13 +23,21 @@ export abstract class VideoControllerSlider extends VideoControllerElementBase<H
         // Handle click event
 
         this.element.addEventListener('click', (ev) => {
+            // Prevent a-tag event of post
+            ev.preventDefault();
+            // Prevent React event
+            ev.stopPropagation();
             this.handleClick(ev, true);
         });
 
         // Handle drag event
 
-        this.element.addEventListener('mousedown', () => this.onDragStart());
-        this.element.addEventListener('touchstart', () => this.onDragStart());
+        this.element.addEventListener('mousedown', (ev) =>
+            this.onDragStart(ev)
+        );
+        this.element.addEventListener('touchstart', (ev) =>
+            this.onDragStart(ev)
+        );
 
         this.element.addEventListener('mousemove', (ev) => this.onDrag(ev));
         this.element.addEventListener('touchmove', (ev) => this.onDrag(ev));
@@ -71,18 +79,21 @@ export abstract class VideoControllerSlider extends VideoControllerElementBase<H
     // Is set onValueChange will be called on every drag event
     protected invokeOnDrag = false;
 
-    private onDragStart() {
+    private onDragStart(ev: MouseEvent | TouchEvent) {
+        ev.stopPropagation();
         this.isDragging = true;
     }
 
     private onDragEnd(ev: MouseEvent | TouchEvent) {
         if (!this.isDragging) return;
+        ev.stopPropagation();
         this.handleClick(ev, true);
         this.isDragging = false;
     }
 
     private onDrag(ev: MouseEvent | TouchEvent) {
         if (!this.isDragging) return;
+        ev.stopPropagation();
         this.handleClick(ev, this.invokeOnDrag);
     }
 }
