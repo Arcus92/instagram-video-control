@@ -48,9 +48,10 @@ export abstract class VideoController {
 
         // Adjust the overlay margin
         const nativeOverlayElement =
-            this.videoPlayer.nativeOverlayElementRef?.deref();
+            this.videoPlayer.nativeOverlayElementRef?.deref()?.parentElement;
         if (nativeOverlayElement) {
-            nativeOverlayElement.style.bottom = `${controlHeight}px`;
+            nativeOverlayElement.style.position = 'relative';
+            nativeOverlayElement.style.height = `calc(100% - ${controlHeight}px)`;
         }
 
         // Hide the native mute button.
@@ -75,9 +76,10 @@ export abstract class VideoController {
 
         // Resets the overlay margins
         const nativeOverlayElement =
-            this.videoPlayer.nativeOverlayElementRef?.deref();
+            this.videoPlayer.nativeOverlayElementRef?.deref()?.parentElement;
         if (nativeOverlayElement) {
-            nativeOverlayElement.style.bottom = '';
+            nativeOverlayElement.style.position = '';
+            nativeOverlayElement.style.height = '100%';
         }
 
         // Restore original mute button
