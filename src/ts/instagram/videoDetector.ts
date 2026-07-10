@@ -83,33 +83,58 @@ export class VideoDetector implements PlaybackManager {
                 const subtreeFlagFilter =
                     ReactFlags.Placement | ReactFlags.Update | ReactFlags.Ref;
 
-                // First level: Find all
+                // Find all new spawned video elements.
                 ReactHelper.traversal(root.current, {
                     filter: (fiber) => {
                         // Only collect the first render of the fiber.
                         if (fiber.alternate) return false;
+
                         // Filter function by name.
-                        if (fiber.tag !== ReactTag.FunctionComponent)
-                            return false;
-                        const name = ReactHelper.getName(fiber);
-                        return name?.endsWith('[from PolarisVideo.react]');
+                        if (fiber.tag !== ReactTag.HostComponent) return false;
+                        return fiber.type === 'video';
                     },
                     subtreeFilter: (fiber) =>
                         (fiber.subtreeFlags & subtreeFlagFilter) !== 0,
                     callback: (fiber) => {
-                        // Wait a few ticks for React to spawn the required elements.
-                        setTimeout(() => {
-                            this.tryAttachPolarisVideo(fiber);
-                        }, 100);
+                        // Gets the video element.
+                        const videoElement = ReactHelper.getNodeFromFiber(
+                            fiber
+                        ) as HTMLVideoElement;
+
+                        // Find the parent Polaris player.
+                        const polarisVideo = ReactHelper.getParentByName(
+                            fiber,
+                            'PolarisVideo'
+                        );
+
+                        if (polarisVideo && videoElement) {
+                            // Add a few ticks to let Instagram create the audio indicators.
+                            setTimeout(() => {
+                                this.tryAttachPolarisVideo(
+                                    polarisVideo,
+                                    videoElement
+                                );
+                            }, 100);
+                        }
                     },
                 });
             },
             onCommitFiberUnmount: (rendererId: number, fiber: ReactFiber) => {
-                // Filter function by name.
-                if (fiber.tag !== ReactTag.FunctionComponent) return false;
-                const name = ReactHelper.getName(fiber);
-                if (!name?.endsWith('[from PolarisVideo.react]')) return;
-                this.tryDetachPolarisVideo(fiber);
+                // A video tag was removed.
+                if (
+                    fiber.tag === ReactTag.HostComponent &&
+                    fiber.type === 'video'
+                ) {
+                    // Find the parent Polaris player
+                    const polarisFiber = ReactHelper.getParentByName(
+                        fiber,
+                        'PolarisVideo'
+                    );
+                    if (!polarisFiber) return;
+
+                    // Detach the video player.
+                    this.tryDetachPolarisVideo(polarisFiber);
+                }
             },
         };
         ReactDevTools.register(hook);
@@ -117,21 +142,28 @@ export class VideoDetector implements PlaybackManager {
 
     // Creates the video player from the given polaris player.
     public tryDetectVideoPlayer(
-        polarisFiber: ReactFiber
+        polarisFiber: ReactFiber,
+        videoElement: HTMLVideoElement
     ): VideoPlayer | undefined {
         const player = new VideoPlayer(this);
-        if (!player.tryDetect(polarisFiber)) return;
+        if (!player.tryDetect(polarisFiber, videoElement)) return;
         return player;
     }
 
-    private tryAttachPolarisVideo(polarisFiber: ReactFiber) {
+    private tryAttachPolarisVideo(
+        polarisFiber: ReactFiber,
+        videoElement: HTMLVideoElement
+    ) {
         const polarisElement = ReactHelper.getNodeFromFiber(polarisFiber);
         if (!polarisElement) {
             return;
         }
 
         // Detect the video player elements.
-        const videoPlayer = this.tryDetectVideoPlayer(polarisFiber);
+        const videoPlayer = this.tryDetectVideoPlayer(
+            polarisFiber,
+            videoElement
+        );
         if (!videoPlayer) {
             return;
         }
