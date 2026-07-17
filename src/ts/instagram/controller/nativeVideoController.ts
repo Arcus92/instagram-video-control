@@ -11,6 +11,19 @@ export class NativeVideoController extends VideoController {
         this.createVideoControlBackground();
         this.adjustVideoControlHeight(controlHeight);
         this.updateControlBarVisibility();
+
+        // Re-enable pointer events on the video element
+        if (this.videoElement) {
+            this.videoElement.style.pointerEvents = 'all';
+        }
+    }
+
+    public remove() {
+        super.remove();
+
+        if (this.videoElement) {
+            this.videoElement.style.pointerEvents = '';
+        }
     }
 
     //#endregion Control
