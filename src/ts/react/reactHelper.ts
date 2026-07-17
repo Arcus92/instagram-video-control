@@ -1,4 +1,5 @@
 import { ReactFiber } from './reactFiber';
+import { ReactTag } from './reactTag';
 
 export class ReactHelper {
     /**
@@ -78,6 +79,22 @@ export class ReactHelper {
         if (!fiber) return;
         let result = callback(fiber);
         if (result) return result;
+
+        // Traversal portals
+        if (fiber.tag === ReactTag.HostPortal) {
+            const portalNode = this.getPortalNode(fiber);
+            if (portalNode && portalNode.parentElement) {
+                const parentFiber = this.getFiberFromNode(
+                    portalNode.parentElement
+                );
+
+                if (parentFiber) {
+                    result = this.traversalParents(parentFiber, callback);
+                    if (result) return result;
+                }
+            }
+        }
+
         if (fiber.return) {
             result = this.traversalParents(fiber.return, callback);
             if (result) return result;
@@ -151,8 +168,9 @@ export class ReactHelper {
                     lookupNames.some((lookupName) =>
                         className.endsWith(lookupName)
                     ))
-            )
+            ) {
                 return callback(fiber);
+            }
         });
     }
 
@@ -168,6 +186,29 @@ export class ReactHelper {
         return this.traversalParentsByName(root, names, (fiber) => fiber);
     }
 
+    /**
+     * If the given fiber is a portal, this method returns the target element of the portal that is somewhere else in
+     * the DOM.
+     * @param fiber The current portal fiber.
+     */
+    public static getPortalNode(fiber: ReactFiber): HTMLElement | undefined {
+        if (fiber.tag !== ReactTag.HostPortal) return;
+
+        // The container info in the state is the target portal fiber
+        if (
+            fiber.stateNode &&
+            typeof fiber.stateNode === 'object' &&
+            'containerInfo' in fiber.stateNode
+        ) {
+            return fiber.stateNode.containerInfo as HTMLElement;
+        }
+    }
+
+    /**
+     * Traverses the fiber tree.
+     * @param fiber The starting fiber.
+     * @param options Traversal options.
+     */
     public static traversal(
         fiber: ReactFiber,
         options: {

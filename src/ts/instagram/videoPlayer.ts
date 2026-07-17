@@ -244,12 +244,12 @@ export class VideoPlayer {
     public nativeControlsElementRef: WeakRef<HTMLElement> | undefined;
 
     // Detects the video type and finds all native components.
-    public tryDetect(polarisFiber: ReactFiber): boolean {
+    public tryDetect(
+        polarisFiber: ReactFiber,
+        videoElement: HTMLVideoElement
+    ): boolean {
         const polarisNode = ReactHelper.getNodeFromFiber(polarisFiber);
         if (!polarisNode) return false;
-
-        const videoElement = polarisNode.querySelector('video');
-        if (!videoElement) return false;
 
         this.polarisFiber = polarisFiber;
         this.videoRootElementRef = new WeakRef(polarisNode);

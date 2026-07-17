@@ -35,6 +35,13 @@ export abstract class VideoController {
             this.videoControlElement.classList.add('ivc-reel');
         }
         videoRootElement.appendChild(this.videoControlElement);
+
+        // Disable the video click event and not redirect to the post url on interaction.
+        if (this.videoElement) {
+            this.videoElement.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+            });
+        }
     }
 
     // Adjust the control bar height for the background and all native elements.
@@ -46,11 +53,20 @@ export abstract class VideoController {
             this.videoControlElement.style.height = `${controlHeight}px`;
         }
 
+        // Prevent the root element from catching pointer events
+        const nativeElement = this.videoPlayer.videoRootElementRef?.deref();
+        if (nativeElement) {
+            nativeElement.style.pointerEvents = 'none';
+        }
+
         // Adjust the overlay margin
         const nativeOverlayElement =
-            this.videoPlayer.nativeOverlayElementRef?.deref();
+            this.videoPlayer.nativeOverlayElementRef?.deref()?.parentElement;
         if (nativeOverlayElement) {
-            nativeOverlayElement.style.bottom = `${controlHeight}px`;
+            if (this.videoPlayer.videoType === VideoType.reel) {
+                nativeOverlayElement.style.position = 'relative';
+            }
+            nativeOverlayElement.style.height = `calc(100% - ${controlHeight}px)`;
         }
 
         // Hide the native mute button.
@@ -75,9 +91,12 @@ export abstract class VideoController {
 
         // Resets the overlay margins
         const nativeOverlayElement =
-            this.videoPlayer.nativeOverlayElementRef?.deref();
+            this.videoPlayer.nativeOverlayElementRef?.deref()?.parentElement;
         if (nativeOverlayElement) {
-            nativeOverlayElement.style.bottom = '';
+            if (this.videoPlayer.videoType === VideoType.reel) {
+                nativeOverlayElement.style.position = '';
+            }
+            nativeOverlayElement.style.height = '100%';
         }
 
         // Restore original mute button
