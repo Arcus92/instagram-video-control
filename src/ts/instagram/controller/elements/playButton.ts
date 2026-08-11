@@ -3,10 +3,16 @@ import { Resources } from '../../resources';
 
 export class PlayButton extends VideoControllerButton {
     override updateControl() {
+        const isPaused = !!this.videoElement?.paused;
         this.setIcon(
-            this.videoElement?.paused
+            isPaused
                 ? Resources.shared.urls.images.play
                 : Resources.shared.urls.images.pause
+        );
+        this.setTitle(
+            isPaused
+                ? Resources.shared.locales.playTooltip
+                : Resources.shared.locales.pauseTooltip
         );
     }
 

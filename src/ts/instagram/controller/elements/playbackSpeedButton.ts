@@ -23,6 +23,7 @@ export class PlaybackSpeedButton extends VideoControllerDropDownButton<number> {
 
     override updateControl() {
         this.setIcon(Resources.shared.urls.images.playbackSpeed);
+        this.setTitle(Resources.shared.locales.playbackSpeedTooltip);
 
         this.setSelectedItem(this.videoElement?.playbackRate);
     }

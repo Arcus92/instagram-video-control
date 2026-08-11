@@ -3,10 +3,16 @@ import { Resources } from '../../resources';
 
 export class FullscreenButton extends VideoControllerButton {
     override updateControl() {
+        const isFullscreen = !!document.fullscreenElement;
         this.setIcon(
-            document.fullscreenElement
+            isFullscreen
                 ? Resources.shared.urls.images.fullscreenExit
                 : Resources.shared.urls.images.fullscreenEnter
+        );
+        this.setTitle(
+            isFullscreen
+                ? Resources.shared.locales.leaveFullscreenTooltip
+                : Resources.shared.locales.enterFullscreenTooltip
         );
     }
 

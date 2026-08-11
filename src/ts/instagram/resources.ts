@@ -18,6 +18,19 @@ export type ResourceUrls = {
     };
 };
 
+export type LocaleTexts = {
+    playTooltip: string;
+    pauseTooltip: string;
+    muteTooltip: string;
+    unmuteTooltip: string;
+    playbackSpeedTooltip: string;
+    enterFullscreenTooltip: string;
+    leaveFullscreenTooltip: string;
+    enterPictureInPictureTooltip: string;
+    leavePictureInPictureTooltip: string;
+    downloadTooltip: string;
+};
+
 // Cached resource urls.
 export class Resources {
     // Gets the shared resources instance.
@@ -42,12 +55,30 @@ export class Resources {
         },
     };
 
+    // The locale texts.
+    public locales: LocaleTexts = {
+        playTooltip: '',
+        pauseTooltip: '',
+        muteTooltip: '',
+        unmuteTooltip: '',
+        playbackSpeedTooltip: '',
+        enterFullscreenTooltip: '',
+        leaveFullscreenTooltip: '',
+        enterPictureInPictureTooltip: '',
+        leavePictureInPictureTooltip: '',
+        downloadTooltip: '',
+    };
+
     // Initializes the resources. If no urls are provided, the urls are created from the extension.
-    public init(urls?: ResourceUrls) {
+    public init(urls?: ResourceUrls, locales?: LocaleTexts) {
         if (!urls) {
             urls = Resources.getExtensionUrls();
         }
+        if (!locales) {
+            locales = Resources.getLocaleTexts();
+        }
         this.urls = urls;
+        this.locales = locales;
     }
 
     // Gets the resource urls from the extension.
@@ -72,6 +103,32 @@ export class Resources {
             sounds: {
                 silence: Browser.getUrl('audio/silence.mp3'),
             },
+        };
+    }
+
+    // Gets the extension locale texts for the extension.
+    private static getLocaleTexts(): LocaleTexts {
+        return {
+            playTooltip: Browser.i18n.getMessage('play_tooltip'),
+            pauseTooltip: Browser.i18n.getMessage('pause_tooltip'),
+            muteTooltip: Browser.i18n.getMessage('mute_tooltip'),
+            unmuteTooltip: Browser.i18n.getMessage('unmute_tooltip'),
+            playbackSpeedTooltip: Browser.i18n.getMessage(
+                'playback_speed_tooltip'
+            ),
+            enterFullscreenTooltip: Browser.i18n.getMessage(
+                'enter_fullscreen_tooltip'
+            ),
+            leaveFullscreenTooltip: Browser.i18n.getMessage(
+                'leave_fullscreen_tooltip'
+            ),
+            enterPictureInPictureTooltip: Browser.i18n.getMessage(
+                'enter_picture_in_picture_tooltip'
+            ),
+            leavePictureInPictureTooltip: Browser.i18n.getMessage(
+                'leave_picture_in_picture_tooltip'
+            ),
+            downloadTooltip: Browser.i18n.getMessage('download_tooltip'),
         };
     }
 }

@@ -3,10 +3,16 @@ import { Resources } from '../../resources';
 
 export class PictureInPictureButton extends VideoControllerButton {
     override updateControl() {
+        const isPictureInPicture = !!document.pictureInPictureElement;
         this.setIcon(
-            document.pictureInPictureElement
+            isPictureInPicture
                 ? Resources.shared.urls.images.pictureInPictureExit
                 : Resources.shared.urls.images.pictureInPictureEnter
+        );
+        this.setTitle(
+            isPictureInPicture
+                ? Resources.shared.locales.leavePictureInPictureTooltip
+                : Resources.shared.locales.enterPictureInPictureTooltip
         );
     }
 

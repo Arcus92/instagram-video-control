@@ -22,4 +22,10 @@ export abstract class VideoControllerButton extends VideoControllerElementBase<H
         if (!img) return;
         img.src = url;
     }
+
+    // Sets the title / hover text.
+    protected setTitle(title: string) {
+        if (!this.element) return;
+        this.element.title = title;
+    }
 }

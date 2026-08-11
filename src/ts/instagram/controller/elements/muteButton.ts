@@ -3,10 +3,16 @@ import { Resources } from '../../resources';
 
 export class MuteButton extends VideoControllerButton {
     override updateControl() {
+        const isMuted = !!this.videoElement?.muted;
         this.setIcon(
-            this.videoElement?.muted
+            isMuted
                 ? Resources.shared.urls.images.speakerOff
                 : Resources.shared.urls.images.speakerOn
+        );
+        this.setTitle(
+            isMuted
+                ? Resources.shared.locales.unmuteTooltip
+                : Resources.shared.locales.muteTooltip
         );
     }
 
