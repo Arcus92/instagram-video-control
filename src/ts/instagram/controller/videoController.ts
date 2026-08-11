@@ -53,6 +53,12 @@ export abstract class VideoController {
             this.videoControlElement.style.height = `${controlHeight}px`;
         }
 
+        // Containing the whole video for fullscreen. Instagram's default is 'cover'.
+        const nativeVideoPlayer = this.videoPlayer.videoElementRef?.deref();
+        if (nativeVideoPlayer) {
+            nativeVideoPlayer.style.objectFit = 'contain';
+        }
+
         // Prevent the root element from catching pointer events
         const nativeElement = this.videoPlayer.videoRootElementRef?.deref();
         if (nativeElement) {
