@@ -41,7 +41,7 @@
 
 .ivc-control-element {
     position: relative;
-    margin: 4px;
+    margin: 4px 0;
 
     /* Enable pointer events for the elements again. */
     pointer-events: initial;
@@ -57,7 +57,7 @@
     font-weight: bold;
 
     cursor: pointer;
-    padding: 2px;
+    padding: 2px 4px;
 }
 
 .ivc-icon-button img {
