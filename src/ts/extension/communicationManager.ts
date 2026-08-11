@@ -33,6 +33,7 @@ export class CommunicationManager {
             type: 'vci-initialized',
             // Since the main DOM cannot access the extension resource, we provide a list of all urls on startup.
             resourceUrls: this.resources.urls,
+            localeTexts: this.resources.locales,
         });
     }
 

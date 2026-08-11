@@ -4,6 +4,7 @@ import { Resources } from '../../resources';
 export class DownloadButton extends VideoControllerButton {
     override updateControl() {
         this.setIcon(Resources.shared.urls.images.download);
+        this.setTitle(Resources.shared.locales.downloadTooltip);
     }
 
     override onClick() {

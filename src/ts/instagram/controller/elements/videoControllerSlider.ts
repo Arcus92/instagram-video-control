@@ -45,6 +45,18 @@ export abstract class VideoControllerSlider extends VideoControllerElementBase<H
         this.element.addEventListener('mouseup', (ev) => this.onDragEnd(ev));
         this.element.addEventListener('touchend', (ev) => this.onDragEnd(ev));
         this.element.addEventListener('mouseleave', (ev) => this.onDragEnd(ev));
+
+        // Init the collapsed state (if set before creation)
+        this.element.classList.toggle('hidden', this.collapsed);
+    }
+
+    private collapsed: boolean = false;
+
+    // Sets if the slider is currently collapsed.
+    public setCollapsed(collapsed: boolean) {
+        this.collapsed = collapsed;
+        if (!this.element) return;
+        this.element.classList.toggle('hidden', this.collapsed);
     }
 
     // Sets the value of the bar.

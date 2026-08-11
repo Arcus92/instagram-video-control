@@ -2,7 +2,7 @@ import { Settings, SettingsData } from '../shared/settings';
 import { VideoPlayer } from './videoPlayer';
 import { PlaybackManager } from './playbackManager';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
-import { Resources, ResourceUrls } from './resources';
+import { LocaleTexts, Resources, ResourceUrls } from './resources';
 import { ReactHelper } from '../react/reactHelper';
 import { ReactFiber } from '../react/reactFiber';
 import { ReactDevTools } from '../react/reactDevTools';
@@ -39,7 +39,8 @@ export class VideoDetector implements PlaybackManager {
             // Handle extension initialization
             case 'vci-initialized': {
                 const resourceUrls: ResourceUrls = ev.data.resourceUrls;
-                Resources.shared.init(resourceUrls);
+                const localeTexts: LocaleTexts = ev.data.localeTexts;
+                Resources.shared.init(resourceUrls, localeTexts);
 
                 this.onInitialized();
                 break;

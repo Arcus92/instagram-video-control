@@ -73,8 +73,20 @@ export class CustomVideoController extends VideoController {
         const controls = [];
 
         controls.push(new PlayButton(this));
-        controls.push(new MuteButton(this));
-        controls.push(new VolumeBar(this));
+
+        // Create a mute and volume bar and make the volume bar collapse when not hovered.
+        const mudeButton = new MuteButton(this);
+        const volumeBar = new VolumeBar(this);
+        volumeBar.setCollapsed(true);
+        // Handle hover events
+        mudeButton.pointerenter = volumeBar.pointerenter = () =>
+            volumeBar.setCollapsed(false);
+        mudeButton.pointerleave = volumeBar.pointerleave = () =>
+            volumeBar.setCollapsed(true);
+
+        controls.push(mudeButton);
+        controls.push(volumeBar);
+
         if (settings.showTimeCodeText) {
             controls.push(new PositionText(this));
         }

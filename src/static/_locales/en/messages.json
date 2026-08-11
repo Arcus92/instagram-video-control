@@ -88,5 +88,35 @@
     },
     "report_an_issue": {
         "message": "Report an Issue"
+    },
+    "play_tooltip": {
+        "message": "Play"
+    },
+    "pause_tooltip": {
+        "message": "Pause"
+    },
+    "mute_tooltip": {
+        "message": "Mute audio"
+    },
+    "unmute_tooltip": {
+        "message": "Unmute audio"
+    },
+    "playback_speed_tooltip": {
+        "message": "Change playback speed"
+    },
+    "enter_fullscreen_tooltip": {
+        "message": "Enter fullscreen mode"
+    },
+    "leave_fullscreen_tooltip": {
+        "message": "Leave fullscreen mode"
+    },
+    "enter_picture_in_picture_tooltip": {
+        "message": "Enter picture-in-picture mode"
+    },
+    "leave_picture_in_picture_tooltip": {
+        "message": "Leave picture-in-picture mode"
+    },
+    "download_tooltip": {
+        "message": "Download this video"
     }
 }
