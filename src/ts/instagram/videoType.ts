@@ -4,4 +4,7 @@ export enum VideoType {
 
     // The video is in a Reel.
     reel,
+
+    // This video is a Story.
+    story,
 }

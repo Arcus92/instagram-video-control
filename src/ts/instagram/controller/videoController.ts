@@ -33,6 +33,8 @@ export abstract class VideoController {
         this.videoControlElement.classList.add('ivc-controls');
         if (this.videoPlayer.videoType === VideoType.reel) {
             this.videoControlElement.classList.add('ivc-reel');
+        } else if (this.videoPlayer.videoType === VideoType.story) {
+            this.videoControlElement.classList.add('ivc-story');
         }
         videoRootElement.appendChild(this.videoControlElement);
 
@@ -75,6 +77,20 @@ export abstract class VideoController {
             nativeOverlayElement.style.height = `calc(100% - ${controlHeight}px)`;
         }
 
+        // Remove click handler from story player
+        const storyPlayerElement =
+            this.videoPlayer.storyMediaPlayerElementRef?.deref();
+        if (storyPlayerElement) {
+            storyPlayerElement.style.pointerEvents = 'none';
+        }
+
+        // Adjust the comment section for Stories.
+        const storyFooterElement =
+            this.videoPlayer.storyFooterElementRef?.deref();
+        if (storyFooterElement) {
+            storyFooterElement.style.marginBottom = `${controlHeight}px`;
+        }
+
         // Hide the native mute button.
         const nativeVolumeControlElement =
             this.videoPlayer.nativeVolumeControlElementRef?.deref();
@@ -103,6 +119,13 @@ export abstract class VideoController {
                 nativeOverlayElement.style.position = '';
             }
             nativeOverlayElement.style.height = '100%';
+        }
+
+        // Restore the comment section for Stories.
+        const storyFooterElement =
+            this.videoPlayer.storyFooterElementRef?.deref();
+        if (storyFooterElement) {
+            storyFooterElement.style.marginBottom = ``;
         }
 
         // Restore original mute button

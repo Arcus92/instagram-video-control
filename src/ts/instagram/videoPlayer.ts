@@ -235,6 +235,12 @@ export class VideoPlayer {
     // The uppermost root element of the whole player.
     public videoRootElementRef: WeakRef<HTMLElement> | undefined;
 
+    // The root player element for Stories.
+    public storyMediaPlayerElementRef: WeakRef<HTMLElement> | undefined;
+
+    // The footer element (comments for stories).
+    public storyFooterElementRef: WeakRef<HTMLElement> | undefined;
+
     // The mute button and volume slider.
     public nativeVolumeControlElementRef: WeakRef<HTMLElement> | undefined;
 
@@ -278,13 +284,46 @@ export class VideoPlayer {
             ? new WeakRef(overlayElement)
             : undefined;
 
+        // Finds the root Story player.
+        const storyPlayerFiber = ReactHelper.getParentByName(
+            polarisFiber,
+            'PolarisStoriesV3Player'
+        );
+
+        // Then find the Story media player.
+        // This has a small mouse-blocking element at the bottom, preventing clicks to the controls.
+        const storyMediaPlayerFiber = ReactHelper.getChildByName(
+            storyPlayerFiber,
+            'PolarisStoriesV3MediaPlayer'
+        );
+        const storyMediaPlayerElement = ReactHelper.getNodeFromFiber(
+            storyMediaPlayerFiber
+        );
+        this.storyMediaPlayerElementRef = storyMediaPlayerElement
+            ? new WeakRef(storyMediaPlayerElement)
+            : undefined;
+
+        // Find the Stories footer (comments, etc.).
+        const storyFooterFiber = ReactHelper.getChildByName(
+            storyPlayerFiber,
+            'PolarisStoriesV3ReelFooter',
+            'PolarisStoriesV3Footer'
+        );
+        const storyFooterElement =
+            ReactHelper.getNodeFromFiber(storyFooterFiber);
+        this.storyFooterElementRef = storyFooterElement
+            ? new WeakRef(storyFooterElement)
+            : undefined;
+
         // Currently the best way to detect Reels
         const postVideoPlayer = ReactHelper.getParentByName(
             polarisFiber,
             'PolarisPostMediaVideoPlayer',
             'PolarisPostVideoPlayer'
         );
-        if (postVideoPlayer) {
+        if (storyFooterElement) {
+            this.videoType = VideoType.story;
+        } else if (postVideoPlayer) {
             this.videoType = VideoType.post;
         } else {
             this.videoType = VideoType.reel;
