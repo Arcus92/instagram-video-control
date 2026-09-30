@@ -19,12 +19,26 @@ export class CommunicationManager {
         // Send the initial settings and then the initialized message.
         this.sendMessageSettings(this.settings.data);
         this.sendMessageInitialized();
+
+        // Listing for messages from the website.
+        window.addEventListener('message', (ev) => this.onMessageHandler(ev));
     }
 
     // An extension setting was changed.
     private onSettingChanged(name: keyof SettingsData) {
         const value = this.settings[name];
         this.sendMessageSettings({ [name]: value });
+    }
+
+    // Handling messages from the website.
+    private onMessageHandler(ev: MessageEvent) {
+        if (typeof ev.data !== 'object' || !ev.data.type) return;
+        switch (ev.data.type) {
+            // Handle setting updates
+            case 'vci-settings':
+                this.settings.applyChanges(ev.data.data);
+                break;
+        }
     }
 
     // Informs the page that the extension is initialized.
