@@ -319,6 +319,17 @@ export class VideoDetector implements PlaybackManager {
         // icon to the url bar, where the user can actually enable audio autoplay.
         // How it works: We simply add a silent audio track to the page, enable unmuted autoplay and check if it starts
         // playback within 100ms.
+        // The extension is initialized at `document_start`, so the body may not exist yet. Throwing here would also
+        // skip the React hook registration, leaving every video without controls.
+        if (!document.body) {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => this.checkForAutoplay(callback),
+                { once: true }
+            );
+            return;
+        }
+
         const audio = document.createElement('audio');
         audio.style.display = 'none';
         audio.autoplay = true;

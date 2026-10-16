@@ -40,7 +40,12 @@ export class ReactHelper {
         if (fiber.stateNode instanceof HTMLElement) {
             return fiber.stateNode;
         }
-        if (fiber.child) return this.getNodeFromFiber(fiber.child);
+        // The first child may render nothing (e.g. CoreVideoPlayerWithComponents for logged-in users), so the element
+        // can be in any of the children.
+        for (let child = fiber.child; child; child = child.sibling) {
+            const node = this.getNodeFromFiber(child);
+            if (node) return node;
+        }
     }
 
     /**
