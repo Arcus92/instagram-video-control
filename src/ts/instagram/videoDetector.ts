@@ -16,6 +16,9 @@ export class VideoDetector implements PlaybackManager {
     // The extension settings.
     private readonly settings = Settings.shared;
 
+    // The extension message receiver
+    private source: MessageEventSource | null = null;
+
     // List of all video players by source element.
     private videoPlayersByElement = new WeakMap<HTMLElement, VideoPlayer>();
     private videoPlayers: VideoPlayer[] = [];
@@ -38,6 +41,7 @@ export class VideoDetector implements PlaybackManager {
         switch (ev.data.type) {
             // Handle extension initialization
             case 'vci-initialized': {
+                this.source = ev.source;
                 const resourceUrls: ResourceUrls = ev.data.resourceUrls;
                 const localeTexts: LocaleTexts = ev.data.localeTexts;
                 Resources.shared.init(resourceUrls, localeTexts);
@@ -222,6 +226,12 @@ export class VideoDetector implements PlaybackManager {
                 this.updateControlModeForVideos();
                 break;
         }
+
+        // Tell the extension to store the value
+        this.source?.postMessage({
+            type: 'vci-settings',
+            data: { [name]: this.settings[name] },
+        });
     }
 
     // Notify all players that a control setting was changed.
