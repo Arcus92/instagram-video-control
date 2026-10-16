@@ -102,34 +102,43 @@ export class VideoDetector implements PlaybackManager {
                             fiber
                         ) as HTMLVideoElement;
 
-                        // Find the parent Polaris player.
-                        const polarisVideo = ReactHelper.getParentByName(
-                            fiber,
-                            'PolarisVideo'
-                        );
+                        if (!videoElement) return;
 
-                        if (polarisVideo && videoElement) {
-                            // Add a few ticks to let Instagram create the audio indicators.
-                            setTimeout(() => {
-                                this.tryAttachPolarisVideo(
-                                    polarisVideo,
-                                    videoElement
-                                );
-                            }, 100);
-                        }
+                        // Add a few ticks to let Instagram create the audio indicators and move the video into place.
+                        setTimeout(() => {
+                            const polarisVideo = this.findPolarisVideo(
+                                fiber,
+                                videoElement
+                            );
+                            if (!polarisVideo) return;
+                            this.tryAttachPolarisVideo(
+                                polarisVideo,
+                                videoElement
+                            );
+                        }, 100);
                     },
                 });
             },
             onCommitFiberUnmount: (rendererId: number, fiber: ReactFiber) => {
+                // A Polaris player was removed.
+                const name = ReactHelper.getName(fiber);
+                if (
+                    name === 'PolarisVideo' ||
+                    name?.endsWith('[from PolarisVideo.react]')
+                ) {
+                    this.tryDetachPolarisVideo(fiber);
+                    return;
+                }
+
                 // A video tag was removed.
                 if (
                     fiber.tag === ReactTag.HostComponent &&
                     fiber.type === 'video'
                 ) {
                     // Find the parent Polaris player
-                    const polarisFiber = ReactHelper.getParentByName(
+                    const polarisFiber = this.findPolarisVideo(
                         fiber,
-                        'PolarisVideo'
+                        ReactHelper.getNodeFromFiber(fiber)
                     );
                     if (!polarisFiber) return;
 
@@ -139,6 +148,22 @@ export class VideoDetector implements PlaybackManager {
             },
         };
         ReactDevTools.register(hook);
+    }
+
+    // Finds the parent Polaris player of a video. Instagram renders some videos in a global React tree
+    // (`GlobalVideoPorts`) and moves them into the player via the DOM, so we fall back to the DOM ancestors.
+    private findPolarisVideo(
+        videoFiber: ReactFiber,
+        videoElement: HTMLElement | undefined
+    ): ReactFiber | undefined {
+        return (
+            ReactHelper.getParentByName(videoFiber, 'PolarisVideo') ??
+            (videoElement &&
+                ReactHelper.getParentByNameFromNode(
+                    videoElement,
+                    'PolarisVideo'
+                ))
+        );
     }
 
     // Creates the video player from the given polaris player.

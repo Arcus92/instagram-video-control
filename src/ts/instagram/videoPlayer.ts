@@ -267,6 +267,7 @@ export class VideoPlayer {
         const volumeControlFiber = ReactHelper.getChildByName(
             polarisFiber,
             'PolarisMediaVideoPlayerAudioToggle',
+            'PolarisMediaVideoPlayerAudioToggleWithVolumeSlider',
             'PolarisPostVideoPlayerControls'
         );
         const volumeControlElement =
