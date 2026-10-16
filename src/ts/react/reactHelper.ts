@@ -30,7 +30,7 @@ export class ReactHelper {
     }
 
     /**
-     * Returns the DOM element of the given fiber node.
+     * Returns the first DOM element of the given fiber node or its descendants.
      * @param fiber The fiber node.
      */
     public static getNodeFromFiber(
@@ -40,7 +40,11 @@ export class ReactHelper {
         if (fiber.stateNode instanceof HTMLElement) {
             return fiber.stateNode;
         }
-        if (fiber.child) return this.getNodeFromFiber(fiber.child);
+        // The first child may render nothing, so we also check its siblings.
+        for (let child = fiber.child; child; child = child.sibling) {
+            const node = this.getNodeFromFiber(child);
+            if (node) return node;
+        }
     }
 
     /**
@@ -184,6 +188,23 @@ export class ReactHelper {
         ...names: string[]
     ): ReactFiber | undefined {
         return this.traversalParentsByName(root, names, (fiber) => fiber);
+    }
+
+    /**
+     * Returns the first parent fiber node with the given name, searching through the fibers of the DOM ancestors.
+     * This finds parents of elements that were rendered in another React tree and moved into place via the DOM.
+     * @param node The DOM node to start from.
+     * @param names The class names to match.
+     */
+    public static getParentByNameFromNode(
+        node: Node,
+        ...names: string[]
+    ): ReactFiber | undefined {
+        for (let el = node.parentElement; el; el = el.parentElement) {
+            const fiber = this.getFiberFromNode(el);
+            const result = this.getParentByName(fiber, ...names);
+            if (result) return result;
+        }
     }
 
     /**
