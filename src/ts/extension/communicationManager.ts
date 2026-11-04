@@ -24,8 +24,15 @@ export class CommunicationManager {
         window.addEventListener('message', (ev) => this.onMessageHandler(ev));
     }
 
+    // Set while changes sent by the website are applied.
+    private applyingWebsiteChanges = false;
+
     // An extension setting was changed.
     private onSettingChanged(name: keyof SettingsData) {
+        // The website already has the values it sent us. Sending them back would start a ping-pong between both
+        // sides as soon as two changes are in flight.
+        if (this.applyingWebsiteChanges) return;
+
         const value = this.settings[name];
         this.sendMessageSettings({ [name]: value });
     }
@@ -34,9 +41,15 @@ export class CommunicationManager {
     private onMessageHandler(ev: MessageEvent) {
         if (typeof ev.data !== 'object' || !ev.data.type) return;
         switch (ev.data.type) {
-            // Handle setting updates
-            case 'vci-settings':
-                this.settings.applyChanges(ev.data.data);
+            // Handle setting updates from the website. This must not be `vci-settings`: both sides share the same
+            // window, so we would also receive our own `vci-settings` messages and apply outdated values.
+            case 'vci-store-settings':
+                this.applyingWebsiteChanges = true;
+                try {
+                    this.settings.applyChanges(ev.data.data);
+                } finally {
+                    this.applyingWebsiteChanges = false;
+                }
                 break;
         }
     }

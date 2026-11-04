@@ -192,12 +192,19 @@ export class Settings implements SettingsData {
     // The setting-changed event is called whenever a setting was changed in or outside of this class.
     public readonly changed = new EventDispatcher<keyof SettingsData>();
 
+    // Set while values that are already in the storage are applied, so they are not written back.
+    private applyingStoredValues = false;
+
     // Invokes the change event.
     private onChange(name: keyof SettingsData) {
         // Invokes the change event.
         this.changed.invoke(name);
 
         if (!this.initialized) return;
+
+        // Values that came from the storage must not be written back. When two tabs write different values at the
+        // same time, every tab would write the other value back and they would overwrite each other forever.
+        if (this.applyingStoredValues) return;
 
         // Write changes to storage.
         const change: { [p: string]: unknown } = {};
@@ -209,7 +216,7 @@ export class Settings implements SettingsData {
     private async load() {
         const names = Object.keys(this.data);
         const data = await Browser.storage.sync.get(names);
-        this.storeValues(data);
+        this.applyStoredValues(data);
     }
 
     // Event that is called whenever settings were changed from the storage.
@@ -221,7 +228,17 @@ export class Settings implements SettingsData {
 
         // Converts the change structure to a simple key-value pair.
         const data = Utils.mapObject(changes, (change) => change.newValue);
-        this.storeValues(data);
+        this.applyStoredValues(data);
+    }
+
+    // Applies values read from the storage without writing them back.
+    private applyStoredValues(data: { [p: string]: unknown }) {
+        this.applyingStoredValues = true;
+        try {
+            this.storeValues(data);
+        } finally {
+            this.applyingStoredValues = false;
+        }
     }
 
     // Stores the data in the settings.
