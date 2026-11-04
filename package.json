@@ -47,6 +47,7 @@
     },
     "homepage": "https://github.com/Arcus92/instagram-video-control#readme",
     "allowScripts": {
-        "unrs-resolver@1.12.2": true
+        "unrs-resolver@1.12.2": true,
+        "@parcel/watcher@2.6.0": true
     }
 }
