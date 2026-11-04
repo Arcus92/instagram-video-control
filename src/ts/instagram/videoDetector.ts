@@ -19,6 +19,9 @@ export class VideoDetector implements PlaybackManager {
     // The extension message receiver
     private source: MessageEventSource | null = null;
 
+    // Set while setting changes sent by the extension are applied.
+    private applyingExtensionChanges = false;
+
     // List of all video players by source element.
     private videoPlayersByElement = new WeakMap<HTMLElement, VideoPlayer>();
     private videoPlayers: VideoPlayer[] = [];
@@ -52,7 +55,12 @@ export class VideoDetector implements PlaybackManager {
 
             // Handle setting updates
             case 'vci-settings':
-                this.settings.applyChanges(ev.data.data);
+                this.applyingExtensionChanges = true;
+                try {
+                    this.settings.applyChanges(ev.data.data);
+                } finally {
+                    this.applyingExtensionChanges = false;
+                }
                 break;
         }
     }
@@ -227,9 +235,14 @@ export class VideoDetector implements PlaybackManager {
                 break;
         }
 
-        // Tell the extension to store the value
+        // Changes sent by the extension are already stored. Sending them back would start a ping-pong between both
+        // sides as soon as two changes are in flight.
+        if (this.applyingExtensionChanges) return;
+
+        // Tell the extension to store the value. This uses its own message type, since we also receive our own
+        // messages and `vci-settings` is applied as a change from the extension.
         this.source?.postMessage({
-            type: 'vci-settings',
+            type: 'vci-store-settings',
             data: { [name]: this.settings[name] },
         });
     }
