@@ -2,6 +2,7 @@ import { Browser } from '../shared/browser';
 import { Settings, SettingsData } from '../shared/settings';
 import { VideoControlMode } from '../shared/videoControlMode';
 import { VideoAutoplayMode } from '../shared/videoAutoplayMode';
+import { VideoQualityMode } from '../shared/videoQualityMode';
 
 // Code class for the settings menu in the extension icon.
 export class Popup {
@@ -97,6 +98,12 @@ export class Popup {
             'option_loop_playback',
             (e) => (this.settings.loopPlayback = e.checked),
             (e) => (e.checked = this.settings.loopPlayback)
+        );
+
+        this.initSettingSelectElement(
+            'option_video_quality',
+            (e) => (this.settings.videoQuality = e.value as VideoQualityMode),
+            (e) => (e.value = this.settings.videoQuality)
         );
 
         this.updateOptionAutoUnmuteHint();

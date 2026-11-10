@@ -74,6 +74,15 @@
     "enable_autoplay_in_step_4_chrome": {
         "message": "Scroll to 'Sound' and select 'Allow'."
     },
+    "option_video_quality_auto": {
+        "message": "Automatic video quality (Instagram default)"
+    },
+    "option_video_quality_highest": {
+        "message": "Always highest video quality"
+    },
+    "option_video_quality_lowest": {
+        "message": "Always lowest video quality"
+    },
     "option_loop_playback": {
         "message": "Loop videos"
     },
