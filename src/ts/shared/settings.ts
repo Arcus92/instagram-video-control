@@ -3,6 +3,7 @@ import { EventDispatcher } from './eventDispatcher';
 import { VideoControlMode } from './videoControlMode';
 import { Utils } from './utils';
 import { VideoAutoplayMode } from './videoAutoplayMode';
+import { VideoQualityMode } from './videoQualityMode';
 import StorageChangeChrome = chrome.storage.StorageChange;
 import StorageChangeBrowser = browser.storage.StorageChange;
 
@@ -19,6 +20,7 @@ export interface SettingsData {
     showPlaybackSpeedOption: boolean;
     autoHideControlBar: boolean;
     loopPlayback: boolean;
+    videoQuality: VideoQualityMode;
 }
 
 // Handle extension settings.
@@ -41,6 +43,7 @@ export class Settings implements SettingsData {
         showPlaybackSpeedOption: true,
         autoHideControlBar: false,
         loopPlayback: true,
+        videoQuality: VideoQualityMode.auto,
     };
 
     // The video control mode
@@ -164,6 +167,16 @@ export class Settings implements SettingsData {
         this.onChange('loopPlayback');
     }
 
+    public get videoQuality(): VideoQualityMode {
+        return this.data.videoQuality;
+    }
+    public set videoQuality(value: VideoQualityMode) {
+        if (this.data.videoQuality === value) return;
+        this.data.videoQuality = value;
+
+        this.onChange('videoQuality');
+    }
+
     //#endregion Data
 
     //#region Init
@@ -275,6 +288,9 @@ export class Settings implements SettingsData {
         }
         if (typeof data.loopPlayback === 'boolean') {
             this.loopPlayback = data.loopPlayback;
+        }
+        if (typeof data.videoQuality === 'string') {
+            this.videoQuality = data.videoQuality as VideoQualityMode;
         }
     }
 

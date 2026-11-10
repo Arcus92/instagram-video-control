@@ -6,6 +6,9 @@
 // to run the whole extension in the original DOM and create an interface to exchange the extension settings.
 
 import { VideoDetector } from './videoDetector';
+import { VideoQualityFilter } from './videoQualityFilter';
+
+VideoQualityFilter.install();
 
 const detector = new VideoDetector();
 detector.init().then();
